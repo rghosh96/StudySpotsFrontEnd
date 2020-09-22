@@ -27,22 +27,21 @@ class SignUp extends React.Component {
     }
     render() {
         return (
-                <Form onSubmit={this.handleSubmit}>
+            <Form onSubmit={this.handleSubmit}>
                 <h1>sign up</h1>
                 <hr></hr>
                 <Form.Group >
-                <Form.Row>
-                    <Col>
-                        <Form.Label>First Name</Form.Label>
-                        <Form.Control onChange={this.handleChange} id="fName" />
-                    </Col>
-                    <Col>
-                        <Form.Label>Last Name</Form.Label>
-                        <Form.Control onChange={this.handleChange} id="lName"  />
-                    </Col>
-                </Form.Row>
+                    <Form.Row>
+                        <Col>
+                            <Form.Label>First Name</Form.Label>
+                            <Form.Control onChange={this.handleChange} id="fName" />
+                        </Col>
+                        <Col>
+                            <Form.Label>Last Name</Form.Label>
+                            <Form.Control onChange={this.handleChange} id="lName"  />
+                        </Col>
+                    </Form.Row>
                 </Form.Group>
-
                 
                 <Form.Group  controlId="formGridEmail">
                     <Form.Label>Email</Form.Label>
@@ -55,22 +54,19 @@ class SignUp extends React.Component {
                 </Form.Group>
 
                 <Form.Row>
-
                     <Form.Group as={Col} controlId="formGridState">
-                    <Form.Label>State</Form.Label>
-                    <Form.Control onChange={this.handleChange} id="state"/>
+                        <Form.Label>State</Form.Label>
+                        <Form.Control onChange={this.handleChange} id="state"/>
                     </Form.Group>
                     
                     <Form.Group as={Col} >
-                    <Form.Label>Zip Code</Form.Label>
-                    <Form.Control onChange={this.handleChange} id="zip" />
+                        <Form.Label>Zip Code</Form.Label>
+                        <Form.Control onChange={this.handleChange} id="zip" />
                     </Form.Group>
-
                 </Form.Row>
-                <Button variant="primary" type="submit">
-                    Submit
-                </Button>
-                </Form>
+
+                <Button type="submit">Submit</Button>
+            </Form>
         )    
     } 
 }
