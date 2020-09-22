@@ -24,11 +24,9 @@ class SignUp extends React.Component {
     handleSubmit = (e) => {
         e.preventDefault();
         console.log(this.state);
-        this.props.signUp(this.state);
     }
     render() {
         return (
-            <div class="form">
                 <Form onSubmit={this.handleSubmit}>
                 <h1>sign up</h1>
                 <hr></hr>
@@ -73,7 +71,6 @@ class SignUp extends React.Component {
                     Submit
                 </Button>
                 </Form>
-            </div>
         )    
     } 
 }
