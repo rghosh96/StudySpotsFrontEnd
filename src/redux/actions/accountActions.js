@@ -1,4 +1,6 @@
-import { SIGN_IN, SIGN_UP, UPDATE_ACCOUNT, FETCH_USER_DATA } from './types'
+import { SIGN_IN_REQUEST, SIGN_UP_REQUEST, UPDATE_ACCOUNT_REQUEST, FETCH_USER_DATA, SIGN_IN_SUCCESS, SIGN_IN_FAILURE } from './types'
+
+const wait = time => new Promise((resolve) => setTimeout(resolve, time));
 
 /* signInData = {
 	email: <string>,
@@ -8,12 +10,39 @@ import { SIGN_IN, SIGN_UP, UPDATE_ACCOUNT, FETCH_USER_DATA } from './types'
 export const userSignIn = (signInData) => dispatch => {
     // Firebase signin here. will probably require multiple asynchronous dispatches: SIGN_IN to 
     // set a loading flag and FETCH_USER_DATA to send the user's data once the Firebase signin is resolved.
-    
-    // dispatch({
-    //     type: 
-    //     payload: 
-    // })
-};    
+	mockSignIn(signInData);
+};
+
+const mockSignIn = (signInData) => dispatch => {
+    dispatch({
+        type: SIGN_IN_REQUEST
+	})
+
+	wait(2000)
+		.then(() => {
+			if (signInData.email === 'email' && signInData.password === 'password') {
+				let userData = {
+					fName: 'Faker',
+					lName: 'McFakerson',
+					zipcode: 12345,
+					email: 'email',
+					musicPref: 3,
+					spacePref: 2,
+					lightingPref: 5,
+					foodPref: 1
+				}
+
+				dispatch({
+					type: SIGN_IN_SUCCESS,
+					payload: userData
+				})
+			} else {
+				dispatch({
+					type: SIGN_IN_FAILURE
+				})
+			}
+		})
+};
 
 
 /* signUpData = {

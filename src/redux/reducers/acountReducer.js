@@ -1,26 +1,52 @@
-import { SIGN_IN, SIGN_UP, UPDATE_ACCOUNT, FETCH_USER_DATA } from '../actions/types';
+import { SIGN_IN_REQUEST, SIGN_UP_REQUEST, UPDATE_ACCOUNT_REQUEST, FETCH_USER_DATA, SIGN_IN_SUCCESS, SIGN_IN_FAILURE } from '../actions/types';
 
 const initialState = {
-    isLoading: false,
-    userData: {}
+    signingUp: false,
+    siginingIn: false,
+    isSignedIn: false,
+    userData: {
+        fName: null,
+	    lName: null,
+	    zipcode: null,
+	    email: null,
+	    musicPref: null,
+	    spacePref: null,
+	    lightingPref: null,
+	    foodPref: null
+    }
 }
 
 export default function(state = initialState, action) {
     switch(action.type) {
 
-        case SIGN_IN: 
+        case SIGN_IN_REQUEST: 
+            return {
+                ...state,
+                siginingIn: true
+            }
+
+        case SIGN_IN_SUCCESS:
+            return {
+                ...state,
+                signingIn: false,
+                isSignedIn: true,
+                userData: action.payload
+            }
+        
+        case SIGN_IN_FAILURE:
+            return {
+                ...state,
+                signingIn: false,
+                isSignedIn: false
+            }    
+
+        case SIGN_UP_REQUEST:
             return {
                 ...state,
                 isLoading: action.payload
             }
 
-        case SIGN_UP:
-            return {
-                ...state,
-                isLoading: action.payload
-            }
-
-        case UPDATE_ACCOUNT: 
+        case UPDATE_ACCOUNT_REQUEST:
             return {
                 ...state,
                 isLoading: action.payload
