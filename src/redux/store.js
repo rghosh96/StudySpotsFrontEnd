@@ -12,7 +12,7 @@ const store = createStore(
 
         // enables functionality with the Chrome redux devtools.
         // if app is working locally but not in production, try commenting this out.
-        window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+        // window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
     )
 )
 
