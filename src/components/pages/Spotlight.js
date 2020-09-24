@@ -6,7 +6,7 @@ class Spotlight extends React.Component {
     render() {
         return (
             <div>
-                <h1>spotlight</h1>
+                <h1>my <span class="text-secondary">spots</span></h1>
                 <Button>click me!</Button>
             </div>
         )    

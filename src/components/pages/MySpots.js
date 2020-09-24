@@ -5,7 +5,7 @@ class MySpots extends React.Component {
     render() {
         return (
             <div>
-                <h1>my spots</h1>
+                <h1>myspots</h1>
             </div>
         )    
     } 

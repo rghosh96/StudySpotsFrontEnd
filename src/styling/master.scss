@@ -1,48 +1,61 @@
 @import "~bootstrap/scss/bootstrap";
+@import 'colors';
+@import 'fonts';
+@import 'config';
 
-$primary: #687E63;
-$secondary: #865640;
-$accent: #C29257;
 
-.App {
-  text-align: center;
+// to define common properties, and then simply call function
+@mixin easeOut {
+  transition: all .5s ease-out !important;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  padding: 3rem;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+h1 {
+  color: $primary;
+  font-size: 3rem;
+  @include header();
 }
 
 p {
-  color: $secondary;
+  color: $grey;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+.text-secondary {
+  color: $primary !important;
+}
+
+label {
+  color: $grey;
+  @include text();
+}
+
+Button {
+  background-color: $primary !important;
+  border: none !important;
+  @include easeOut();
+  &:hover {
+    background-color: $accent !important;
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+@include mobile {
+  html, body {
+    padding: 1rem;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 }
+
