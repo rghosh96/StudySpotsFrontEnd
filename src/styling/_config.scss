@@ -1,0 +1,30 @@
+// for responsiveness
+
+// Media Query Mixins
+// mobile
+@mixin mobile {
+    @media screen and (max-width: 500px) {
+        @content;
+    }
+}
+
+// tablet
+@mixin tablet {
+    @media screen and (max-width: 768px) {
+        @content;
+    }
+}
+
+// desktop
+@mixin desktop {
+    @media screen and (min-width: 769px) and (max-width: 1170px) {
+        @content;
+    }
+}
+
+// desktop
+@mixin lg-desktop {
+    @media screen and (min-width: 1171px) {
+        @content;
+    }
+}
