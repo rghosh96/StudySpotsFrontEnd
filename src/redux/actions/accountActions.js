@@ -32,6 +32,7 @@ function mockSignIn(signInData, dispatch) {
 				let userData = {
 					fName: 'Faker',
 					lName: 'McFakerson',
+					state: 'ZZ',
 					zipcode: 12345,
 					email: 'email',
 					musicPref: 3,
@@ -56,6 +57,7 @@ function mockSignIn(signInData, dispatch) {
 /* signUpData = {
     fName: <string>,
 	lName: <string>,
+	state: <string>,  // length 2
 	zipcode: <int>,
 	email: <string>,
 	password: <string>,
@@ -85,6 +87,7 @@ function mockSignUp(signUpData, dispatch) {
 				let userData = {
 					fName: signUpData.fName,
 					lName: signUpData.lName,
+					state: signUpData.state,
 					zipcode: signUpData.zipcode,
 					email: signUpData.email,
 					musicPref: signUpData.musicPref,
@@ -104,6 +107,7 @@ function mockSignUp(signUpData, dispatch) {
 /* userData = {
     fName: <string>,
 	lName: <string>,
+	state: <string>,  // length 2
 	zipcode: <int>,
 	email: <string>,
 	newPassword: <string>,

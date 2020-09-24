@@ -11,8 +11,9 @@ const initialState = {
     userData: {
         fName: null,
 	    lName: null,
-	    zipcode: null,
-	    email: null,
+        zipcode: null,
+        state: null,
+        email: null,
 	    musicPref: null,
 	    spacePref: null,
 	    lightingPref: null,
