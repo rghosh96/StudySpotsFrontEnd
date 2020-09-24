@@ -11,6 +11,7 @@ class TestAccountActions extends React.Component {
             this.props.userSignUp({
                 fName: "ZMan",
                 lName: "DMan",
+                state: "AR",
                 zipcode: 72758,
                 email: "zzz@z.com",
                 musicPref: 2,
@@ -24,6 +25,7 @@ class TestAccountActions extends React.Component {
             this.props.userSignUp({
                 fName: "ZMan",
                 lName: "DMan",
+                state: "AR",
                 zipcode: 72758,
                 email: "email",
                 musicPref: 2,
@@ -51,6 +53,7 @@ class TestAccountActions extends React.Component {
             this.props.updateUserAccount({
                 fName: "DIFF fname",
                 lName: "DIFF lname",
+                state: "AR",
                 zipcode: 99999,
                 email: "diffEmail@diff.com",
                 musicPref: 5,
