@@ -21,36 +21,36 @@ class SignUp extends React.Component {
         foodPref: '',
     }
 
+    // handles general state change info
     handleChange = (e) => {
         this.setState({
             [e.target.id]: e.target.value,
         })
     }
 
+    // handles state info that can have multiple options
     handleMOptions = (e) => {
         this.setState({
             musicPref: Array.from(e.target.selectedOptions, (item) => item.value),
         })
     }
-
     handleSOptions = (e) => {
         this.setState({
             spacePref: Array.from(e.target.selectedOptions, (item) => item.value),
         })
     }
-
     handleLOptions = (e) => {
         this.setState({
             lightingPref: Array.from(e.target.selectedOptions, (item) => item.value),
         })
     }
-
     handleFOptions = (e) => {
         this.setState({
             foodPref: Array.from(e.target.selectedOptions, (item) => item.value),
         })
     }
 
+    // handles submit, sending state information to redux store
     handleSubmit = (e) => {
         e.preventDefault();
         this.props.userSignUp(this.state)
@@ -99,28 +99,6 @@ class SignUp extends React.Component {
 
                 <Form.Row>
                     <Form.Group as={Col}>
-                        <Form.Label>music preference</Form.Label>
-                        <Form.Control onChange={this.handleChange} id="musicPref"/>
-                    </Form.Group>
-                    
-                    <Form.Group as={Col} >
-                        <Form.Label>space preference</Form.Label>
-                        <Form.Control onChange={this.handleChange} id="spacePref" />
-                    </Form.Group>
-
-                    <Form.Group as={Col}>
-                        <Form.Label>lighting preference</Form.Label>
-                        <Form.Control onChange={this.handleChange} id="lightingPref"/>
-                    </Form.Group>
-                    
-                    <Form.Group as={Col} >
-                        <Form.Label>food preference</Form.Label>
-                        <Form.Control onChange={this.handleChange} id="foodPref" />
-                    </Form.Group>
-                </Form.Row>
-
-                {/* <Form.Row>
-                    <Form.Group as={Col}>
                         <Form.Label>Music Preference</Form.Label>
                         <Form.Control onChange ={this.handleMOptions} as="select" multiple>
                             <option value="upbeat">upbeat</option>
@@ -163,17 +141,18 @@ class SignUp extends React.Component {
                             <option value="nopref">no preference</option>
                         </Form.Control>
                     </Form.Group>
-                </Form.Row> */}
+                </Form.Row>
 
                 <Button type="submit">Submit</Button>
 
-                <div>signingUp...{this.props.signingUp.toString()}</div>
+                {/* <div>signingUp...{this.props.signingUp.toString()}</div>
                 <div>signingIn...{this.props.signingIn.toString()}</div>
                 <div>updatingAccount...{this.props.updatingAccount.toString()}</div>
                 <div>isSignedIn...{this.props.isSignedIn.toString()}</div>
                 <div>errorMsg...{this.props.errorMsg.toString()}</div>
-                <div>userData...{JSON.stringify(this.props.userData)}</div>
+                <div>userData...{JSON.stringify(this.props.userData)}</div> */}
             </Form>
+            
         )    
     } 
 }

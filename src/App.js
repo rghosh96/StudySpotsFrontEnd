@@ -18,7 +18,7 @@ function App() {
   return (
     <Provider store={store}>
       <BrowserRouter>
-        <div className="App">
+        <div class="App">
             <Route exact path = '/' component={ Spotlight } />
             <Route exact path = '/signin' component={ SignIn } />
             <Route exact path = '/signup' component={ SignUp } />
