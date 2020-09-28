@@ -13,7 +13,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 // importing the redux actions used in this component
-import { updateSubmittedText, incrementButtonValue } from './redux/actions/exampleActions';
+import { updateSubmittedText, incrementButtonValue } from '../../redux/actions/exampleActions';
 
 class ReduxExample extends Component {
     constructor() {
