@@ -1,9 +1,10 @@
+
 // for responsiveness
 
 // Media Query Mixins
 // mobile
-@mixin mobile {
-    @media screen and (max-width: 500px) {
+@mixin tiny {
+    @media screen and (max-width: 600px) {
         @content;
     }
 }
