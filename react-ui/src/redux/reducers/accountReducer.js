@@ -38,7 +38,7 @@ export default function(state = initialState, action) {
                 isSignedIn: true,
                 userData: action.payload
             }
-        
+        //###Add payload sending to accountActions 
         case SIGN_IN_FAILURE:
             return {
                 ...state,

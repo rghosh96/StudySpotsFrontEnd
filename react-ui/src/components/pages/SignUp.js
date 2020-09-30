@@ -164,14 +164,23 @@ const mapStateToProps = state => ({
     updatingAccount: state.account.updatingAccount,
     isSignedIn: state.account.isSignedIn,
     userData: state.account.userData,
-    errorMsg: state.account.errorMsg
+    errorMsg: state.account.errorMsg,
+    auth: state.firebase.auth
 });
 
 // tell redux what actions we want to use (the same ones we imported at the top)
-const mapDispatchToProps = {
-    userSignUp,
-    userSignIn,
-    updateUserAccount
+const mapDispatchToProps = (dispatch) => {
+    return {
+        userSignUp: (newUser) => dispatchEvent(userSignUp(newUser))
+    }
+
+    //removed below to work with new user setup
+    //confused as to why SignIn and updateUserAccount are
+    //included in SignUp page -O
+
+    //userSignUp,
+    //userSignIn,
+    //updateUserAccount,
 }
 
 // tell this component what it will be getting from redux. these members can be accessed using this.props

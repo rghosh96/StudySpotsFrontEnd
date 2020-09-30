@@ -67,9 +67,35 @@ function mockSignIn(signInData, dispatch) {
 	lightingPref: <int>,  // lighting (5 = brightest)
 	foodPref: <int>       // importance of food/drink quality pref (5 = most important)
 } */
-export const userSignUp = (signUpData) => dispatch => {
-	mockSignUp(signUpData, dispatch);
-};
+export const userSignUp = (newUser) => {
+    return (dispatch, getState, { getFirebase , getFirestore}) => {
+        const firebase = getFirebase();//connect to firebase
+        const firestore = getFirebase().firestore();
+
+        firebase.auth().createUserWithEmailAndPassword( //create user
+            newUser.email,
+            newUser.password
+        ).then((resp) => { //create new record for new user (user.uid primary key)
+            return firestore.collection('users').doc(resp.user.uid).set({
+                firstName: newUser.fName,
+				lastName: newUser.lName,
+				state: newUser.state,
+				zipcode: newUser.zipcode,
+				musicPref: newUser.musicPref,
+				spacePref: newUser.spacePref,
+				lightingPref: newUser.lightingPref,
+				foodPref: newUser.foodPref
+                //### currently not sending all data(only firstname lastname)
+
+            })
+        }).then(() => { //if success or error
+            dispatch({ type: 'SIGN_UP_SUCCESS' }) //### need to add action.payload 
+        }).catch(err => {
+            dispatch({ type: 'SIGN_UP_FAILURE', err})
+        })
+
+    }
+}
 
 function mockSignUp(signUpData, dispatch) {
 	dispatch({

@@ -13,10 +13,10 @@ import SignUp from './components/pages/SignUp.js'
 // redux testing components
 import TestAccountActions from './components/redux-testing/TestAccountActions';
 
-
+//removed provider and moved over to wrapping index.js instead (caused error for user creation)
 function App() {
   return (
-    <Provider store={store}>
+    
       <BrowserRouter>
         <div className="App">
             <Route exact path = '/' component={ Spotlight } />
@@ -29,7 +29,7 @@ function App() {
             <Route exact path = '/redux/testaccountactions' component={ TestAccountActions } />
         </div>
       </BrowserRouter>
-    </Provider>
+  
   );
 }
 
