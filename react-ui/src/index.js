@@ -8,12 +8,23 @@ import { createStore, applyMiddleware, compose } from 'redux'
 import rootReducer from './redux/reducers/rootReducer'
 import { Provider } from 'react-redux'
 import thunk from 'redux-thunk'
+import { persistStore, persistReducer } from 'redux-persist'
+import { PersistGate } from 'redux-persist/integration/react'
+import storage from 'redux-persist/lib/storage' // defaults to localStorage for web
 
 import fbConfig from './config/fbConfig'
 import firebase from 'firebase/app'
 import 'firebase/firestore'
 import { createFirestoreInstance, reduxFirestore, getFirestore } from 'redux-firestore'
 import { ReactReduxFirebaseProvider, getFirebase } from 'react-redux-firebase'
+
+
+const persistConfig = {
+  key: 'root',
+  storage,
+}
+
+const persistedReducer = persistReducer(persistConfig, rootReducer)
 
 
 const rrfConfig = {
@@ -23,14 +34,16 @@ const rrfConfig = {
 
 const initialState = {};
 const store = createStore(
-  rootReducer,
+  persistedReducer,
   initialState,
   compose(
     applyMiddleware(thunk.withExtraArgument({ getFirebase, getFirestore })),
     reduxFirestore(fbConfig)
-  ),
+    ),
 );
 
+let persistor = persistStore(store)
+   
 const rrfProps = {
   firebase,
   useFirestoreForProfile: true,
@@ -44,11 +57,13 @@ const rrfProps = {
 
 ReactDOM.render(
   <Provider store={store}>
-    <ReactReduxFirebaseProvider {...rrfProps}>
-      <React.StrictMode>
-        <App />
-      </React.StrictMode>
-    </ReactReduxFirebaseProvider>
+    <PersistGate loading={null} persistor={persistor}>
+      <ReactReduxFirebaseProvider {...rrfProps}>
+        <React.StrictMode>
+          <App />
+        </React.StrictMode>
+      </ReactReduxFirebaseProvider>
+    </PersistGate>
   </Provider>,
   document.getElementById('root')
 );

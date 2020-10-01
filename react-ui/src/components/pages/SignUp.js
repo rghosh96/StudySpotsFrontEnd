@@ -7,13 +7,15 @@ import { connect } from 'react-redux';
 import { userSignUp, userSignIn, updateUserAccount } from '../../redux/actions/accountActions';
 import PropTypes from 'prop-types';
 
+// need to clear fields and show confirmation/error to user
+
 class SignUp extends React.Component {
     state = {
         email: '',
         password: '',
         fName: '',
         lName: '',
-        zip: '',
+        zipcode: '',
         state: '',
         musicPref: '',
         spacePref: '',
@@ -93,7 +95,7 @@ class SignUp extends React.Component {
                     
                     <Form.Group as={Col} >
                         <Form.Label>Zip Code</Form.Label>
-                        <Form.Control onChange={this.handleChange} id="zip" />
+                        <Form.Control onChange={this.handleChange} id="zipcode" />
                     </Form.Group>
                 </Form.Row>
 
