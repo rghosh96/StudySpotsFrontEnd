@@ -1,6 +1,5 @@
 node_modules/
 react-ui/node_modules/
-react-ui/components/config
 npm-debug.log
 
 # Local development
