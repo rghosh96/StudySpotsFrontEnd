@@ -23,7 +23,6 @@ class SignIn extends React.Component {
       handleSubmit = (e) => {
         e.preventDefault();
         this.props.userSignIn(this.state)
-        console.log(this.state);
     }
     render() {
         return (

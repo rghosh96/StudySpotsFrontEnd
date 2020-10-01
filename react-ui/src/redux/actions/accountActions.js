@@ -1,9 +1,23 @@
-import {  SIGN_UP_REQUEST, SIGN_UP_FAILURE, SIGN_UP_SUCCESS } from './types';
-import { UPDATE_ACCOUNT_REQUEST, UPDATE_ACCOUNT_SUCCESS, UPDATE_ACCOUNT_FAILURE } from './types';
-import { SIGN_IN_REQUEST, SIGN_IN_SUCCESS, SIGN_IN_FAILURE } from './types';
-import { INTERNAL_SERVER, EXISTING_ACCOUNT, BAD_CREDENTIALS } from '../errorMessages';
+import {  SIGN_UP_REQUEST, SIGN_UP_FAILURE, SIGN_UP_SUCCESS,
+    UPDATE_ACCOUNT_REQUEST, UPDATE_ACCOUNT_SUCCESS, UPDATE_ACCOUNT_FAILURE, 
+    SIGN_IN_REQUEST, SIGN_IN_SUCCESS, SIGN_IN_FAILURE, 
+    FETCH_USERDATA_REQUEST, FETCH_USERDATA_SUCCESS, FETCH_USERDATA_FAILURE } from '../actions/types';
+import { INTERNAL_SERVER, EXISTING_ACCOUNT, BAD_CREDENTIALS, USER_NOT_SIGNED_IN } from '../errorMessages';
+import { getFirebase } from 'react-redux-firebase'
 
 const wait = time => new Promise((resolve) => setTimeout(resolve, time));
+
+export const checkAuth = () => dispatch => {
+	const firebase = getFirebase(); //connect to firebase
+
+	// what if guest user? what happens when they refresh and have no acct?
+	// maybe include a link to signin on the signup page
+	firebase.auth().onAuthStateChanged((user) => {
+		if (!user) {
+			userSignIn();
+		}
+	});
+}
 
 /* signInData = {
 	email: <string>,
@@ -11,12 +25,71 @@ const wait = time => new Promise((resolve) => setTimeout(resolve, time));
 	provider: <string>  // e.g. "google". if not using third-party auth, set to null
 } */
 export const userSignIn = (signInData) => dispatch => {
-    // Firebase signin here. will require multiple dispatches: SIGN_IN_REQUEST to 
-	// set a loading flag, SIGN_IN_SUCCESS that passes userData in the format defined
-	// in the reducer, and SIGN_IN_FAILURE
-	
-	mockSignIn(signInData, dispatch);
+	console.log("enter userSignIn")
+	dispatch({ type: SIGN_IN_REQUEST });
+
+	const firebase = getFirebase(); //connect to firebase
+
+	firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION)
+		.then(() => {
+			// Existing and future Auth states are now persisted in the current
+			// session only. Closing the window would clear any existing state even
+			// if a user forgets to sign out.
+			// ...
+			// New sign-in will be persisted with session persistence.
+			return firebase.auth().signInWithEmailAndPassword(signInData.email, signInData.password);
+		})
+		.then(() => {
+			fetchUserData(dispatch);
+			console.log("signin success")
+			dispatch({ type: SIGN_IN_SUCCESS });
+		})
+		.catch((error) => {
+			console.log(error.message)
+			dispatch({
+				type: SIGN_IN_FAILURE,
+				payload: error.message
+			})
+		});
 };
+
+function fetchUserData(dispatch) {
+	console.log("enter fetchUserData")
+	dispatch({ type: FETCH_USERDATA_REQUEST });
+
+	const firebase = getFirebase(); //connect to firebase
+	const firestore = getFirebase().firestore();
+
+	const user = firebase.auth().currentUser;
+
+	console.log(JSON.stringify(user))
+
+	if (user) {
+		firestore.collection('users').doc(user.uid.toString()).get()
+			.then(doc => {
+				console.log("doc: " + doc)
+				const userData = doc.data();
+				console.log(userData);
+				
+				dispatch({
+					type: FETCH_USERDATA_SUCCESS,
+					payload: userData
+				});
+			})
+			.catch(error => {
+				console.log(error.message)
+				dispatch({
+					type: FETCH_USERDATA_FAILURE,
+					payload: error.message
+				});
+			});
+	} else {
+		dispatch({
+			type: FETCH_USERDATA_FAILURE,
+			payload: USER_NOT_SIGNED_IN
+		});
+	}
+}
 
 function mockSignIn(signInData, dispatch) {
 	// for now, here is a mock sign in with a 2 second delay to simulate processing.
@@ -55,7 +128,7 @@ function mockSignIn(signInData, dispatch) {
 }
 
 /* signUpData = {
-    fName: <string>,
+	fName: <string>,
 	lName: <string>,
 	state: <string>,  // length 2
 	zipcode: <int>,
@@ -68,7 +141,25 @@ function mockSignIn(signInData, dispatch) {
 	foodPref: <int>       // importance of food/drink quality pref (5 = most important)
 } */
 export const userSignUp = (signUpData) => dispatch => {
-	mockSignUp(signUpData, dispatch);
+	console.log("enter userSignUp")
+	dispatch({ type: SIGN_UP_REQUEST });
+
+	const firebase = getFirebase(); //connect to firebase
+
+	firebase.auth().createUserWithEmailAndPassword( //create user
+		signUpData.email,
+		signUpData.password
+	).then(() => { //if success or error
+		dispatch({ type: 'SIGN_UP_SUCCESS' }) //### need to add action.payload
+		updateUserAccount(signUpData)(dispatch)
+		fetchUserData(dispatch);
+	}).catch(error => {
+		console.log(error.message)
+		dispatch({
+			type: 'SIGN_UP_FAILURE',
+			payload: error.message
+		})
+	})
 };
 
 function mockSignUp(signUpData, dispatch) {
@@ -95,7 +186,7 @@ function mockSignUp(signUpData, dispatch) {
 					lightingPref: signUpData.lightingPref,
 					foodPref: signUpData.foodPref
 				};
-				
+
 				dispatch({
 					type: SIGN_UP_SUCCESS,
 					payload: userData
@@ -105,7 +196,7 @@ function mockSignUp(signUpData, dispatch) {
 }
 
 /* userData = {
-    fName: <string>,
+	fName: <string>,
 	lName: <string>,
 	state: <string>,  // length 2
 	zipcode: <int>,
@@ -118,7 +209,32 @@ function mockSignUp(signUpData, dispatch) {
 	foodPref: <int>       // as above for importance of food/drink quality (1 = least important)
 } */
 export const updateUserAccount = (userData) => dispatch => {
-    mockUpdateAccount(userData, dispatch);
+	console.log("enter updateUserAccount")
+	dispatch({ type: UPDATE_ACCOUNT_REQUEST });
+
+	const firebase = getFirebase(); //connect to firebase
+	const firestore = getFirebase().firestore();
+
+	firestore.collection('users').doc(firebase.auth().currentUser.uid.toString()).set({
+		fName: userData.fName,
+		lName: userData.lName,
+		state: userData.state,
+		zipcode: userData.zipcode,
+		musicPref: userData.musicPref,
+		spacePref: userData.spacePref,
+		lightingPref: userData.lightingPref,
+		foodPref: userData.foodPref
+		//### currently not sending all data(only firstname lastname)
+	}).then(() => {
+		dispatch({ type: UPDATE_ACCOUNT_SUCCESS });
+		// should we call fetchUserData() here just in case?
+	}).catch(error => {
+		console.log(error.message)
+		dispatch({ 
+			type: UPDATE_ACCOUNT_FAILURE,
+			payload: error.message
+		});
+	})
 };
 
 function mockUpdateAccount(userData, dispatch) {
@@ -138,7 +254,7 @@ function mockUpdateAccount(userData, dispatch) {
 				lightingPref: userData.lightingPref,
 				foodPref: userData.foodPref
 			};
-				
+
 			dispatch({
 				type: UPDATE_ACCOUNT_SUCCESS,
 				payload: userNewData
