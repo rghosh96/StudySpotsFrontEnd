@@ -2,6 +2,7 @@ import {  SIGN_UP_REQUEST, SIGN_UP_FAILURE, SIGN_UP_SUCCESS } from './types';
 import { UPDATE_ACCOUNT_REQUEST, UPDATE_ACCOUNT_SUCCESS, UPDATE_ACCOUNT_FAILURE } from './types';
 import { SIGN_IN_REQUEST, SIGN_IN_SUCCESS, SIGN_IN_FAILURE } from './types';
 import { INTERNAL_SERVER, EXISTING_ACCOUNT, BAD_CREDENTIALS } from '../errorMessages';
+import { getFirebase } from 'react-redux-firebase'
 
 const wait = time => new Promise((resolve) => setTimeout(resolve, time));
 
@@ -68,7 +69,32 @@ function mockSignIn(signInData, dispatch) {
 	foodPref: <int>       // importance of food/drink quality pref (5 = most important)
 } */
 export const userSignUp = (signUpData) => dispatch => {
-	mockSignUp(signUpData, dispatch);
+	dispatch({ type: SIGN_UP_REQUEST });
+
+	const firebase = getFirebase(); //connect to firebase
+        const firestore = getFirebase().firestore();
+
+        firebase.auth().createUserWithEmailAndPassword( //create user
+            signUpData.email,
+            signUpData.password
+        ).then((resp) => { //create new record for new user (user.uid primary key)
+            return firestore.collection('users').doc(resp.user.uid).set({
+                fName: signUpData.fName,
+				lName: signUpData.lName,
+				state: signUpData.state,
+				zipcode: signUpData.zipcode,
+				musicPref: signUpData.musicPref,
+				spacePref: signUpData.spacePref,
+				lightingPref: signUpData.lightingPref,
+				foodPref: signUpData.foodPref
+                //### currently not sending all data(only firstname lastname)
+
+            })
+        }).then(() => { //if success or error
+            dispatch({ type: 'SIGN_UP_SUCCESS' }) //### need to add action.payload 
+        }).catch(err => {
+            dispatch({ type: 'SIGN_UP_FAILURE', err})
+        })
 };
 
 function mockSignUp(signUpData, dispatch) {
