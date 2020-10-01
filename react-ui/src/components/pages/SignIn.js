@@ -41,10 +41,7 @@ class SignIn extends React.Component {
                 </Form.Group>
 
                 <Button type="submit">Sign In</Button>
-                {JSON.stringify(this.props.userData)}
-                {/* <button onClick={() => this.props.fetchUserData()}>Fetch Data</button> */}
             </Form>
-
         )    
     } 
 }
@@ -62,8 +59,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = {
     userSignUp,
     userSignIn,
-    updateUserAccount,
-    // fetchUserData
+    updateUserAccount
 }
 
 // tell this component what it will be getting from redux. these members can be accessed using this.props
@@ -76,8 +72,7 @@ SignIn.propTypes = {
     errorMsg: PropTypes.string.isRequired,
     userSignUp: PropTypes.func.isRequired,
     userSignIn: PropTypes.func.isRequired,
-    updateUserAccount: PropTypes.func.isRequired,
-    // fetchUserData: PropTypes.func.isRequired
+    updateUserAccount: PropTypes.func.isRequired
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(SignIn);

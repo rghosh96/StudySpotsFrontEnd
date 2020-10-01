@@ -7,7 +7,9 @@ import { connect } from 'react-redux';
 import { userSignUp, userSignIn, updateUserAccount } from '../../redux/actions/accountActions';
 import PropTypes from 'prop-types';
 
+
 // need to clear fields and show confirmation/error to user
+
 
 class SignUp extends React.Component {
     state = {
@@ -96,6 +98,52 @@ class SignUp extends React.Component {
                     <Form.Group as={Col} >
                         <Form.Label>Zip Code</Form.Label>
                         <Form.Control onChange={this.handleChange} id="zipcode" />
+                    </Form.Group>
+                </Form.Row>
+
+                <Form.Row>
+                    <Form.Group as={Col}>
+                        <Form.Label>Music Preference</Form.Label>
+                        <Form.Control onChange ={this.handleMOptions} as="select" multiple>
+                            <option value="upbeat">upbeat</option>
+                            <option value="lofi">lo fi</option>
+                            <option value="indie">indie</option>
+                            <option value="pop">pop</option>
+                            <option value="funky">funky</option>
+                            <option value="nopref">no preference</option>
+                        </Form.Control>
+                    </Form.Group>
+                    
+                    <Form.Group as={Col}>
+                        <Form.Label>Space Preference</Form.Label>
+                        <Form.Control onChange ={this.handleSOptions} as="select" multiple>
+                            <option value="individual">individual study</option>
+                            <option value="couple">couple of people</option>
+                            <option value="smallgroup">small group (3 or less)</option>
+                            <option value="largegroup">large group (4 or more)</option>
+                            <option value="nopref">no preference</option>
+                        </Form.Control>
+                    </Form.Group>
+                </Form.Row>
+                <Form.Row>
+                    <Form.Group as={Col}>
+                        <Form.Label>Lighting Preference</Form.Label>
+                        <Form.Control onChange ={this.handleLOptions} as="select" multiple>
+                            <option value="dim">dim</option>
+                            <option value="natural">natural</option>
+                            <option value="nopref">no preference</option>
+                        </Form.Control>
+                    </Form.Group>
+
+                    <Form.Group as={Col}>
+                        <Form.Label>Food Preference</Form.Label>
+                        <Form.Control onChange ={this.handleFOptions} as="select" multiple>
+                            <option value="smallbites">small bites</option>
+                            <option value="bakery">bakery</option>
+                            <option value="fullmenu">full menu</option>
+                            <option value="coffeeonly">just coffee</option>
+                            <option value="nopref">no preference</option>
+                        </Form.Control>
                     </Form.Group>
                 </Form.Row>
 
