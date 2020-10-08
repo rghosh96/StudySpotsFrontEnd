@@ -5,11 +5,10 @@ import {  SIGN_UP_REQUEST, SIGN_UP_FAILURE, SIGN_UP_SUCCESS,
 import { INTERNAL_SERVER, EXISTING_ACCOUNT, BAD_CREDENTIALS, USER_NOT_SIGNED_IN } from '../errorMessages';
 import { getFirebase } from 'react-redux-firebase'
 
-const wait = time => new Promise((resolve) => setTimeout(resolve, time));
 
 export const checkAuth = () => dispatch => {
 	const firebase = getFirebase(); //connect to firebase
-
+	
 	// what if guest user? what happens when they refresh and have no acct?
 	// maybe include a link to signin on the signup page
 	firebase.auth().onAuthStateChanged((user) => {
@@ -27,11 +26,11 @@ export const checkAuth = () => dispatch => {
 export const userSignIn = (signInData) => dispatch => {
 	console.log("enter userSignIn")
 	dispatch({ type: SIGN_IN_REQUEST });
-
+	
 	const firebase = getFirebase(); //connect to firebase
-
+	
 	firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION)
-		.then(() => {
+	.then(() => {
 			// Existing and future Auth states are now persisted in the current
 			// session only. Closing the window would clear any existing state even
 			// if a user forgets to sign out.
@@ -61,12 +60,12 @@ function fetchUserData(dispatch) {
 	const firestore = getFirebase().firestore();
 
 	const user = firebase.auth().currentUser;
-
+	
 	console.log(JSON.stringify(user))
-
+	
 	if (user) {
 		firestore.collection('users').doc(user.uid.toString()).get()
-			.then(doc => {
+		.then(doc => {
 				console.log("doc: " + doc)
 				const userData = doc.data();
 				console.log(userData);
@@ -91,42 +90,6 @@ function fetchUserData(dispatch) {
 	}
 }
 
-function mockSignIn(signInData, dispatch) {
-	// for now, here is a mock sign in with a 2 second delay to simulate processing.
-	// requires email "email" and password "password" for success
-	// populates store with mock userData on success
-	dispatch({
-		type: SIGN_IN_REQUEST
-	})
-
-	wait(2000)
-		.then(() => {
-			if (signInData.email === 'email' && signInData.password === 'password') {
-				let userData = {
-					fName: 'Faker',
-					lName: 'McFakerson',
-					state: 'ZZ',
-					zipcode: 12345,
-					email: 'email',
-					musicPref: 3,
-					spacePref: 2,
-					lightingPref: 5,
-					foodPref: 1
-				};
-
-				dispatch({
-					type: SIGN_IN_SUCCESS,
-					payload: userData
-				});
-			} else {
-				dispatch({
-					type: SIGN_IN_FAILURE,
-					payload: BAD_CREDENTIALS
-				});
-			}
-		});
-}
-
 /* signUpData = {
 	fName: <string>,
 	lName: <string>,
@@ -143,9 +106,9 @@ function mockSignIn(signInData, dispatch) {
 export const userSignUp = (signUpData) => dispatch => {
 	console.log("enter userSignUp")
 	dispatch({ type: SIGN_UP_REQUEST });
-
+	
 	const firebase = getFirebase(); //connect to firebase
-
+	
 	firebase.auth().createUserWithEmailAndPassword( //create user
 		signUpData.email,
 		signUpData.password
@@ -161,39 +124,6 @@ export const userSignUp = (signUpData) => dispatch => {
 		})
 	})
 };
-
-function mockSignUp(signUpData, dispatch) {
-	dispatch({
-		type: SIGN_UP_REQUEST
-	})
-
-	wait(2000)
-		.then(() => {
-			if (signUpData.email === 'email') {
-				dispatch({
-					type: SIGN_UP_FAILURE,
-					payload: EXISTING_ACCOUNT
-				});
-			} else {
-				let userData = {
-					fName: signUpData.fName,
-					lName: signUpData.lName,
-					state: signUpData.state,
-					zipcode: signUpData.zipcode,
-					email: signUpData.email,
-					musicPref: signUpData.musicPref,
-					spacePref: signUpData.spacePref,
-					lightingPref: signUpData.lightingPref,
-					foodPref: signUpData.foodPref
-				};
-
-				dispatch({
-					type: SIGN_UP_SUCCESS,
-					payload: userData
-				});
-			}
-		});
-}
 
 /* userData = {
 	fName: <string>,
@@ -236,6 +166,77 @@ export const updateUserAccount = (userData) => dispatch => {
 		});
 	})
 };
+
+const wait = time => new Promise((resolve) => setTimeout(resolve, time));
+
+function mockSignIn(signInData, dispatch) {
+	// for now, here is a mock sign in with a 2 second delay to simulate processing.
+	// requires email "email" and password "password" for success
+	// populates store with mock userData on success
+	dispatch({
+		type: SIGN_IN_REQUEST
+	})
+	
+	wait(2000)
+	.then(() => {
+		if (signInData.email === 'email' && signInData.password === 'password') {
+				let userData = {
+					fName: 'Faker',
+					lName: 'McFakerson',
+					state: 'ZZ',
+					zipcode: 12345,
+					email: 'email',
+					musicPref: 3,
+					spacePref: 2,
+					lightingPref: 5,
+					foodPref: 1
+				};
+
+				dispatch({
+					type: SIGN_IN_SUCCESS,
+					payload: userData
+				});
+			} else {
+				dispatch({
+					type: SIGN_IN_FAILURE,
+					payload: BAD_CREDENTIALS
+				});
+			}
+		});
+}
+
+function mockSignUp(signUpData, dispatch) {
+	dispatch({
+		type: SIGN_UP_REQUEST
+	})
+	
+	wait(2000)
+		.then(() => {
+			if (signUpData.email === 'email') {
+				dispatch({
+					type: SIGN_UP_FAILURE,
+					payload: EXISTING_ACCOUNT
+				});
+			} else {
+				let userData = {
+					fName: signUpData.fName,
+					lName: signUpData.lName,
+					state: signUpData.state,
+					zipcode: signUpData.zipcode,
+					email: signUpData.email,
+					musicPref: signUpData.musicPref,
+					spacePref: signUpData.spacePref,
+					lightingPref: signUpData.lightingPref,
+					foodPref: signUpData.foodPref
+				};
+
+				dispatch({
+					type: SIGN_UP_SUCCESS,
+					payload: userData
+				});
+			}
+		});
+}
 
 function mockUpdateAccount(userData, dispatch) {
 	dispatch({
