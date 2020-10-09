@@ -38,7 +38,8 @@ export default function(state = initialState, action) {
             return {
                 ...state,
                 signingIn: false,
-                isSignedIn: true
+                isSignedIn: true,
+                errorMsg: SUCCESS
             }
         
         case SIGN_IN_FAILURE:
@@ -59,7 +60,8 @@ export default function(state = initialState, action) {
             return {
                 ...state,
                 signingUp: false,
-                isSignedIn: true
+                isSignedIn: true,
+                errorMsg: SUCCESS
             }
 
         case SIGN_UP_FAILURE:
@@ -79,7 +81,8 @@ export default function(state = initialState, action) {
         case UPDATE_ACCOUNT_SUCCESS:
             return {
                 ...state,
-                updatingAccount: false
+                updatingAccount: false,
+                errorMsg: SUCCESS
             }
 
         case UPDATE_ACCOUNT_FAILURE:
@@ -100,7 +103,8 @@ export default function(state = initialState, action) {
                 ...state,
                 fetchingUserData: false,
                 userDataFetched: true,
-                userData: action.payload
+                userData: action.payload,
+                errorMsg: SUCCESS
             }
 
         case FETCH_USERDATA_FAILURE:

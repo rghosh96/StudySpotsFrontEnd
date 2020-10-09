@@ -1,3 +1,6 @@
+// Having problems with redux persist at the moment. Everything
+// related to it is commented out for now
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
@@ -8,8 +11,8 @@ import { createStore, applyMiddleware, compose } from 'redux'
 import rootReducer from './redux/reducers/rootReducer'
 import { Provider } from 'react-redux'
 import thunk from 'redux-thunk'
-import { persistStore, persistReducer } from 'redux-persist'
-import { PersistGate } from 'redux-persist/integration/react'
+// import { persistStore, persistReducer } from 'redux-persist'
+// import { PersistGate } from 'redux-persist/integration/react'
 import storage from 'redux-persist/lib/storage' // defaults to localStorage for web
 
 import fbConfig from './config/fbConfig'
@@ -19,12 +22,12 @@ import { createFirestoreInstance, reduxFirestore, getFirestore } from 'redux-fir
 import { ReactReduxFirebaseProvider, getFirebase } from 'react-redux-firebase'
 
 
-const persistConfig = {
-  key: 'root',
-  storage,
-}
+// const persistConfig = {
+//   key: 'root',
+//   storage,
+// }
 
-const persistedReducer = persistReducer(persistConfig, rootReducer)
+// const persistedReducer = persistReducer(persistConfig, rootReducer)
 
 
 const rrfConfig = {
@@ -34,7 +37,8 @@ const rrfConfig = {
 
 const initialState = {};
 const store = createStore(
-  persistedReducer,
+  rootReducer,
+  // persistedReducer,
   initialState,
   compose(
     applyMiddleware(thunk.withExtraArgument({ getFirebase, getFirestore })),
@@ -42,7 +46,7 @@ const store = createStore(
     ),
 );
 
-let persistor = persistStore(store)
+// let persistor = persistStore(store)
    
 const rrfProps = {
   firebase,
@@ -57,13 +61,13 @@ const rrfProps = {
 
 ReactDOM.render(
   <Provider store={store}>
-    <PersistGate loading={null} persistor={persistor}>
+    {/* <PersistGate loading={null} persistor={persistor}> */}
       <ReactReduxFirebaseProvider {...rrfProps}>
         <React.StrictMode>
           <App />
         </React.StrictMode>
       </ReactReduxFirebaseProvider>
-    </PersistGate>
+    {/* </PersistGate> */}
   </Provider>,
   document.getElementById('root')
 );
