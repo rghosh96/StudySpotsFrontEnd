@@ -7,11 +7,8 @@ import { connect } from 'react-redux';
 import { userSignUp, userSignIn, updateUserAccount } from '../../redux/actions/accountActions';
 import PropTypes from 'prop-types';
 import {Modal} from 'react-bootstrap'
-import { 
-    Redirect } from 'react-router-dom';
-
-
-// need to clear fields and show confirmation/error to user
+import { Redirect } from 'react-router-dom';
+import LoadSpinner from './LoadSpinner'
 
 
 class SignUp extends React.Component {
@@ -26,7 +23,14 @@ class SignUp extends React.Component {
         spacePref: [],
         lightingPref: [],
         foodPref: [],
-        modalToggle: false
+        modalToggle: false,
+        loading: true
+    }
+
+    componentDidMount(){
+        setTimeout(() => { 
+          this.setState({loading: false})
+        },1000)
     }
 
     // handles general state change info
@@ -98,6 +102,7 @@ class SignUp extends React.Component {
     handleSubmit = (e) => {
         e.preventDefault();
         this.props.userSignUp(this.state)
+        this.setState({ loading: true })
         // wait one second to check if successfully signed in
         setTimeout(() => {
             // if not signed in, show error modal
@@ -105,7 +110,8 @@ class SignUp extends React.Component {
                 this.setState({
                     modalToggle: true
                 })
-            } 
+            }
+            this.setState({ loading: false })
           }, 1000);
     }
 
@@ -123,6 +129,9 @@ class SignUp extends React.Component {
         console.log(this.state.lightingPref)
         console.log(this.state.foodPref)
         // conditionally redirect to myspots if successful sign in
+        if (this.state.loading) {
+            return <LoadSpinner />
+        } else {
         if (this.props.isSignedIn) {
         return (
             <Redirect to="/myspots" />
@@ -231,6 +240,7 @@ class SignUp extends React.Component {
             )    
         } 
     }
+}
 }
 
 // tell redux what properties we want to read from the global store.
