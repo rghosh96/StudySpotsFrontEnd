@@ -24,7 +24,6 @@ export const checkAuth = () => dispatch => {
 	provider: <string>  // e.g. "google". if not using third-party auth, set to null
 } */
 export const userSignIn = (signInData) => dispatch => {
-	console.log("enter userSignIn")
 	dispatch({ type: SIGN_IN_REQUEST });
 	
 	const firebase = getFirebase(); //connect to firebase
@@ -40,11 +39,9 @@ export const userSignIn = (signInData) => dispatch => {
 		})
 		.then(() => {
 			fetchUserData(dispatch);
-			console.log("signin success")
 			dispatch({ type: SIGN_IN_SUCCESS });
 		})
 		.catch((error) => {
-			console.log(error.message)
 			dispatch({
 				type: SIGN_IN_FAILURE,
 				payload: error.message
@@ -53,7 +50,6 @@ export const userSignIn = (signInData) => dispatch => {
 };
 
 function fetchUserData(dispatch) {
-	console.log("enter fetchUserData")
 	dispatch({ type: FETCH_USERDATA_REQUEST });
 
 	const firebase = getFirebase(); //connect to firebase
@@ -61,14 +57,10 @@ function fetchUserData(dispatch) {
 
 	const user = firebase.auth().currentUser;
 	
-	console.log(JSON.stringify(user))
-	
 	if (user) {
 		firestore.collection('users').doc(user.uid.toString()).get()
 		.then(doc => {
-				console.log("doc: " + doc)
 				const userData = doc.data();
-				console.log(userData);
 				
 				dispatch({
 					type: FETCH_USERDATA_SUCCESS,
@@ -76,7 +68,6 @@ function fetchUserData(dispatch) {
 				});
 			})
 			.catch(error => {
-				console.log(error.message)
 				dispatch({
 					type: FETCH_USERDATA_FAILURE,
 					payload: error.message
@@ -104,7 +95,6 @@ function fetchUserData(dispatch) {
 	foodPref: <int>       // importance of food/drink quality pref (5 = most important)
 } */
 export const userSignUp = (signUpData) => dispatch => {
-	console.log("enter userSignUp")
 	dispatch({ type: SIGN_UP_REQUEST });
 	
 	const firebase = getFirebase(); //connect to firebase
@@ -117,7 +107,6 @@ export const userSignUp = (signUpData) => dispatch => {
 		updateUserAccount(signUpData)(dispatch)
 		fetchUserData(dispatch);
 	}).catch(error => {
-		console.log(error.message)
 		dispatch({
 			type: 'SIGN_UP_FAILURE',
 			payload: error.message
@@ -139,7 +128,6 @@ export const userSignUp = (signUpData) => dispatch => {
 	foodPref: <int>       // as above for importance of food/drink quality (1 = least important)
 } */
 export const updateUserAccount = (userData) => dispatch => {
-	console.log("enter updateUserAccount")
 	dispatch({ type: UPDATE_ACCOUNT_REQUEST });
 
 	const firebase = getFirebase(); //connect to firebase
@@ -159,7 +147,6 @@ export const updateUserAccount = (userData) => dispatch => {
 		dispatch({ type: UPDATE_ACCOUNT_SUCCESS });
 		// should we call fetchUserData() here just in case?
 	}).catch(error => {
-		console.log(error.message)
 		dispatch({ 
 			type: UPDATE_ACCOUNT_FAILURE,
 			payload: error.message
