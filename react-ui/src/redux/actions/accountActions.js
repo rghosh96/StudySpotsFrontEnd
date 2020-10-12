@@ -1,4 +1,4 @@
-import {  SIGN_UP_REQUEST, SIGN_UP_FAILURE, SIGN_UP_SUCCESS,
+import {  SIGN_UP_REQUEST, SIGN_UP_FAILURE, SIGN_UP_SUCCESS, SIGN_OUT_REQUEST, SIGN_OUT_SUCCESS, SIGN_OUT_FAILURE,
     UPDATE_ACCOUNT_REQUEST, UPDATE_ACCOUNT_SUCCESS, UPDATE_ACCOUNT_FAILURE, 
     SIGN_IN_REQUEST, SIGN_IN_SUCCESS, SIGN_IN_FAILURE, 
     FETCH_USERDATA_REQUEST, FETCH_USERDATA_SUCCESS, FETCH_USERDATA_FAILURE } from '../actions/types';
@@ -38,7 +38,7 @@ export const userSignIn = (signInData) => dispatch => {
 			return firebase.auth().signInWithEmailAndPassword(signInData.email, signInData.password);
 		})
 		.then(() => {
-			fetchUserData(dispatch);
+			fetchUserData()(dispatch);
 			dispatch({ type: SIGN_IN_SUCCESS });
 		})
 		.catch((error) => {
@@ -49,7 +49,7 @@ export const userSignIn = (signInData) => dispatch => {
 		});
 };
 
-function fetchUserData(dispatch) {
+export const fetchUserData = () => dispatch => {
 	dispatch({ type: FETCH_USERDATA_REQUEST });
 
 	const firebase = getFirebase(); //connect to firebase
@@ -61,7 +61,7 @@ function fetchUserData(dispatch) {
 		firestore.collection('users').doc(user.uid.toString()).get()
 		.then(doc => {
 				const userData = doc.data();
-				
+				console.log(userData)
 				dispatch({
 					type: FETCH_USERDATA_SUCCESS,
 					payload: userData
@@ -105,7 +105,7 @@ export const userSignUp = (signUpData) => dispatch => {
 	).then(() => { //if success or error
 		dispatch({ type: 'SIGN_UP_SUCCESS' }) //### need to add action.payload
 		updateUserAccount(signUpData)(dispatch)
-		fetchUserData(dispatch);
+		fetchUserData()(dispatch);
 	}).catch(error => {
 		dispatch({
 			type: 'SIGN_UP_FAILURE',
@@ -248,4 +248,15 @@ function mockUpdateAccount(userData, dispatch) {
 				payload: userNewData
 			});
 		});
+}
+
+export const userSignOut = () => dispatch => {
+    dispatch({ type: SIGN_OUT_REQUEST });
+	const firebase = getFirebase();
+
+    firebase.auth().signOut().then(() => {
+    	dispatch({ type: SIGN_OUT_SUCCESS });
+	});
+
+	//Add else SIGN_OUT_FAILURE
 }
