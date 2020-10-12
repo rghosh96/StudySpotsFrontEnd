@@ -79,11 +79,6 @@ export const fetchSpotsConstants = () => (dispatch) => {
             rankByMap = mapify(constants.rankby, "display", "api");
             typeMap = mapify(constants.types, "display", "api");
             
-            console.log(businessStatusMap);
-            console.log(languageMap);
-            console.log(priceLevelMap);
-            console.log(rankByMap);
-            console.log(typeMap);
 
             dispatch({
                 type: FETCH_SPOTS_CONSTANTS_SUCCESS,

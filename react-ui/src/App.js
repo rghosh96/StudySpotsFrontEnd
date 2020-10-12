@@ -11,6 +11,7 @@ import SignUp from './components/pages/SignUp.js'
 // redux testing components
 import TestAccountActions from './components/redux-testing/TestAccountActions';
 import TestSpotsActions from './components/redux-testing/TestSpotsActions';
+import TestSignOut from './components/redux-testing/TestSignOut';
 
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
 
             <Route exact path='/redux/testaccountactions' component={TestAccountActions} />
             <Route exact path='/redux/testspotsactions' component={TestSpotsActions} />
+            <Route exact path='/redux/signout' component={TestSignOut} />
           </div>
         </BrowserRouter>
   );
