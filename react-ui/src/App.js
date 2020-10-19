@@ -7,6 +7,7 @@ import Settings from './components/pages/Settings.js'
 import Spotlight from './components/pages/Spotlight.js'
 import SignIn from './components/pages/SignIn.js'
 import SignUp from './components/pages/SignUp.js'
+import Header from './components/nav/Header';
 
 // redux testing components
 import TestAccountActions from './components/redux-testing/TestAccountActions';
@@ -15,19 +16,20 @@ import TestSpotsActions from './components/redux-testing/TestSpotsActions';
 
 function App() {
   return (
-        <BrowserRouter>
-          <div className="App">
-            <Route exact path='/' component={Spotlight} />
-            <Route exact path='/signin' component={SignIn} />
-            <Route exact path='/signup' component={SignUp} />
-            <Route exact path='/settings' component={Settings} />
-            <Route exact path='/reviews' component={Reviews} />
-            <Route exact path='/myspots' component={MySpots} />
+    <div className="App">
+      <BrowserRouter>
+      <Header />
+        <Route exact path='/' component={Spotlight} />
+        <Route exact path='/signin' component={SignIn} />
+        <Route exact path='/signup' component={SignUp} />
+        <Route exact path='/settings' component={Settings} />
+        <Route exact path='/reviews' component={Reviews} />
+        <Route exact path='/myspots' component={MySpots} />
 
-            <Route exact path='/redux/testaccountactions' component={TestAccountActions} />
-            <Route exact path='/redux/testspotsactions' component={TestSpotsActions} />
-          </div>
-        </BrowserRouter>
+        <Route exact path='/redux/testaccountactions' component={TestAccountActions} />
+        <Route exact path='/redux/testspotsactions' component={TestSpotsActions} />
+      </BrowserRouter>
+    </div>
   );
 }
 

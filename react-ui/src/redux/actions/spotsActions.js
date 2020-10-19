@@ -1,20 +1,3 @@
-import { FETCH_SPOTS_REQUEST, FETCH_SPOTS_SUCCESS, FETCH_SPOTS_FAILURE,
-    FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE 
-} from '../actions/types';
-import { SPOT_CONSTANTS_ERROR } from '../errorMessages';
-import { getFirebase } from 'react-redux-firebase';
-import axios from "axios";
-import { mockSpots } from '../mock-data/mockSpots';
-import { mapify } from '../../helpers/dataStructureHelpers';
-
-
-var businessStatusMap;
-var languageMap;
-var priceLevelMap;
-var rankByMap;
-var typeMap;
-
-
 /* The flow of Places data retrieval goes like this (Note: all requests require an API key):
 
    (https://developers.google.com/places/web-service/search)
@@ -51,19 +34,112 @@ var typeMap;
 */
 
 
+import {
+    FETCH_SPOTS_REQUEST, FETCH_SPOTS_SUCCESS, FETCH_SPOTS_FAILURE,
+    FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE
+} from '../actions/types';
+import { INTERNAL_SERVER, SPOT_CONSTANTS_ERROR, USER_DENIED_LOCATION } from '../errorMessages';
+import { getFirebase } from 'react-redux-firebase';
+import axios from "axios";
+import { mockSpots } from '../mock-data/mockSpots';
+import { mapify, mapGetArray } from '../../helpers/dataStructureHelpers';
+
+
+var placesRequestStatusMap = undefined;
+var businessStatusMap = undefined;
+var typesMap = undefined;
+
+const PLACES_NEARBY_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
+const NEARBY_SEARCH_RADIUS = 10000; // in meters (about 6 miles). max is 50000
+
 /*  (optional. these are params we can pass directly to a Place Search Request)
-    queryParams: {
+    params: {
         keyword: <string>,   (phone number, address, name; pretty much anything)
         language: <enum>,    (language code: https://developers.google.com/maps/faq#languagesupport)
-        types: [<enum>],     (enum list stored in our db, matching Google's types
+        type: <enum>,     (enum list stored in our db, matching Google's types
         minprice: <number>,         NOTE: Place Search only allows one type. we will have to make mult requests to do this properly)
         maxprice: <number>,
         opennow: <boolean>,  (if true, only return places open now)
         rankby: <enum>,      (possible values: prominence (importance), distance (latter requires types or keyword))  
     }
 */
-export const fetchSpots = (queryParams) => (dispatch) => {
-    mockFetchSpots(queryParams)(dispatch);
+export const fetchNearbySpots = (params) => (dispatch) => {
+    dispatch({ type: FETCH_SPOTS_REQUEST });
+
+    // this will force a browser popup that asks permission to use the user's location
+    navigator.geolocation.getCurrentPosition(
+        function (position) {
+            var latitude = position.coords.latitude;
+            var longitude = position.coords.longitude;
+
+            if (latitude && longitude) {
+                var here = new window.google.maps.LatLng(latitude, longitude);
+                // var map = new google.maps.Map(document.getElementById('map'), {
+                //     center: here,
+                //     zoom: 15
+                // })
+
+                // use map from above instead of createElement to integrate Google maps
+                var service = new window.google.maps.places.PlacesService(document.createElement('div')); // a dummy element
+                service.nearbySearch(
+                    // request params
+                    {
+                        location: here,
+                        radius: NEARBY_SEARCH_RADIUS, 
+                        type: params.type || null,
+                        language: params.language || null,
+                        keyword: params.keyword || null,
+                        opennow: params.opennow || null,
+                        rankby: params.rankby || null,
+                        pagetoken: params.pagetoken || null,
+                    },
+
+                    // callback to handle response/errors
+                    (results, status) => {
+                        if (status == window.google.maps.places.PlacesServiceStatus.OK) {
+                            // use for maps integration
+                            // for (var i = 0; i < results.length; i++) {
+                            //     createMarker(results[i]);
+                            // }
+
+                            console.log('results: ' + JSON.stringify(results))
+
+                            let data = results.map(r => {
+                                return {
+                                    placeId: r.place_id,
+                                    name: r.name,
+                                    businessStatus: businessStatusMap ? businessStatusMap.get(r.business_status) : '',
+                                    iconUrl: r.icon,
+                                    opennow: r.opening_hours ? r.opening_hours.open_now : null,
+                                    vicinity: r.vicinity, // almost always an address
+                                    photos: r.photos, // [{ height, premade html element, width }]
+                                    types: typesMap && r.types ? mapGetArray(typesMap, r.types) : [],
+                                    rating: r.rating,
+                                    userRatingsTotal: r.user_ratings_total
+                                }
+                            })
+
+                            dispatch({
+                                type: FETCH_SPOTS_SUCCESS,
+                                payload: data
+                            })
+                        } else {
+                            dispatch({
+                                type: FETCH_SPOTS_FAILURE,
+                                payload: placesRequestStatusMap ? 
+                                    placesRequestStatusMap.get(status) : INTERNAL_SERVER
+                            })
+                        }
+                    }
+                );                
+            } else {
+                dispatch({
+                    type: FETCH_SPOTS_FAILURE,
+                    payload: USER_DENIED_LOCATION
+                })
+            }
+        }
+    );
 };
 
 export const fetchSpotsConstants = () => (dispatch) => {
@@ -73,26 +149,18 @@ export const fetchSpotsConstants = () => (dispatch) => {
         .then(doc => {
             const constants = doc.data();
 
-            businessStatusMap = mapify(constants.business_status, "display", "api");
-            languageMap = mapify(constants.language, "display", "api");
-            priceLevelMap = mapify(constants.price_level, "display", "api");
-            rankByMap = mapify(constants.rankby, "display", "api");
-            typeMap = mapify(constants.types, "display", "api");
-            
-            console.log(businessStatusMap);
-            console.log(languageMap);
-            console.log(priceLevelMap);
-            console.log(rankByMap);
-            console.log(typeMap);
+            businessStatusMap = mapify(constants.business_status, "api", "display");
+            typesMap = mapify(constants.types, "api", "display");
+            placesRequestStatusMap = mapify(constants.status, "api", "display");
 
             dispatch({
                 type: FETCH_SPOTS_CONSTANTS_SUCCESS,
                 payload: {
-                    businessStatusConstants: Array.from(businessStatusMap.keys()),
-                    languageConstants: Array.from(languageMap.keys()),
-                    priceLevelConstants: Array.from(priceLevelMap.keys()),
-                    rankByConstants: Array.from(rankByMap.keys()),
-                    typeConstants: Array.from(typeMap.keys()),
+                    businessStatusConstants: constants.business_status,
+                    languageConstants: constants.language,
+                    priceLevelConstants: constants.price_level,
+                    rankByConstants: constants.rankby,
+                    typeConstants: constants.types,
                 }
             });
         })

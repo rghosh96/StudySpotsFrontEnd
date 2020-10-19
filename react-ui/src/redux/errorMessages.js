@@ -5,3 +5,4 @@ export const BAD_CREDENTIALS = "Please check your email and password, and try si
 export const BAD_SPOTS_FETCH = "We are having trouble finding study spots at the moment.";
 export const USER_NOT_SIGNED_IN = "There is no user signed in.";
 export const SPOT_CONSTANTS_ERROR = "Could not retrieve Spot search constants.";
+export const USER_DENIED_LOCATION = "User denied access to location.";
