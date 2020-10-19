@@ -44,7 +44,12 @@ import axios from "axios";
 import { mockSpots } from '../mock-data/mockSpots';
 import { mapify, mapGetArray } from '../../helpers/dataStructureHelpers';
 
-
+// these maps are used to turn enums returned by api calls into text that can
+// be displayed to the user (the values from Firestore). 
+// see helpers.dataStructureHelpers.mapify() and fetchSpotsConstants()
+//
+// example: businessStatusMapMap.get(response.business_status) 
+// returns "Temporarily closed" when response.business_status === "TEMPORARILY_CLOSED"
 var placesRequestStatusMap = undefined;
 var businessStatusMap = undefined;
 var typesMap = undefined;
@@ -55,12 +60,12 @@ const NEARBY_SEARCH_RADIUS = 10000; // in meters (about 6 miles). max is 50000
 /*  (optional. these are params we can pass directly to a Place Search Request)
     params: {
         keyword: <string>,   (phone number, address, name; pretty much anything)
-        language: <enum>,    (language code: https://developers.google.com/maps/faq#languagesupport)
-        type: <enum>,     (enum list stored in our db, matching Google's types
+        language: constants.display,    (language code: https://developers.google.com/maps/faq#languagesupport)
+        type: constants.display,     (enum list stored in our db, matching Google's types
         minprice: <number>,         NOTE: Place Search only allows one type. we will have to make mult requests to do this properly)
         maxprice: <number>,
         opennow: <boolean>,  (if true, only return places open now)
-        rankby: <enum>,      (possible values: prominence (importance), distance (latter requires types or keyword))  
+        rankby: constants.display,      (possible values: prominence (importance), distance (latter requires types or keyword))  
     }
 */
 export const fetchNearbySpots = (params) => (dispatch) => {
@@ -101,8 +106,6 @@ export const fetchNearbySpots = (params) => (dispatch) => {
                             // for (var i = 0; i < results.length; i++) {
                             //     createMarker(results[i]);
                             // }
-
-                            console.log('results: ' + JSON.stringify(results))
 
                             let data = results.map(r => {
                                 return {
@@ -179,8 +182,6 @@ export const mockFetchSpots = (queryParams) => (dispatch) => {
 
     wait(2000)
         .then(() => {
-            console.log(mockSpots[0])
-
             dispatch({
                 type: FETCH_SPOTS_SUCCESS,
                 payload: mockSpots
