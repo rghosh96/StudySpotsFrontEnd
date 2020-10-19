@@ -1,4 +1,4 @@
-import {  SIGN_UP_REQUEST, SIGN_UP_FAILURE, SIGN_UP_SUCCESS,
+import {  SIGN_UP_REQUEST, SIGN_UP_FAILURE, SIGN_UP_SUCCESS, SIGN_OUT_REQUEST, SIGN_OUT_SUCCESS, SIGN_OUT_FAILURE,
     UPDATE_ACCOUNT_REQUEST, UPDATE_ACCOUNT_SUCCESS, UPDATE_ACCOUNT_FAILURE, 
     SIGN_IN_REQUEST, SIGN_IN_SUCCESS, SIGN_IN_FAILURE, 
     FETCH_USERDATA_REQUEST, FETCH_USERDATA_SUCCESS, FETCH_USERDATA_FAILURE } from '../actions/types';
@@ -7,6 +7,7 @@ import { SUCCESS } from '../errorMessages'
 const initialState = {
     signingUp: false,
     signingIn: false,
+    signingOut: false,
     isSignedIn: false,
     updatingAccount: false,
     fetchingUserData: false,
@@ -69,6 +70,29 @@ export default function(state = initialState, action) {
                 ...state,
                 signingUp: false,
                 isSignedIn: false,
+                errorMsg: action.payload
+            }
+
+        case SIGN_OUT_REQUEST:
+            return {
+                ...state,
+                signingOut: true
+            }
+        case SIGN_OUT_SUCCESS:
+            return {
+                ...state,
+                signingOut: false,
+                isSignedIn: false,
+                userData: [],
+                errorMsg: SUCCESS
+            }
+
+        case SIGN_OUT_FAILURE:
+            return {
+                ...state,
+                signingOut: false,
+                isSignedIn: true,
+                userData: [],
                 errorMsg: action.payload
             }
 

@@ -12,6 +12,7 @@ import Header from './components/nav/Header';
 // redux testing components
 import TestAccountActions from './components/redux-testing/TestAccountActions';
 import TestSpotsActions from './components/redux-testing/TestSpotsActions';
+import TestSignOut from './components/redux-testing/TestSignOut';
 
 
 function App() {
@@ -25,11 +26,12 @@ function App() {
         <Route exact path='/settings' component={Settings} />
         <Route exact path='/reviews' component={Reviews} />
         <Route exact path='/myspots' component={MySpots} />
-
+    
         <Route exact path='/redux/testaccountactions' component={TestAccountActions} />
         <Route exact path='/redux/testspotsactions' component={TestSpotsActions} />
       </BrowserRouter>
     </div>
+
   );
 }
 

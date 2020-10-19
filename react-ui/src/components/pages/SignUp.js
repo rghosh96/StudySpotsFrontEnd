@@ -6,9 +6,9 @@ import '../../styling/master.scss'
 import { connect } from 'react-redux';
 import { userSignUp, userSignIn, updateUserAccount } from '../../redux/actions/accountActions';
 import PropTypes from 'prop-types';
-
-
-// need to clear fields and show confirmation/error to user
+import {Modal} from 'react-bootstrap'
+import { Redirect } from 'react-router-dom';
+import LoadSpinner from './LoadSpinner'
 
 
 class SignUp extends React.Component {
@@ -19,10 +19,18 @@ class SignUp extends React.Component {
         lName: '',
         zipcode: '',
         state: '',
-        musicPref: '',
-        spacePref: '',
-        lightingPref: '',
-        foodPref: '',
+        musicPref: [],
+        spacePref: [],
+        lightingPref: [],
+        foodPref: [],
+        modalToggle: false,
+        loading: true
+    }
+
+    componentDidMount(){
+        setTimeout(() => { 
+          this.setState({loading: false})
+        },1000)
     }
 
     // handles general state change info
@@ -34,177 +42,205 @@ class SignUp extends React.Component {
 
     // handles state info that can have multiple options
     handleMOptions = (e) => {
-        this.setState({
-            musicPref: Array.from(e.target.selectedOptions, (item) => item.value),
-        })
+        let mPref = this.state.musicPref
+        // check if the check box is checked or unchecked
+        if (e.target.checked) {
+            // add the numerical value of the checkbox to options array
+            mPref.push(e.target.value)
+        } else {
+            // or remove the value from the unchecked checkbox from the array
+            let index = mPref.indexOf(e.target.value)
+            mPref.splice(index, 1)
+        }
+        // update the state with the new array of options
+        this.setState({ musicPref: mPref })
     }
     handleSOptions = (e) => {
-        this.setState({
-            spacePref: Array.from(e.target.selectedOptions, (item) => item.value),
-        })
+        let sPref = this.state.spacePref
+        // check if the check box is checked or unchecked
+        if (e.target.checked) {
+            // add the numerical value of the checkbox to options array
+            sPref.push(e.target.value)
+        } else {
+            // or remove the value from the unchecked checkbox from the array
+            let index = sPref.indexOf(e.target.value)
+            sPref.splice(index, 1)
+        }
+        // update the state with the new array of options
+        this.setState({ spacePref: sPref })
     }
     handleLOptions = (e) => {
-        this.setState({
-            lightingPref: Array.from(e.target.selectedOptions, (item) => item.value),
-        })
+        let lPref = this.state.lightingPref
+        // check if the check box is checked or unchecked
+        if (e.target.checked) {
+            // add the numerical value of the checkbox to options array
+            lPref.push(e.target.value)
+        } else {
+            // or remove the value from the unchecked checkbox from the array
+            let index = lPref.indexOf(e.target.value)
+            lPref.splice(index, 1)
+        }
+        // update the state with the new array of options
+        this.setState({ lightingPref: lPref })
     }
     handleFOptions = (e) => {
-        this.setState({
-            foodPref: Array.from(e.target.selectedOptions, (item) => item.value),
-        })
+        let fPref = this.state.foodPref
+        // check if the check box is checked or unchecked
+        if (e.target.checked) {
+            // add the numerical value of the checkbox to options array
+            fPref.push(e.target.value)
+        } else {
+            // or remove the value from the unchecked checkbox from the array
+            let index = fPref.indexOf(e.target.value)
+            fPref.splice(index, 1)
+        }
+        // update the state with the new array of options
+        this.setState({ foodPref: fPref })
     }
 
     // handles submit, sending state information to redux store
     handleSubmit = (e) => {
         e.preventDefault();
         this.props.userSignUp(this.state)
-        console.log(this.state);
+        this.setState({ loading: true })
+        // wait one second to check if successfully signed in
+        setTimeout(() => {
+            // if not signed in, show error modal
+            if (!this.props.isSignedIn) {
+                this.setState({
+                    modalToggle: true
+                })
+            }
+            this.setState({ loading: false })
+          }, 1000);
     }
 
+    // for handling closing of modal
+    handleClose = (e) => {
+        this.setState({
+            modalToggle: false
+        })
+    }
+    
+
     render() {
+        console.log(this.state.musicPref)
+        console.log(this.state.spacePref)
+        console.log(this.state.lightingPref)
+        console.log(this.state.foodPref)
+        // conditionally redirect to myspots if successful sign in
+        if (this.state.loading) {
+            return <LoadSpinner />
+        } else {
+        if (this.props.isSignedIn) {
         return (
-            <Form onSubmit={this.handleSubmit}>
-                <h1>sign up</h1>
-                <hr></hr>
-                <Form.Group >
+            <Redirect to="/myspots" />
+        )} else {
+        return (
+            <div>
+                <Form id="form" onSubmit={this.handleSubmit}>
+                    <h1>sign up</h1>
+                    <hr></hr>
+                    <Form.Group >
+                        <Form.Row>
+                            <Col>
+                                <Form.Label>First Name</Form.Label>
+                                <Form.Control required onChange={this.handleChange} id="fName" />
+                            </Col>
+                            <Col>
+                                <Form.Label>Last Name</Form.Label>
+                                <Form.Control required onChange={this.handleChange} id="lName"  />
+                            </Col>
+                        </Form.Row>
+                    </Form.Group>
+                    
+                    <Form.Group >
+                        <Form.Label>Email</Form.Label>
+                        <Form.Control required onChange={this.handleChange} id="email" type="email"  />
+                    </Form.Group>
+
+                    <Form.Group>
+                        <Form.Label>Password</Form.Label>
+                        <Form.Control required onChange={this.handleChange} id="password" type="password"/>
+                    </Form.Group>
+
                     <Form.Row>
-                        <Col>
-                            <Form.Label>First Name</Form.Label>
-                            <Form.Control onChange={this.handleChange} id="fName" />
-                        </Col>
-                        <Col>
-                            <Form.Label>Last Name</Form.Label>
-                            <Form.Control onChange={this.handleChange} id="lName"  />
-                        </Col>
+                        <Form.Group as={Col}>
+                            <Form.Label>State</Form.Label>
+                            <Form.Control required onChange={this.handleChange} id="state"/>
+                        </Form.Group>
+                        
+                        <Form.Group as={Col} >
+                            <Form.Label>Zip Code</Form.Label>
+                            <Form.Control required onChange={this.handleChange} id="zipcode" />
+                        </Form.Group>
                     </Form.Row>
-                </Form.Group>
-                
-                <Form.Group >
-                    <Form.Label>Email</Form.Label>
-                    <Form.Control onChange={this.handleChange} id="email" type="email"  />
-                </Form.Group>
 
-                <Form.Group>
-                    <Form.Label>Password</Form.Label>
-                    <Form.Control onChange={this.handleChange} id="password" type="password"/>
-                </Form.Group>
+                    <Form.Row>
+                        <Form.Group as={Col}>
+                            <Form.Label>Music Preference</Form.Label>
+                            <Form.Check type="checkbox" label="Upbeat" value="upbeat" onChange={this.handleMOptions}/>
+                            <Form.Check type="checkbox" label="Lo-Fi" value="lofi" onChange={this.handleMOptions}/>
+                            <Form.Check type="checkbox" label="Indie" value="indie" onChange={this.handleMOptions}/>
+                            <Form.Check type="checkbox" label="Pop" value="pop" onChange={this.handleMOptions}/>
+                            <Form.Check type="checkbox" label="Funky" value="funky" onChange={this.handleMOptions}/>
+                            <Form.Check type="checkbox" label="No Preference" value="nopref" onChange={this.handleMOptions}/>
+                        </Form.Group>
+                        <Form.Group as={Col}>
+                            <Form.Label>Space Preference</Form.Label>
+                            <Form.Check type="checkbox" label="Individual Study" value="individual" onChange={this.handleSOptions}/>
+                            <Form.Check type="checkbox" label="Couple of People" value="couple" onChange={this.handleSOptions}/>
+                            <Form.Check type="checkbox" label="Small Group (<4)" value="smallgroup" onChange={this.handleSOptions}/>
+                            <Form.Check type="checkbox" label="Large Group (5+)" value="largegroup" onChange={this.handleSOptions}/>
+                            <Form.Check type="checkbox" label="No Preference" value="nopref" onChange={this.handleSOptions}/>
+                        </Form.Group>
+                    </Form.Row>
+                    <Form.Row>
+                        <Form.Group as={Col}>
+                            <Form.Label>Lighting Preference</Form.Label>
+                            <Form.Check type="checkbox" label="Dim Lighting" value="dim" onChange={this.handleLOptions}/>
+                            <Form.Check type="checkbox" label="Natural Lighting" value="natural" onChange={this.handleLOptions}/>
+                            <Form.Check type="checkbox" label="Bright Lighting" value="bright" onChange={this.handleLOptions}/>
+                            <Form.Check type="checkbox" label="No Preference" value="nopref" onChange={this.handleLOptions}/>
+                        </Form.Group>
+                        <Form.Group as={Col}>
+                            <Form.Label>Food Preference</Form.Label>
+                            <Form.Check type="checkbox" label="Small Bites/Bakery" value="smallbites" onChange={this.handleFOptions}/>
+                            <Form.Check type="checkbox" label="Full Menu" value="fullmenu" onChange={this.handleFOptions}/>
+                            <Form.Check type="checkbox" label="Just Coffee" value="coffee" onChange={this.handleFOptions}/>
+                            <Form.Check type="checkbox" label="No Preference" value="nopref" onChange={this.handleFOptions}/>
+                        </Form.Group>
+                    </Form.Row>
 
-                <Form.Row>
-                    <Form.Group as={Col}>
-                        <Form.Label>State</Form.Label>
-                        <Form.Control onChange={this.handleChange} id="state"/>
-                    </Form.Group>
-                    
-                    <Form.Group as={Col} >
-                        <Form.Label>Zip Code</Form.Label>
-                        <Form.Control onChange={this.handleChange} id="zipcode" />
-                    </Form.Group>
-                </Form.Row>
+                    <Button type="submit">Submit</Button>
+                </Form>
 
-                <Form.Row>
-                    <Form.Group as={Col}>
-                        <Form.Label>Music Preference</Form.Label>
-                        <Form.Control onChange ={this.handleMOptions} as="select" multiple>
-                            <option value="upbeat">upbeat</option>
-                            <option value="lofi">lo fi</option>
-                            <option value="indie">indie</option>
-                            <option value="pop">pop</option>
-                            <option value="funky">funky</option>
-                            <option value="nopref">no preference</option>
-                        </Form.Control>
-                    </Form.Group>
-                    
-                    <Form.Group as={Col}>
-                        <Form.Label>Space Preference</Form.Label>
-                        <Form.Control onChange ={this.handleSOptions} as="select" multiple>
-                            <option value="individual">individual study</option>
-                            <option value="couple">couple of people</option>
-                            <option value="smallgroup">small group (3 or less)</option>
-                            <option value="largegroup">large group (4 or more)</option>
-                            <option value="nopref">no preference</option>
-                        </Form.Control>
-                    </Form.Group>
-                </Form.Row>
-                <Form.Row>
-                    <Form.Group as={Col}>
-                        <Form.Label>Lighting Preference</Form.Label>
-                        <Form.Control onChange ={this.handleLOptions} as="select" multiple>
-                            <option value="dim">dim</option>
-                            <option value="natural">natural</option>
-                            <option value="nopref">no preference</option>
-                        </Form.Control>
-                    </Form.Group>
-
-                    <Form.Group as={Col}>
-                        <Form.Label>Food Preference</Form.Label>
-                        <Form.Control onChange ={this.handleFOptions} as="select" multiple>
-                            <option value="smallbites">small bites</option>
-                            <option value="bakery">bakery</option>
-                            <option value="fullmenu">full menu</option>
-                            <option value="coffeeonly">just coffee</option>
-                            <option value="nopref">no preference</option>
-                        </Form.Control>
-                    </Form.Group>
-                </Form.Row>
-
-                <Form.Row>
-                    <Form.Group as={Col}>
-                        <Form.Label>Music Preference</Form.Label>
-                        <Form.Control onChange ={this.handleMOptions} as="select" multiple>
-                            <option value="upbeat">upbeat</option>
-                            <option value="lofi">lo fi</option>
-                            <option value="indie">indie</option>
-                            <option value="pop">pop</option>
-                            <option value="funky">funky</option>
-                            <option value="nopref">no preference</option>
-                        </Form.Control>
-                    </Form.Group>
-                    
-                    <Form.Group as={Col}>
-                        <Form.Label>Space Preference</Form.Label>
-                        <Form.Control onChange ={this.handleSOptions} as="select" multiple>
-                            <option value="individual">individual study</option>
-                            <option value="couple">couple of people</option>
-                            <option value="smallgroup">small group (3 or less)</option>
-                            <option value="largegroup">large group (4 or more)</option>
-                            <option value="nopref">no preference</option>
-                        </Form.Control>
-                    </Form.Group>
-                </Form.Row>
-                <Form.Row>
-                    <Form.Group as={Col}>
-                        <Form.Label>Lighting Preference</Form.Label>
-                        <Form.Control onChange ={this.handleLOptions} as="select" multiple>
-                            <option value="dim">dim</option>
-                            <option value="natural">natural</option>
-                            <option value="nopref">no preference</option>
-                        </Form.Control>
-                    </Form.Group>
-
-                    <Form.Group as={Col}>
-                        <Form.Label>Food Preference</Form.Label>
-                        <Form.Control onChange ={this.handleFOptions} as="select" multiple>
-                            <option value="smallbites">small bites</option>
-                            <option value="bakery">bakery</option>
-                            <option value="fullmenu">full menu</option>
-                            <option value="coffeeonly">just coffee</option>
-                            <option value="nopref">no preference</option>
-                        </Form.Control>
-                    </Form.Group>
-                </Form.Row>
-
-                <Button type="submit">Submit</Button>
-
-                {/* <div>signingUp...{this.props.signingUp.toString()}</div>
-                <div>signingIn...{this.props.signingIn.toString()}</div>
-                <div>updatingAccount...{this.props.updatingAccount.toString()}</div>
-                <div>isSignedIn...{this.props.isSignedIn.toString()}</div>
-                <div>errorMsg...{this.props.errorMsg.toString()}</div>
-                <div>userData...{JSON.stringify(this.props.userData)}</div>  */}
-            </Form>
+                {/* error modal */}
+                <Modal 
+                    show={this.state.modalToggle} 
+                    onHide={this.handleClose}
+                    size="lg"
+                    aria-labelledby="contained-modal-title-vcenter"
+                    centered
+                >
+                    <Modal.Header>
+                        <Modal.Title>Sorry, there was an error.</Modal.Title>
+                    </Modal.Header>
+                    {/* displays appropriate error message */}
+                    <Modal.Body>{this.props.errorMsg.toString()}</Modal.Body>
+                    <Modal.Footer>
+                    <Button variant="secondary" onClick={this.handleClose}>
+                        Close
+                    </Button>
+                    </Modal.Footer>
+                </Modal>
             
-        )    
-    } 
+            </div>
+                
+            )    
+        } 
+    }
+}
 }
 
 // tell redux what properties we want to read from the global store.
