@@ -5,13 +5,17 @@ import '../../styling/master.scss'
 import { connect } from 'react-redux';
 import { userSignUp, userSignIn, updateUserAccount } from '../../redux/actions/accountActions';
 import PropTypes from 'prop-types';
+import {Modal} from 'react-bootstrap'
+import { 
+    Redirect } from 'react-router-dom';
 
 class SignIn extends React.Component {
     state = {
         email: '',
-        password: '',
+        password: ''
     }
 
+    // handles general state change info
     handleChange = (e) => {
         this.setState( {
             [e.target.id]: e.target.value,
@@ -23,26 +27,87 @@ class SignIn extends React.Component {
       handleSubmit = (e) => {
         e.preventDefault();
         this.props.userSignIn(this.state)
+        console.log(this.state);
+        // wait one second to check if successfully signed in
+        setTimeout(() => {
+            // if not signed in, show error modal
+            if (!this.props.isSignedIn) {
+                this.setState({
+                    modalToggle: true
+                    //password: ''
+                });
+                // check for password error message to reset password field
+                 if (this.props.errorMsg.toString()=="The password is invalid or the user does not have a password.") {
+                   document.getElementById("password").value = '';
+                 }
+                 // else reset both fields
+                 else {
+                    document.getElementById("password").value = '';
+                    document.getElementById("email").value = '';
+                }
+
+            } 
+          }, 1000);
+        
     }
+
+    // for handling closing of modal
+    handleClose = (e) => {
+        this.setState({
+            modalToggle: false
+        })
+    }
+
+
     render() {
+       
+        // conditionally redirect to myspots if successful sign in
+        if (this.props.isSignedIn) {
         return (
+            <Redirect to="/myspots" />
+        )} else {
+        return (
+            <div>
             <Form onSubmit={this.handleSubmit}>
                 <h1>sign in</h1>
                 <hr></hr>
                 
                 <Form.Group  controlId="formGridEmail">
                     <Form.Label>Email</Form.Label>
-                    <Form.Control onChange={this.handleChange} id="email" type="email"  />
+                    <Form.Control required onChange={this.handleChange} id="email" type="email"  />
                 </Form.Group>
 
                 <Form.Group controlId="formGridPassword">
                     <Form.Label>Password</Form.Label>
-                    <Form.Control onChange={this.handleChange} id="password" type="password"/>
+                    <Form.Control required onChange={this.handleChange} id="password" type="password"/>
                 </Form.Group>
 
                 <Button type="submit">Sign In</Button>
             </Form>
-        )    
+
+            {/* error modal */}
+            <Modal 
+            show={this.state.modalToggle} 
+            onHide={this.handleClose}
+            size="lg"
+            aria-labelledby="contained-modal-title-vcenter"
+            centered
+        >
+            <Modal.Header>
+                <Modal.Title>Sorry, there was an error.</Modal.Title>
+            </Modal.Header>
+            {/* displays appropriate error message */}
+            <Modal.Body>{this.props.errorMsg.toString()}</Modal.Body>
+            <Modal.Footer>
+            <Button variant="secondary" onClick={this.handleClose}>
+                Close
+            </Button>
+            </Modal.Footer>
+            </Modal>
+
+        </div>
+        )  
+        }  
     } 
 }
 // tell redux what properties we want to read from the global store.
