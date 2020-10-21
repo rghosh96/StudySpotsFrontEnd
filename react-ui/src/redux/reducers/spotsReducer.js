@@ -8,11 +8,18 @@ const initialState = {
     fetchingSpots: false,
     spotsFetched: false,
     constantsFetched: false,
+
+    // the constants are arrays of the form: [{display: <string>, api: <string>}, ...]
+    // frontend usage: 
+    // constants.map(c => {
+    //     return <option value={c.api}>{c.display}</option>
+    // })
     businessStatusConstants: [],
     languageConstants: [],
     priceLevelConstants: [],
     rankByConstants: [],
     typeConstants: [],
+     
     spots: [],
     errorMsg: ''
 };

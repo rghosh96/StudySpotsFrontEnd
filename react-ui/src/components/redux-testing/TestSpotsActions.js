@@ -3,33 +3,84 @@ import '../../styling/master.scss'
 
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { fetchSpots, fetchSpotsConstants } from '../../redux/actions/spotsActions';
+import { fetchNearbySpots, fetchSpotsConstants } from '../../redux/actions/spotsActions';
 
 class TestSpotsActions extends React.Component {
+    constructor() {
+        super()
+        this.state = {
+            l: '',
+            pl: '',
+            rb: '',
+            t: '',
+            k: ''
+        }
+    }
+
+    componentDidMount() {
+        this.props.fetchSpotsConstants();
+    }
+
     render() {
-        let fetchSpots = () => {
-            this.props.fetchSpots();
+        let fetchNearbySpots = () => {
+            this.props.fetchNearbySpots({
+                language: this.state.l,
+                priceLevel: this.state.pl,
+                rankBy: this.state.rb,
+                type: this.state.t,
+                keyword: this.state.k
+            });
         }
 
         let fetchSpotsConstants = () => {
             this.props.fetchSpotsConstants();
         }
 
-
-
         return (
             <div>
-                <button onClick={fetchSpots}>fetch spots</button><br />
                 <button onClick={fetchSpotsConstants}>fetch spots constants</button><br />
 
                 <div>fetchingSpots...{this.props.fetchingSpots.toString()}</div>
                 <div>spotsFetched...{this.props.spotsFetched.toString()}</div>
                 <div>errorMsg...{this.props.errorMsg.toString()}</div>
-                <div>businessStatusConstants...<div><pre>{JSON.stringify(this.props.businessStatusConstants, null, 2)}</pre></div></div>
-                <div>languageConstants...<div><pre>{JSON.stringify(this.props.languageConstants, null, 2)}</pre></div></div>
-                <div>priceLevelConstants...<div><pre>{JSON.stringify(this.props.priceLevelConstants, null, 2)}</pre></div></div>
-                <div>rankByConstants...<div><pre>{JSON.stringify(this.props.rankByConstants, null, 2)}</pre></div></div>
-                <div>typeConstants...<div><pre>{JSON.stringify(this.props.typeConstants, null, 2)}</pre></div></div>
+
+                search keyword:
+                <input type="text" onChange={(e) => {this.setState({k: e.target.value})}}/><br/>
+                
+                choose language: 
+                <select onChange={(e) => {this.setState({l: e.target.value})}}>
+                    <option value="" selected disabled hidden>Choose...</option>
+                    {this.props.languageConstants.map(l => {
+                        return <option value={l.api}>{l.display}</option>
+                    })}
+                </select><br/>
+
+                choose priceLevel: 
+                <select onChange={(e) => {this.setState({pl: e.target.value})}}>
+                    <option value="" selected disabled hidden>Choose...</option>
+                    {this.props.priceLevelConstants.map(pl => {
+                        return <option value={pl.api}>{pl.display}</option>
+                    })}
+                </select><br/>
+
+                choose rankBy: 
+                <select onChange={(e) => {this.setState({rb: e.target.value})}}>
+                    <option value="" selected disabled hidden>Choose...</option>
+                    {this.props.rankByConstants.map(rb => {
+                        return <option value={rb.api}>{rb.display}</option>
+                    })}
+                </select><br/>
+
+                choose type: 
+                <select onChange={(e) => {this.setState({t: [e.target.value]})}}>
+                    <option value="" selected disabled hidden>Choose...</option>
+                    {this.props.typeConstants.map(t => {
+                        return <option value={t.api}>{t.display}</option>
+                    })}
+                </select><br/>
+
+                <button onClick={fetchNearbySpots}>fetch spots</button><br />
+                
                 <div>spots...<div><pre>{JSON.stringify(this.props.spots, null, 2)}</pre></div></div>
             </div>
         )
@@ -51,7 +102,7 @@ const mapStateToProps = state => ({
 
 // tell redux what actions we want to use (the same ones we imported at the top)
 const mapDispatchToProps = {
-    fetchSpots,
+    fetchNearbySpots,
     fetchSpotsConstants
 }
 
@@ -59,7 +110,9 @@ const mapDispatchToProps = {
 TestSpotsActions.propTypes = {
     fetchingSpots: PropTypes.bool.isRequired,
     spotsFetched: PropTypes.bool.isRequired,
-    spots: PropTypes.array.isRequired,
+    // spots: PropTypes.array.isRequired,
+    spots: PropTypes.object.isRequired,
+
     errorMsg: PropTypes.string.isRequired,
 
     businessStatusConstants: PropTypes.array.isRequired,
@@ -67,8 +120,7 @@ TestSpotsActions.propTypes = {
     priceLevelConstants: PropTypes.array.isRequired,
     rankByConstants: PropTypes.array.isRequired,
     typeConstants: PropTypes.array.isRequired,
-
-    fetchSpots: PropTypes.func.isRequired
+    fetchNearbySpots: PropTypes.func.isRequired
 };
 
 // finally, link this component to the redux actions and global properties using the function we imported
