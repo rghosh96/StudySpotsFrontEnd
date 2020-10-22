@@ -170,7 +170,7 @@ export const fetchSpotsConstants = () => (dispatch) => {
         .catch(error => {
             dispatch({
                 type: FETCH_SPOTS_CONSTANTS_FAILURE,
-                payload: SPOT_CONSTANTS_ERROR
+                payload: error.message
             });
         });
 };
