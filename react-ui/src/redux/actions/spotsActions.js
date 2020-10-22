@@ -148,8 +148,6 @@ export const fetchNearbySpots = (params) => (dispatch) => {
 export const fetchSpotsConstants = () => (dispatch) => {
     const firestore = getFirebase().firestore(); //connect to firebase
 
-    console.log(firestore)
-
     firestore.collection('constants').doc("googlePlaces").get()
         .then(doc => {
             const constants = doc.data();
