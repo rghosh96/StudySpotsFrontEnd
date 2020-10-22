@@ -64,7 +64,6 @@ export const fetchUserData = () => dispatch => {
 		firestore.collection('users').doc(user.uid.toString()).get()
 		.then(doc => {
 				const userData = doc.data();
-				console.log(userData)
 				dispatch({
 					type: FETCH_USERDATA_SUCCESS,
 					payload: userData
