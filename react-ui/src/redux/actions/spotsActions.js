@@ -148,6 +148,8 @@ export const fetchNearbySpots = (params) => (dispatch) => {
 export const fetchSpotsConstants = () => (dispatch) => {
     const firestore = getFirebase().firestore(); //connect to firebase
 
+    console.log(firestore)
+
     firestore.collection('constants').doc("googlePlaces").get()
         .then(doc => {
             const constants = doc.data();
@@ -170,7 +172,7 @@ export const fetchSpotsConstants = () => (dispatch) => {
         .catch(error => {
             dispatch({
                 type: FETCH_SPOTS_CONSTANTS_FAILURE,
-                payload: SPOT_CONSTANTS_ERROR
+                payload: error.message
             });
         });
 };
