@@ -23,6 +23,7 @@ class SignUp extends React.Component {
         spacePref: [],
         lightingPref: [],
         foodPref: [],
+        passwordConfirmed: false,
         modalToggle: false,
         loading: true
     }
@@ -38,6 +39,21 @@ class SignUp extends React.Component {
         this.setState({
             [e.target.id]: e.target.value,
         })
+    }
+
+    handleConfirmPassword = (e) => {
+        if (this.state.password === e.target.value) {
+            this.setState({
+                passwordConfirmed: true,
+            })
+        } else {
+            this.setState({
+                passwordConfirmed: false,
+            })
+        }
+        console.log("IN CONFIRM PASSWORD")
+        console.log(e.target.value)
+        console.log(this.state.passwordConfirmed)
     }
 
     // handles state info that can have multiple options
@@ -101,7 +117,8 @@ class SignUp extends React.Component {
     // handles submit, sending state information to redux store
     handleSubmit = (e) => {
         e.preventDefault();
-        this.props.userSignUp(this.state)
+        if (this.state.passwordConfirmed) {
+            this.props.userSignUp(this.state)
         this.setState({ loading: true })
         // wait one second to check if successfully signed in
         setTimeout(() => {
@@ -113,6 +130,12 @@ class SignUp extends React.Component {
             }
             this.setState({ loading: false })
           }, 1000);
+        } else {
+            this.setState({
+                modalToggle: true
+            })
+        }
+        
     }
 
     // for handling closing of modal
@@ -140,38 +163,44 @@ class SignUp extends React.Component {
             <div>
                 <Form id="form" onSubmit={this.handleSubmit}>
                     <h1>sign up</h1>
+                    <p>Fields marked with (*) are required.</p>
                     <hr></hr>
                     <Form.Group >
                         <Form.Row>
                             <Col>
-                                <Form.Label>First Name</Form.Label>
+                                <Form.Label>First Name*</Form.Label>
                                 <Form.Control required onChange={this.handleChange} id="fName" />
                             </Col>
                             <Col>
-                                <Form.Label>Last Name</Form.Label>
+                                <Form.Label>Last Name*</Form.Label>
                                 <Form.Control required onChange={this.handleChange} id="lName"  />
                             </Col>
                         </Form.Row>
                     </Form.Group>
                     
                     <Form.Group >
-                        <Form.Label>Email</Form.Label>
+                        <Form.Label>Email*</Form.Label>
                         <Form.Control required onChange={this.handleChange} id="email" type="email"  />
                     </Form.Group>
 
                     <Form.Group>
-                        <Form.Label>Password</Form.Label>
+                        <Form.Label>Password*</Form.Label>
                         <Form.Control required onChange={this.handleChange} id="password" type="password"/>
+                    </Form.Group>
+
+                    <Form.Group>
+                        <Form.Label>Confirm Password *</Form.Label>
+                        <Form.Control required onChange={this.handleConfirmPassword} id="passwordConfirm" type="password"/>
                     </Form.Group>
 
                     <Form.Row>
                         <Form.Group as={Col}>
-                            <Form.Label>State</Form.Label>
+                            <Form.Label>State*</Form.Label>
                             <Form.Control required onChange={this.handleChange} id="state"/>
                         </Form.Group>
                         
                         <Form.Group as={Col} >
-                            <Form.Label>Zip Code</Form.Label>
+                            <Form.Label>Zip Code*</Form.Label>
                             <Form.Control required onChange={this.handleChange} id="zipcode" />
                         </Form.Group>
                     </Form.Row>
@@ -227,7 +256,7 @@ class SignUp extends React.Component {
                         <Modal.Title>Sorry, there was an error.</Modal.Title>
                     </Modal.Header>
                     {/* displays appropriate error message */}
-                    <Modal.Body>{this.props.errorMsg.toString()}</Modal.Body>
+                    <Modal.Body>{this.state.passwordConfirmed ? this.props.errorMsg.toString() : "Passwords do not match."}</Modal.Body>
                     <Modal.Footer>
                     <Button variant="secondary" onClick={this.handleClose}>
                         Close
