@@ -118,18 +118,23 @@ class SignUp extends React.Component {
     handleSubmit = (e) => {
         e.preventDefault();
         if (this.state.passwordConfirmed) {
+            if (this.state.musicPref.length === 0) this.state.musicPref = "No preference."
+            if (this.state.foodPref.length === 0) this.state.foodPref = "No preference."
+            if (this.state.spacePref.length === 0) this.state.spacePref = "No preference."
+            if (this.state.lightingPref.length === 0) this.state.lightingPref = "No preference."
+            console.log(this.state)
             this.props.userSignUp(this.state)
-        this.setState({ loading: true })
-        // wait one second to check if successfully signed in
-        setTimeout(() => {
-            // if not signed in, show error modal
-            if (!this.props.isSignedIn) {
-                this.setState({
-                    modalToggle: true
-                })
-            }
-            this.setState({ loading: false })
-          }, 1000);
+            this.setState({ loading: true })
+            // wait one second to check if successfully signed in
+            setTimeout(() => {
+                // if not signed in, show error modal
+                if (!this.props.isSignedIn) {
+                    this.setState({
+                        modalToggle: true
+                    })
+                }
+                this.setState({ loading: false })
+            }, 1000);
         } else {
             this.setState({
                 modalToggle: true
@@ -205,6 +210,8 @@ class SignUp extends React.Component {
                         </Form.Group>
                     </Form.Row>
 
+                    <p>Select preferences from the areas below. If you do not have a preference for an area, do not check any boxes.</p>
+
                     <Form.Row>
                         <Form.Group as={Col}>
                             <Form.Label>Music Preference</Form.Label>
@@ -213,7 +220,6 @@ class SignUp extends React.Component {
                             <Form.Check type="checkbox" label="Indie" value="indie" onChange={this.handleMOptions}/>
                             <Form.Check type="checkbox" label="Pop" value="pop" onChange={this.handleMOptions}/>
                             <Form.Check type="checkbox" label="Funky" value="funky" onChange={this.handleMOptions}/>
-                            <Form.Check type="checkbox" label="No Preference" value="nopref" onChange={this.handleMOptions}/>
                         </Form.Group>
                         <Form.Group as={Col}>
                             <Form.Label>Space Preference</Form.Label>
@@ -221,7 +227,6 @@ class SignUp extends React.Component {
                             <Form.Check type="checkbox" label="Couple of People" value="couple" onChange={this.handleSOptions}/>
                             <Form.Check type="checkbox" label="Small Group (<4)" value="smallgroup" onChange={this.handleSOptions}/>
                             <Form.Check type="checkbox" label="Large Group (5+)" value="largegroup" onChange={this.handleSOptions}/>
-                            <Form.Check type="checkbox" label="No Preference" value="nopref" onChange={this.handleSOptions}/>
                         </Form.Group>
                     </Form.Row>
                     <Form.Row>
@@ -230,14 +235,12 @@ class SignUp extends React.Component {
                             <Form.Check type="checkbox" label="Dim Lighting" value="dim" onChange={this.handleLOptions}/>
                             <Form.Check type="checkbox" label="Natural Lighting" value="natural" onChange={this.handleLOptions}/>
                             <Form.Check type="checkbox" label="Bright Lighting" value="bright" onChange={this.handleLOptions}/>
-                            <Form.Check type="checkbox" label="No Preference" value="nopref" onChange={this.handleLOptions}/>
                         </Form.Group>
                         <Form.Group as={Col}>
                             <Form.Label>Food Preference</Form.Label>
                             <Form.Check type="checkbox" label="Small Bites/Bakery" value="smallbites" onChange={this.handleFOptions}/>
                             <Form.Check type="checkbox" label="Full Menu" value="fullmenu" onChange={this.handleFOptions}/>
                             <Form.Check type="checkbox" label="Just Coffee" value="coffee" onChange={this.handleFOptions}/>
-                            <Form.Check type="checkbox" label="No Preference" value="nopref" onChange={this.handleFOptions}/>
                         </Form.Group>
                     </Form.Row>
 
