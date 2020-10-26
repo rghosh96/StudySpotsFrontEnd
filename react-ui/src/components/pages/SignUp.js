@@ -118,10 +118,6 @@ class SignUp extends React.Component {
     handleSubmit = (e) => {
         e.preventDefault();
         if (this.state.passwordConfirmed) {
-            if (this.state.musicPref.length === 0) this.state.musicPref = "No preference."
-            if (this.state.foodPref.length === 0) this.state.foodPref = "No preference."
-            if (this.state.spacePref.length === 0) this.state.spacePref = "No preference."
-            if (this.state.lightingPref.length === 0) this.state.lightingPref = "No preference."
             console.log(this.state)
             this.props.userSignUp(this.state)
             this.setState({ loading: true })
