@@ -3,7 +3,7 @@ import '../../styling/master.scss'
 
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { fetchNearbySpots, fetchSpotsConstants } from '../../redux/actions/spotsActions';
+import { fetchNearbySpots, fetchSpotDetails, fetchSpotsConstants } from '../../redux/actions/spotsActions';
 
 class TestSpotsActions extends React.Component {
     constructor() {
@@ -13,7 +13,8 @@ class TestSpotsActions extends React.Component {
             pl: '',
             rb: '',
             t: '',
-            k: ''
+            k: '',
+            placeId: '',
         }
     }
 
@@ -22,7 +23,7 @@ class TestSpotsActions extends React.Component {
     }
 
     render() {
-        let fetchNearbySpots = () => {
+        const fetchNearbySpots = () => {
             this.props.fetchNearbySpots({
                 language: this.state.l,
                 priceLevel: this.state.pl,
@@ -30,14 +31,22 @@ class TestSpotsActions extends React.Component {
                 type: this.state.t,
                 keyword: this.state.k
             });
-        }
+        };
 
-        let fetchSpotsConstants = () => {
+        const fetchSpotDetails = () => {
+            this.props.fetchSpotDetails(this.state.placeId);
+        };
+
+        const fetchSpotsConstants = () => {
             this.props.fetchSpotsConstants();
-        }
+        };
+        
+        const shortener = (key, value) => {
+            return value.toString().slice(0, 20) + "...";
+        };
 
         return (
-            <div>
+            <div style={{position: "absolute", top: "200px"}}>
                 <button onClick={fetchSpotsConstants}>fetch spots constants</button><br />
 
                 <div>fetchingSpots...{this.props.fetchingSpots.toString()}</div>
@@ -45,7 +54,8 @@ class TestSpotsActions extends React.Component {
                 <div>errorMsg...{this.props.errorMsg.toString()}</div>
 
                 search keyword:
-                <input type="text" onChange={(e) => {this.setState({k: e.target.value})}}/><br/>
+                <input type="text" onChange={(e) => {this.setState({k: e.target.value})}}/>
+                <br/>
                 
                 choose language: 
                 <select onChange={(e) => {this.setState({l: e.target.value})}}>
@@ -53,7 +63,8 @@ class TestSpotsActions extends React.Component {
                     {this.props.languageConstants.map(l => {
                         return <option value={l.api}>{l.display}</option>
                     })}
-                </select><br/>
+                </select>
+                <br/>
 
                 choose priceLevel: 
                 <select onChange={(e) => {this.setState({pl: e.target.value})}}>
@@ -61,7 +72,8 @@ class TestSpotsActions extends React.Component {
                     {this.props.priceLevelConstants.map(pl => {
                         return <option value={pl.api}>{pl.display}</option>
                     })}
-                </select><br/>
+                </select>
+                <br/>
 
                 choose rankBy: 
                 <select onChange={(e) => {this.setState({rb: e.target.value})}}>
@@ -69,7 +81,8 @@ class TestSpotsActions extends React.Component {
                     {this.props.rankByConstants.map(rb => {
                         return <option value={rb.api}>{rb.display}</option>
                     })}
-                </select><br/>
+                </select>
+                <br/>
 
                 choose type: 
                 <select onChange={(e) => {this.setState({t: [e.target.value]})}}>
@@ -77,11 +90,17 @@ class TestSpotsActions extends React.Component {
                     {this.props.typeConstants.map(t => {
                         return <option value={t.api}>{t.display}</option>
                     })}
-                </select><br/>
+                </select>
+                <br/>
 
-                <button onClick={fetchNearbySpots}>fetch spots</button><br />
+                <input type="text" placeholder="placeId" onChange={e => {this.setState({placeId: e.target.value})}}/>
+                <button onClick={fetchSpotDetails}>fetch active spot</button>
+                <div>activeSpot...<div style={{maxHeight: "1000px", maxWidth: "1200px", overflow: "auto"}}><pre>{JSON.stringify(this.props.activeSpot, null, 2)}</pre></div></div>
+                <br/>
                 
-                <div>spots...<div><pre>{JSON.stringify(this.props.spots, null, 2)}</pre></div></div>
+                <button onClick={fetchNearbySpots}>fetch spots</button><br />
+                <div>spots...<div style={{maxHeight: "1000px", maxWidth: "1200px", overflow: "auto"}}><pre>{JSON.stringify(this.props.spots, null, 2)}</pre></div></div>
+                <br/>
             </div>
         )
     }
@@ -94,6 +113,7 @@ const mapStateToProps = state => ({
     // savingSpots: state.spots.spots,
     // savedSpots: state.spots.savedSpots,
     spots: state.spots.spots,
+    activeSpot: state.spots.activeSpot,
     errorMsg: state.spots.errorMsg,
     businessStatusConstants: state.spots.businessStatusConstants,
     languageConstants: state.spots.languageConstants,
@@ -106,7 +126,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = {
     fetchNearbySpots,
     fetchSpotsConstants,
-    // saveSpot
+    fetchSpotDetails
 }
 
 // tell this component what it will be getting from redux. these members can be accessed using this.props
@@ -115,17 +135,15 @@ TestSpotsActions.propTypes = {
     // savedSpots: PropTypes.Map.isRequired,
     fetchingSpots: PropTypes.bool.isRequired,
     spotsFetched: PropTypes.bool.isRequired,
-    // spots: PropTypes.array.isRequired,
-    spots: PropTypes.object.isRequired,
-    
+    spots: PropTypes.array.isRequired,
+    errorMsg: PropTypes.string.isRequired,
     businessStatusConstants: PropTypes.array.isRequired,
     languageConstants: PropTypes.array.isRequired,
     priceLevelConstants: PropTypes.array.isRequired,
     rankByConstants: PropTypes.array.isRequired,
     typeConstants: PropTypes.array.isRequired,
-    errorMsg: PropTypes.string.isRequired,
-
-    // fetchNearbySpots: PropTypes.func.isRequired,
+    fetchNearbySpots: PropTypes.func.isRequired,
+    fetchSpotDetails: PropTypes.func.isRequired,
     // saveSpot: PropTypes.func.isRequired,
 };
 

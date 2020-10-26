@@ -1,14 +1,15 @@
 import {
     FETCH_SPOTS_REQUEST, FETCH_SPOTS_SUCCESS, FETCH_SPOTS_FAILURE,
     FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE,
-	SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS
+    FETCH_SPOT_DETAILS_REQUEST, FETCH_SPOT_DETAILS_SUCCESS, FETCH_SPOT_DETAILS_FAILURE,
+	SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS,
 } from '../actions/types';
 import { SUCCESS, BAD_SPOTS_FETCH } from '../errorMessages'
 
 const initialState = {
     fetchingSpots: false,
-    spotsFetched: false,
-    constantsFetched: false,
+    spotsFetched: false,     // would like to remove this if no one is using
+    constantsFetched: false, // would like to remove this if no one is using
 
     // the constants are arrays of the form: [{display: <string>, api: <string>}, ...]
     // frontend usage: 
@@ -23,6 +24,7 @@ const initialState = {
 
     spots: [],
     savedSpots: new Map(),
+    activeSpot: {},
     errorMsg: ''
 };
 
@@ -48,7 +50,6 @@ export default function (state = initialState, action) {
             return {
                 ...state,
                 fetchingSpots: false,
-                spotsFetched: false,
                 errorMsg: action.payload
             }
 
@@ -79,6 +80,27 @@ export default function (state = initialState, action) {
                 savedSpots: action.payload.spotDetails ?
                     state.savedSpots.set(action.payload.placeId)
                     : state.savedSpots,
+            }
+
+        case FETCH_SPOT_DETAILS_REQUEST:
+            return {
+                ...state,
+                fetchingSpots: true
+            }
+
+        case FETCH_SPOT_DETAILS_SUCCESS:
+            return {
+                ...state,
+                fetchingSpots: false,
+                activeSpot: action.payload,
+                errorMsg: SUCCESS
+            }
+
+        case FETCH_SPOT_DETAILS_FAILURE:
+            return {
+                ...state,
+                fetchingSpots: false,
+                errorMsg: action.payload
             }
 
         default:
