@@ -3,9 +3,17 @@ import '../../styling/master.scss'
 
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { userSignUp, userSignIn, updateUserAccount } from '../../redux/actions/accountActions';
+import { userSignUp, userSignIn, updateUserAccount, saveSpot } from '../../redux/actions/accountActions';
 
 class TestAccountActions extends React.Component {
+    constructor() {
+        super();
+        this.state = {
+            // some examples: ChIJa00m55kayYcRnz5WcvjDiMI, ChIJnQKsxvQPyYcRxqw3vavZ3jY, ChIJp5zBHqUayYcRAwbxonj30jA
+            placeId: ''
+        }
+    }
+
     render() {
         let goodSignUp = () => {
             this.props.userSignUp({
@@ -64,19 +72,22 @@ class TestAccountActions extends React.Component {
         }
 
         return (
-            <div>
+            <div style={{position: "absolute", top: "200px"}}>
                 <button onClick={goodSignUp}>good sign up</button><br/>
                 <button onClick={badSignUp}>bad sign up</button><br/>
                 <button onClick={goodSignIn}>good sign in</button><br/>
                 <button onClick={badSignIn}>bad sign in</button><br/>
+                <input type="text" placeholder="placeId" onChange={e => this.setState({placeId: e.target.value})} />
+                <button onClick={() => this.props.saveSpot(this.state.placeId)}>save spot</button><br/>
                 <button onClick={updateAccount}>update account</button><br/>
 
                 <div>signingUp...{this.props.signingUp.toString()}</div>
                 <div>signingIn...{this.props.signingIn.toString()}</div>
                 <div>updatingAccount...{this.props.updatingAccount.toString()}</div>
+                <div>savingSpot...{this.props.savingSpot}</div>
                 <div>isSignedIn...{this.props.isSignedIn.toString()}</div>
                 <div>errorMsg...{this.props.errorMsg.toString()}</div>
-                <div>userData...{JSON.stringify(this.props.userData)}</div>
+                <div style={{maxHeight: "1000px", maxWidth: "1200px", overflow: "auto"}}>userData...<pre>{JSON.stringify(this.props.userData, null, 2)}</pre></div>
             </div>
         )    
     } 
@@ -86,6 +97,7 @@ class TestAccountActions extends React.Component {
 const mapStateToProps = state => ({
     signingUp: state.account.signingUp,
     signingIn: state.account.signingIn,
+    savingSpot: state.account.savingSpot,
     updatingAccount: state.account.updatingAccount,
     isSignedIn: state.account.isSignedIn,
     userData: state.account.userData,
@@ -96,7 +108,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = {
     userSignUp,
     userSignIn,
-    updateUserAccount
+    updateUserAccount,
 }
 
 // tell this component what it will be getting from redux. these members can be accessed using this.props
@@ -109,7 +121,7 @@ TestAccountActions.propTypes = {
     errorMsg: PropTypes.string.isRequired,
     userSignUp: PropTypes.func.isRequired,
     userSignIn: PropTypes.func.isRequired,
-    updateUserAccount: PropTypes.func.isRequired
+    updateUserAccount: PropTypes.func.isRequired,
 };
 
 // finally, link this component to the redux actions and global properties using the function we imported

@@ -1,6 +1,7 @@
 import {
     FETCH_SPOTS_REQUEST, FETCH_SPOTS_SUCCESS, FETCH_SPOTS_FAILURE,
-    FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE
+    FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE,
+	SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS
 } from '../actions/types';
 import { SUCCESS, BAD_SPOTS_FETCH } from '../errorMessages'
 
@@ -19,8 +20,9 @@ const initialState = {
     priceLevelConstants: [],
     rankByConstants: [],
     typeConstants: [],
-     
+
     spots: [],
+    savedSpots: new Map(),
     errorMsg: ''
 };
 
@@ -67,6 +69,16 @@ export default function (state = initialState, action) {
                 ...state,
                 constantsFetched: false,
                 errorMsg: action.payload
+            }
+
+        case SAVE_SPOT:
+            return {
+                ...state,
+                savingSpot: action.payload.savingSpot,
+                errorMsg: action.payload.errorMsg,
+                savedSpots: action.payload.spotDetails ?
+                    state.savedSpots.set(action.payload.placeId)
+                    : state.savedSpots,
             }
 
         default:

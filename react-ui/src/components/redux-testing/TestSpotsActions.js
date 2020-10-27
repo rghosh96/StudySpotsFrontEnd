@@ -91,6 +91,8 @@ class TestSpotsActions extends React.Component {
 const mapStateToProps = state => ({
     fetchingSpots: state.spots.fetchingSpots,
     spotsFetched: state.spots.spotsFetched,
+    // savingSpots: state.spots.spots,
+    // savedSpots: state.spots.savedSpots,
     spots: state.spots.spots,
     errorMsg: state.spots.errorMsg,
     businessStatusConstants: state.spots.businessStatusConstants,
@@ -103,24 +105,28 @@ const mapStateToProps = state => ({
 // tell redux what actions we want to use (the same ones we imported at the top)
 const mapDispatchToProps = {
     fetchNearbySpots,
-    fetchSpotsConstants
+    fetchSpotsConstants,
+    // saveSpot
 }
 
 // tell this component what it will be getting from redux. these members can be accessed using this.props
 TestSpotsActions.propTypes = {
+    // savingSpot: PropTypes.bool.isRequired,
+    // savedSpots: PropTypes.Map.isRequired,
     fetchingSpots: PropTypes.bool.isRequired,
     spotsFetched: PropTypes.bool.isRequired,
     // spots: PropTypes.array.isRequired,
     spots: PropTypes.object.isRequired,
-
-    errorMsg: PropTypes.string.isRequired,
-
+    
     businessStatusConstants: PropTypes.array.isRequired,
     languageConstants: PropTypes.array.isRequired,
     priceLevelConstants: PropTypes.array.isRequired,
     rankByConstants: PropTypes.array.isRequired,
     typeConstants: PropTypes.array.isRequired,
-    fetchNearbySpots: PropTypes.func.isRequired
+    errorMsg: PropTypes.string.isRequired,
+
+    // fetchNearbySpots: PropTypes.func.isRequired,
+    // saveSpot: PropTypes.func.isRequired,
 };
 
 // finally, link this component to the redux actions and global properties using the function we imported

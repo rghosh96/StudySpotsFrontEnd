@@ -36,9 +36,12 @@
 
 import {
     FETCH_SPOTS_REQUEST, FETCH_SPOTS_SUCCESS, FETCH_SPOTS_FAILURE,
-    FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE
+    FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE,
+	SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS
 } from '../actions/types';
-import { INTERNAL_SERVER, SPOT_CONSTANTS_ERROR, USER_DENIED_LOCATION } from '../errorMessages';
+import { 
+    INTERNAL_SERVER, SPOT_CONSTANTS_ERROR, USER_DENIED_LOCATION, USER_NOT_SIGNED_IN
+} from '../errorMessages';
 import { getFirebase } from 'react-redux-firebase';
 import axios from "axios";
 import { mockSpots } from '../mock-data/mockSpots';
@@ -175,78 +178,59 @@ export const fetchSpotsConstants = () => (dispatch) => {
         });
 };
 
-const wait = time => new Promise((resolve) => setTimeout(resolve, time));
+// if no placeId, fetches data for all the user's saved spots and passes it to reducer
+// else fetches the data for the placeId that was passed (similar to spotActions.fetchSpotDetails)
+export const fetchedSavedSpots = (placeId = null) => (dispatch) => {
 
-export const mockFetchSpots = (queryParams) => (dispatch) => {
-    dispatch({ type: FETCH_SPOTS_REQUEST });
-
-    wait(2000)
-        .then(() => {
-            dispatch({
-                type: FETCH_SPOTS_SUCCESS,
-                payload: mockSpots
-            });
-        })
-
-    return;
-
-
-    // used for generating data from fakeJSON api
-    let payload = {
-        token: process.env.REACT_APP_FAKEJSON_API_TOKEN,
-        data: {
-            name: "companyName",
-            business_status: "numberInt|0,2",           // 0: OPERATIONAL, 1: CLOSED_TEMPORARILY, 3: CLOSED_PERMANENTLY
-            types: "functionArray|1,5|numberInt|0,9",   // array of 1-5 numbers valued 0-9, an enum type of business
-            formatted_address: "addressFullStreet",
-            formatted_phone_number: "phoneHome",
-            opening_hours: {
-                open_now: "numberBool",
-                periods: {
-                    open: {
-                        day: "numberInt|0,6",        // enum day of the week
-                        time: "dateTime|ISOtime"
-                    },
-                    close: {  // may be null/missing
-                        day: "numberInt|0,6",
-                        time: "dateTime|ISOtime"
-                    },
-                    _repeat: 7
-                },
-                weekday_text: "stringWords",
-            },
-            rating: "numberFloat|1,5|1",    // 1.0-5.0 stars
-            reviews: {
-                author_name: "name",
-                author_url: "internetUrl",
-                profile_photo_url: "internetUrl",
-                // language ?
-                rating: "numberInt|1,5",
-                relative_time_description: "dateTime",
-                text: "stringWords",
-                date: "date:ISO:Basic",
-                _repeat: 3
-            },
-            price_level: "numberInt|0,4",   // 0-4 least to most expensive
-            url: "internetUrl",             // Google page url
-            website: "internetUrl",         // definitive url for the business
-            _repeat: 5
-        }
-    };
-
-    axios({
-        method: "post",
-        url: "https://app.fakejson.com/q",
-        data: payload
-    }).then(response => {
-        dispatch({
-            type: FETCH_SPOTS_SUCCESS,
-            payload: response.data
-        });
-    }).catch(err => {
-        dispatch({
-            type: FETCH_SPOTS_FAILURE,
-            payload: err.message
-        })
-    })
 }
+
+// adds placeId to the current user's savedSpots in Firestore, then calls 
+// spotsActions.fetchSpotDetails(), and the details are passed into the reducer
+// to create a new entry in the redux savedSpots Map
+export const saveSpot = (placeId) => (dispatch) => {
+    dispatch({
+        type: SAVE_SPOT,
+		payload: {
+            errorMsg: '',
+			savingSpot: true
+		}
+	});
+    
+	const firebase = getFirebase(); // connect to firebase
+	const firestore = getFirebase().firestore();
+	const user = firebase.auth().currentUser;
+    
+	// user isn't signed in
+	if (!user) {
+        dispatch({
+            type: SAVE_SPOT,
+			payload: {
+                errorMsg: USER_NOT_SIGNED_IN,
+				savingSpot: false
+			}
+		})
+        // user is signed in; save to their spots and fetch details
+	} else {
+        var userRef = firestore.collection("users").doc(user.uid.toString());
+        
+		// Atomically add a new placeId to the savedSpots array field.
+		userRef.update({
+            savedSpots: firebase.firestore.FieldValue.arrayUnion(placeId)
+		}).then(() => {
+            
+        }).catch(error => {
+            dispatch({
+                type: SAVE_SPOT,
+				payload: {
+                    errorMsg: error.message,
+					savingSpot: false
+				}
+			});
+		})
+	}
+}
+
+// removes the placeId from the user's Firestore array of saved spots
+export const removeSavedSpot = (placeId) => (dispatch) => {
+
+} 
