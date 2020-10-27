@@ -1,13 +1,14 @@
 import {
     FETCH_SPOTS_REQUEST, FETCH_SPOTS_SUCCESS, FETCH_SPOTS_FAILURE,
-    FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE
+    FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE,
+    FETCH_SPOT_DETAILS_REQUEST, FETCH_SPOT_DETAILS_SUCCESS, FETCH_SPOT_DETAILS_FAILURE,
 } from '../actions/types';
 import { SUCCESS, BAD_SPOTS_FETCH } from '../errorMessages'
 
 const initialState = {
     fetchingSpots: false,
-    spotsFetched: false,
-    constantsFetched: false,
+    spotsFetched: false,     // would like to remove this if no one is using
+    constantsFetched: false, // would like to remove this if no one is using
 
     // the constants are arrays of the form: [{display: <string>, api: <string>}, ...]
     // frontend usage: 
@@ -19,8 +20,9 @@ const initialState = {
     priceLevelConstants: [],
     rankByConstants: [],
     typeConstants: [],
-     
+
     spots: [],
+    activeSpot: {},
     errorMsg: ''
 };
 
@@ -46,7 +48,6 @@ export default function (state = initialState, action) {
             return {
                 ...state,
                 fetchingSpots: false,
-                spotsFetched: false,
                 errorMsg: action.payload
             }
 
@@ -66,6 +67,27 @@ export default function (state = initialState, action) {
             return {
                 ...state,
                 constantsFetched: false,
+                errorMsg: action.payload
+            }
+
+        case FETCH_SPOT_DETAILS_REQUEST:
+            return {
+                ...state,
+                fetchingSpots: true
+            }
+
+        case FETCH_SPOT_DETAILS_SUCCESS:
+            return {
+                ...state,
+                fetchingSpots: false,
+                activeSpot: action.payload,
+                errorMsg: SUCCESS
+            }
+
+        case FETCH_SPOT_DETAILS_FAILURE:
+            return {
+                ...state,
+                fetchingSpots: false,
                 errorMsg: action.payload
             }
 

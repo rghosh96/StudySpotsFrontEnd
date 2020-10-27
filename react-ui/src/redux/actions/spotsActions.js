@@ -36,13 +36,16 @@
 
 import {
     FETCH_SPOTS_REQUEST, FETCH_SPOTS_SUCCESS, FETCH_SPOTS_FAILURE,
+    FETCH_SPOT_DETAILS_REQUEST, FETCH_SPOT_DETAILS_SUCCESS, FETCH_SPOT_DETAILS_FAILURE,
     FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE
 } from '../actions/types';
 import { INTERNAL_SERVER, SPOT_CONSTANTS_ERROR, USER_DENIED_LOCATION } from '../errorMessages';
 import { getFirebase } from 'react-redux-firebase';
 import axios from "axios";
 import { mockSpots } from '../mock-data/mockSpots';
-import { mapify, mapGetArray } from '../../helpers/dataStructureHelpers';
+import {
+    mapify, mapGetArray, placesPeriodsReducer, placesPhotosReducer, placesReviewsReducer, placesTypesReducer
+} from '../../helpers/dataStructureHelpers';
 
 // these maps are used to turn enums returned by api calls into text that can
 // be displayed to the user (the values from Firestore). 
@@ -84,13 +87,13 @@ export const fetchNearbySpots = (params) => (dispatch) => {
                 //     zoom: 15
                 // })
 
-                // use map from above instead of createElement to integrate Google maps
+                // use map from above instead of createElement to integrate Google maps 
                 var service = new window.google.maps.places.PlacesService(document.createElement('div')); // a dummy element
                 service.nearbySearch(
                     // request params
                     {
                         location: here,
-                        radius: NEARBY_SEARCH_RADIUS, 
+                        radius: NEARBY_SEARCH_RADIUS,
                         type: params.type || null,
                         language: params.language || null,
                         keyword: params.keyword || null,
@@ -113,7 +116,7 @@ export const fetchNearbySpots = (params) => (dispatch) => {
                                     name: r.name,
                                     businessStatus: businessStatusMap ? businessStatusMap.get(r.business_status) : '',
                                     iconUrl: r.icon,
-                                    opennow: r.opening_hours ? r.opening_hours.open_now : null,
+                                    openNow: r.opening_hours ? r.opening_hours.open_now : null,
                                     vicinity: r.vicinity, // almost always an address
                                     photos: r.photos, // [{ height, premade html element, width }]
                                     types: typesMap && r.types ? mapGetArray(typesMap, r.types) : [],
@@ -129,12 +132,12 @@ export const fetchNearbySpots = (params) => (dispatch) => {
                         } else {
                             dispatch({
                                 type: FETCH_SPOTS_FAILURE,
-                                payload: placesRequestStatusMap ? 
+                                payload: placesRequestStatusMap ?
                                     placesRequestStatusMap.get(status) : INTERNAL_SERVER
                             })
                         }
                     }
-                );                
+                );
             } else {
                 dispatch({
                     type: FETCH_SPOTS_FAILURE,
@@ -144,6 +147,63 @@ export const fetchNearbySpots = (params) => (dispatch) => {
         }
     );
 };
+
+// placeId example (starbucks in Rogers): ChIJnQKsxvQPyYcRxqw3vavZ3jY
+export const fetchSpotDetails = (placeId) => dispatch => {
+    dispatch({ type: FETCH_SPOT_DETAILS_REQUEST });
+
+    var service = new window.google.maps.places.PlacesService(document.createElement('div'));
+
+    service.getDetails({
+        placeId: placeId,
+        // return only the fields specified
+        fields: [
+            "place_id",
+            "name",
+            "business_status",
+            "formatted_address",
+            "formatted_phone_number",
+            "icon",
+            "types",
+            "opening_hours",
+            "photos",
+            "price_level",
+            "rating",
+            "review"
+        ]
+    },
+
+        (results, status) => {
+            if (status == window.google.maps.places.PlacesServiceStatus.OK) {
+                // createMarker(place); // for usage with map
+                dispatch({
+                    type: FETCH_SPOT_DETAILS_SUCCESS,
+                    payload: {
+                        placeId: results.place_id,
+                        name: results.name,
+                        businessStatus: results.business_status,
+                        formattedAddress: results.formattedAddress,
+                        formattedPhoneNumber: results.formattedPhoneNumber,
+                        iconUrl: results.icon,
+                        types: placesTypesReducer(results.types),
+                        openNow: results.opening_hours.isOpen(),
+                        openHours: placesPeriodsReducer(results.opening_hours.periods),
+                        photos: placesPhotosReducer(results.photos),
+                        priceLevel: results.price_level,
+                        rating: results.rating,
+                        reviews: placesReviewsReducer(results.reviews),
+                    }
+                });
+            } else {
+                dispatch({
+                    type: FETCH_SPOT_DETAILS_FAILURE,
+                    payload: placesRequestStatusMap ?
+                        placesRequestStatusMap.get(status) : INTERNAL_SERVER
+                });
+            }
+        }
+    );
+}
 
 export const fetchSpotsConstants = () => (dispatch) => {
     const firestore = getFirebase().firestore(); //connect to firebase
