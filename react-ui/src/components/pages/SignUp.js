@@ -23,6 +23,7 @@ class SignUp extends React.Component {
         spacePref: [],
         lightingPref: [],
         foodPref: [],
+        passwordConfirmed: false,
         modalToggle: false,
         loading: true
     }
@@ -38,6 +39,21 @@ class SignUp extends React.Component {
         this.setState({
             [e.target.id]: e.target.value,
         })
+    }
+
+    handleConfirmPassword = (e) => {
+        if (this.state.password === e.target.value) {
+            this.setState({
+                passwordConfirmed: true,
+            })
+        } else {
+            this.setState({
+                passwordConfirmed: false,
+            })
+        }
+        console.log("IN CONFIRM PASSWORD")
+        console.log(e.target.value)
+        console.log(this.state.passwordConfirmed)
     }
 
     // handles state info that can have multiple options
@@ -101,18 +117,26 @@ class SignUp extends React.Component {
     // handles submit, sending state information to redux store
     handleSubmit = (e) => {
         e.preventDefault();
-        this.props.userSignUp(this.state)
-        this.setState({ loading: true })
-        // wait one second to check if successfully signed in
-        setTimeout(() => {
-            // if not signed in, show error modal
-            if (!this.props.isSignedIn) {
-                this.setState({
-                    modalToggle: true
-                })
-            }
-            this.setState({ loading: false })
-          }, 1000);
+        if (this.state.passwordConfirmed) {
+            console.log(this.state)
+            this.props.userSignUp(this.state)
+            this.setState({ loading: true })
+            // wait one second to check if successfully signed in
+            setTimeout(() => {
+                // if not signed in, show error modal
+                if (!this.props.isSignedIn) {
+                    this.setState({
+                        modalToggle: true
+                    })
+                }
+                this.setState({ loading: false })
+            }, 1000);
+        } else {
+            this.setState({
+                modalToggle: true
+            })
+        }
+        
     }
 
     // for handling closing of modal
@@ -140,41 +164,49 @@ class SignUp extends React.Component {
             <div>
                 <Form id="form" onSubmit={this.handleSubmit}>
                     <h1>sign up</h1>
+                    <p>Fields marked with (*) are required.</p>
                     <hr></hr>
                     <Form.Group >
                         <Form.Row>
                             <Col>
-                                <Form.Label>First Name</Form.Label>
+                                <Form.Label>First Name*</Form.Label>
                                 <Form.Control required onChange={this.handleChange} id="fName" />
                             </Col>
                             <Col>
-                                <Form.Label>Last Name</Form.Label>
+                                <Form.Label>Last Name*</Form.Label>
                                 <Form.Control required onChange={this.handleChange} id="lName"  />
                             </Col>
                         </Form.Row>
                     </Form.Group>
                     
                     <Form.Group >
-                        <Form.Label>Email</Form.Label>
+                        <Form.Label>Email*</Form.Label>
                         <Form.Control required onChange={this.handleChange} id="email" type="email"  />
                     </Form.Group>
 
                     <Form.Group>
-                        <Form.Label>Password</Form.Label>
+                        <Form.Label>Password*</Form.Label>
                         <Form.Control required onChange={this.handleChange} id="password" type="password"/>
+                    </Form.Group>
+
+                    <Form.Group>
+                        <Form.Label>Confirm Password *</Form.Label>
+                        <Form.Control required onChange={this.handleConfirmPassword} id="passwordConfirm" type="password"/>
                     </Form.Group>
 
                     <Form.Row>
                         <Form.Group as={Col}>
-                            <Form.Label>State</Form.Label>
+                            <Form.Label>State*</Form.Label>
                             <Form.Control required onChange={this.handleChange} id="state"/>
                         </Form.Group>
                         
                         <Form.Group as={Col} >
-                            <Form.Label>Zip Code</Form.Label>
+                            <Form.Label>Zip Code*</Form.Label>
                             <Form.Control required onChange={this.handleChange} id="zipcode" />
                         </Form.Group>
                     </Form.Row>
+
+                    <p>Select preferences from the areas below. If you do not have a preference for an area, do not check any boxes.</p>
 
                     <Form.Row>
                         <Form.Group as={Col}>
@@ -184,7 +216,6 @@ class SignUp extends React.Component {
                             <Form.Check type="checkbox" label="Indie" value="indie" onChange={this.handleMOptions}/>
                             <Form.Check type="checkbox" label="Pop" value="pop" onChange={this.handleMOptions}/>
                             <Form.Check type="checkbox" label="Funky" value="funky" onChange={this.handleMOptions}/>
-                            <Form.Check type="checkbox" label="No Preference" value="nopref" onChange={this.handleMOptions}/>
                         </Form.Group>
                         <Form.Group as={Col}>
                             <Form.Label>Space Preference</Form.Label>
@@ -192,7 +223,6 @@ class SignUp extends React.Component {
                             <Form.Check type="checkbox" label="Couple of People" value="couple" onChange={this.handleSOptions}/>
                             <Form.Check type="checkbox" label="Small Group (<4)" value="smallgroup" onChange={this.handleSOptions}/>
                             <Form.Check type="checkbox" label="Large Group (5+)" value="largegroup" onChange={this.handleSOptions}/>
-                            <Form.Check type="checkbox" label="No Preference" value="nopref" onChange={this.handleSOptions}/>
                         </Form.Group>
                     </Form.Row>
                     <Form.Row>
@@ -201,14 +231,12 @@ class SignUp extends React.Component {
                             <Form.Check type="checkbox" label="Dim Lighting" value="dim" onChange={this.handleLOptions}/>
                             <Form.Check type="checkbox" label="Natural Lighting" value="natural" onChange={this.handleLOptions}/>
                             <Form.Check type="checkbox" label="Bright Lighting" value="bright" onChange={this.handleLOptions}/>
-                            <Form.Check type="checkbox" label="No Preference" value="nopref" onChange={this.handleLOptions}/>
                         </Form.Group>
                         <Form.Group as={Col}>
                             <Form.Label>Food Preference</Form.Label>
                             <Form.Check type="checkbox" label="Small Bites/Bakery" value="smallbites" onChange={this.handleFOptions}/>
                             <Form.Check type="checkbox" label="Full Menu" value="fullmenu" onChange={this.handleFOptions}/>
                             <Form.Check type="checkbox" label="Just Coffee" value="coffee" onChange={this.handleFOptions}/>
-                            <Form.Check type="checkbox" label="No Preference" value="nopref" onChange={this.handleFOptions}/>
                         </Form.Group>
                     </Form.Row>
 
@@ -227,7 +255,7 @@ class SignUp extends React.Component {
                         <Modal.Title>Sorry, there was an error.</Modal.Title>
                     </Modal.Header>
                     {/* displays appropriate error message */}
-                    <Modal.Body>{this.props.errorMsg.toString()}</Modal.Body>
+                    <Modal.Body>{this.state.passwordConfirmed ? this.props.errorMsg.toString() : "Passwords do not match."}</Modal.Body>
                     <Modal.Footer>
                     <Button variant="secondary" onClick={this.handleClose}>
                         Close
