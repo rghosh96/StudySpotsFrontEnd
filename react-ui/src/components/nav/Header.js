@@ -20,6 +20,7 @@ export default class Header extends Component {
                             <NavDropdown title="Redux" id="basic-nav-dropdown">
                                 <NavDropdown.Item as={Link} to="/redux/testaccountactions">Account</NavDropdown.Item>
                                 <NavDropdown.Item as={Link} to="/redux/testspotsactions">Spots</NavDropdown.Item>
+                                <NavDropdown.Item as={Link} to="/redux/testsignout">Sign Out</NavDropdown.Item>
                             </NavDropdown>
                         </Nav>
                     </Navbar.Collapse>

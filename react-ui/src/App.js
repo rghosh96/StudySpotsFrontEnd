@@ -29,6 +29,7 @@ function App() {
     
         <Route exact path='/redux/testaccountactions' component={TestAccountActions} />
         <Route exact path='/redux/testspotsactions' component={TestSpotsActions} />
+        <Route exact path='/redux/testsignout' component={TestSignOut} />
       </BrowserRouter>
     </div>
 
