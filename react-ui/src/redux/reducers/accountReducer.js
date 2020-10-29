@@ -24,7 +24,8 @@ const initialState = {
 	    musicPref: [],
 	    spacePref: [],
 	    lightingPref: [],
-	    foodPref: []
+        foodPref: [],
+        savedSpots: [],
     },
     errorMsg: ''
 };

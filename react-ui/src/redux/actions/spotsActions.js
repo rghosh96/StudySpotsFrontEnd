@@ -37,12 +37,13 @@
 import {
     FETCH_SPOTS_REQUEST, FETCH_SPOTS_SUCCESS, FETCH_SPOTS_FAILURE,
     FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE,
-    FETCH_SPOT_DETAILS_REQUEST, FETCH_SPOT_DETAILS_SUCCESS, FETCH_SPOT_DETAILS_FAILURE,
-	SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS
+    FETCH_SPOT_DETAILS,
+    SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS_DETAILS
 
 } from '../actions/types';
-import { 
-    INTERNAL_SERVER, SPOT_CONSTANTS_ERROR, USER_DENIED_LOCATION, USER_NOT_SIGNED_IN
+import {
+    SUCCESS, INTERNAL_SERVER, SPOT_CONSTANTS_ERROR, USER_DENIED_LOCATION, USER_NOT_SIGNED_IN,
+    SPOT_SAVED, SPOT_REMOVED, MISSING_PLACE_IDS
 } from '../errorMessages';
 import { getFirebase } from 'react-redux-firebase';
 import axios from "axios";
@@ -60,9 +61,43 @@ import {
 var placesRequestStatusMap = undefined;
 var businessStatusMap = undefined;
 var typesMap = undefined;
+var priceLevelMap = undefined;
 
 const PLACES_NEARBY_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
 const NEARBY_SEARCH_RADIUS = 10000; // in meters (about 6 miles). max is 50000
+
+// fetches the constants from Firestore which are necessary to make API calls
+// and display options during spot search
+export const fetchSpotsConstants = () => (dispatch) => {
+    const firestore = getFirebase().firestore(); //connect to firebase
+
+    firestore.collection('constants').doc("googlePlaces").get()
+        .then(doc => {
+            const constants = doc.data();
+
+            businessStatusMap = mapify(constants.business_status, "api", "display");
+            typesMap = mapify(constants.types, "api", "display");
+            placesRequestStatusMap = mapify(constants.status, "api", "display");
+            priceLevelMap = mapify(constants.price_level, "api", "display");
+
+            dispatch({
+                type: FETCH_SPOTS_CONSTANTS_SUCCESS,
+                payload: {
+                    businessStatusConstants: constants.business_status,
+                    languageConstants: constants.language,
+                    priceLevelConstants: constants.price_level,
+                    rankByConstants: constants.rankby,
+                    typeConstants: constants.types,
+                }
+            });
+        })
+        .catch(error => {
+            dispatch({
+                type: FETCH_SPOTS_CONSTANTS_FAILURE,
+                payload: error.message
+            });
+        });
+};
 
 /*  (optional. these are params we can pass directly to a Place Search Request)
     params: {
@@ -152,97 +187,149 @@ export const fetchNearbySpots = (params) => (dispatch) => {
     );
 };
 
+// given a placeId, fetches the details for that place from the Spots API.
 // placeId example (starbucks in Rogers): ChIJnQKsxvQPyYcRxqw3vavZ3jY
-export const fetchSpotDetails = (placeId) => dispatch => {
-    dispatch({ type: FETCH_SPOT_DETAILS_REQUEST });
-
+//
+// onSuccess(spot): a callback which takes the spot details and dispatches accordingly
+// onFailure(status): a callback which dispatches in case of failure, takes the status of the request
+const fetchAPISpotDetails = (placeId, onSuccess, onFailure) => {
     var service = new window.google.maps.places.PlacesService(document.createElement('div'));
 
-    service.getDetails({
-        placeId: placeId,
-        // return only the fields specified
-        fields: [
-            "place_id",
-            "name",
-            "business_status",
-            "formatted_address",
-            "formatted_phone_number",
-            "icon",
-            "types",
-            "opening_hours",
-            "photos",
-            "price_level",
-            "rating",
-            "review"
-        ]
-    },
+    service.getDetails(
+        {
+            placeId: placeId,
+            // return only the fields specified
+            fields: [
+                "place_id",
+                "name",
+                "business_status",
+                "formatted_address",
+                "formatted_phone_number",
+                "icon",
+                "types",
+                "opening_hours",
+                "photos",
+                "price_level",
+                "rating",
+                "review"
+            ]
+        },
 
         (results, status) => {
             if (status == window.google.maps.places.PlacesServiceStatus.OK) {
                 // createMarker(place); // for usage with map
-                dispatch({
-                    type: FETCH_SPOT_DETAILS_SUCCESS,
-                    payload: {
-                        placeId: results.place_id,
-                        name: results.name,
-                        businessStatus: results.business_status,
-                        formattedAddress: results.formattedAddress,
-                        formattedPhoneNumber: results.formattedPhoneNumber,
-                        iconUrl: results.icon,
-                        types: placesTypesReducer(results.types),
-                        openNow: results.opening_hours.isOpen(),
-                        openHours: placesPeriodsReducer(results.opening_hours.periods),
-                        photos: placesPhotosReducer(results.photos),
-                        priceLevel: results.price_level,
-                        rating: results.rating,
-                        reviews: placesReviewsReducer(results.reviews),
-                    }
-                });
+                let spot = {
+                    placeId: results.place_id,
+                    name: results.name,
+                    businessStatus: businessStatusMap.get(results.business_status),
+                    formattedAddress: results.formatted_address,
+                    formattedPhoneNumber: results.formatted_phone_number,
+                    iconUrl: results.icon,
+                    types: placesTypesReducer(results.types),
+                    openNow: results.opening_hours.isOpen(),
+                    openHours: placesPeriodsReducer(results.opening_hours.periods),
+                    photos: placesPhotosReducer(results.photos),
+                    priceLevel: priceLevelMap.get(results.price_level),
+                    rating: results.rating,
+                    reviews: placesReviewsReducer(results.reviews),
+                }
+
+                onSuccess(spot);
             } else {
-                dispatch({
-                    type: FETCH_SPOT_DETAILS_FAILURE,
-                    payload: placesRequestStatusMap ?
-                        placesRequestStatusMap.get(status) : INTERNAL_SERVER
-                });
+                onFailure(status);
             }
         }
     );
 }
 
-export const fetchSpotsConstants = () => (dispatch) => {
-    const firestore = getFirebase().firestore(); //connect to firebase
+// calls fetchAPISpotDetails with the appropriate dispatches
+export const fetchSpotDetails = (placeId) => dispatch => {
+    dispatch({
+        type: FETCH_SPOT_DETAILS,
+        payload: {
+            fetchingSpots: true
+        }
+    });
 
-    firestore.collection('constants').doc("googlePlaces").get()
-        .then(doc => {
-            const constants = doc.data();
-
-            businessStatusMap = mapify(constants.business_status, "api", "display");
-            typesMap = mapify(constants.types, "api", "display");
-            placesRequestStatusMap = mapify(constants.status, "api", "display");
-
-            dispatch({
-                type: FETCH_SPOTS_CONSTANTS_SUCCESS,
-                payload: {
-                    businessStatusConstants: constants.business_status,
-                    languageConstants: constants.language,
-                    priceLevelConstants: constants.price_level,
-                    rankByConstants: constants.rankby,
-                    typeConstants: constants.types,
-                }
-            });
-        })
-        .catch(error => {
-            dispatch({
-                type: FETCH_SPOTS_CONSTANTS_FAILURE,
-                payload: error.message
-            });
+    const onSuccess = (spot) => {
+        dispatch({
+            type: FETCH_SPOT_DETAILS,
+            payload: {
+                spotDetails: spot,
+                fetchingSpots: false,
+                spotsFetched: true,
+            }
         });
-};
+    }
 
-// if no placeId, fetches data for all the user's saved spots and passes it to reducer
-// else fetches the data for the placeId that was passed (similar to spotActions.fetchSpotDetails)
-export const fetchedSavedSpots = (placeId = null) => (dispatch) => {
+    const onFailure = (status) => {
+        dispatch({
+            type: FETCH_SPOT_DETAILS,
+            payload: {
+                fetchingSpots: false,
+                errorMsg: placesRequestStatusMap ?
+                    placesRequestStatusMap.get(status) : INTERNAL_SERVER
+            }
+        });
+    }
 
+    fetchAPISpotDetails(placeId, onSuccess, onFailure);
+}
+
+// given an array of placeIds, fetches the data for each placeId that was 
+// passed and sends spot details to reducer
+// (this should only be called when a user is signed in, but it won't check explicitly
+// since non-members should not have access to My Spots)
+export const fetchSavedSpotsDetails = (placeIds) => dispatch => {
+
+    // if no array of placeIds is given, fail
+    if (placeIds.length < 1) {
+        dispatch({
+            type: FETCH_SAVED_SPOTS_DETAILS,
+            payload: {
+                fetchingSpots: false,
+                errorMsg: MISSING_PLACE_IDS
+            }         
+        });
+
+        return;
+    }
+
+    dispatch({
+        type: FETCH_SAVED_SPOTS_DETAILS,
+        payload: {
+            fetchingSpots: true,
+        }
+    });
+
+    const onFailure = (status) => {
+        dispatch({
+            type: FETCH_SAVED_SPOTS_DETAILS,
+            payload: {
+                fetchingSpots: false,
+                errorMsg: placesRequestStatusMap ?
+                    placesRequestStatusMap.get(status) : INTERNAL_SERVER
+            }
+        });
+    };  
+
+    // dispatch the spot details on success
+    const onSuccess = (spot) => {
+        dispatch({
+            type: FETCH_SAVED_SPOTS_DETAILS,
+            payload: {
+                fetchingSpots: false,
+                spotsFetched: true,
+                errorMsg: SUCCESS,
+                spotsDetails: spot
+            }
+        });
+    };
+
+    // repeat for each id given
+    placeIds.forEach(id => {
+        fetchAPISpotDetails(id, onSuccess, onFailure);
+    });
 }
 
 // adds placeId to the current user's savedSpots in Firestore, then calls 
@@ -251,47 +338,106 @@ export const fetchedSavedSpots = (placeId = null) => (dispatch) => {
 export const saveSpot = (placeId) => (dispatch) => {
     dispatch({
         type: SAVE_SPOT,
-		payload: {
-            errorMsg: '',
-			savingSpot: true
-		}
-	});
-    
-	const firebase = getFirebase(); // connect to firebase
-	const firestore = getFirebase().firestore();
-	const user = firebase.auth().currentUser;
-    
-	// user isn't signed in
-	if (!user) {
+        payload: {
+            savingSpot: true
+        }
+    });
+
+    const firebase = getFirebase(); // connect to firebase
+    const firestore = getFirebase().firestore();
+    const user = firebase.auth().currentUser;
+
+    if (!user) {
+        // user isn't signed in
         dispatch({
             type: SAVE_SPOT,
-			payload: {
+            payload: {
                 errorMsg: USER_NOT_SIGNED_IN,
-				savingSpot: false
-			}
-		})
-        // user is signed in; save to their spots and fetch details
-	} else {
+                savingSpot: false
+            }
+        })
+    } else {
         var userRef = firestore.collection("users").doc(user.uid.toString());
-        
-		// Atomically add a new placeId to the savedSpots array field.
-		userRef.update({
+
+        // Atomically add a new placeId to the savedSpots array field.
+        userRef.update({
             savedSpots: firebase.firestore.FieldValue.arrayUnion(placeId)
-		}).then(() => {
-            
-        }).catch(error => {
-            dispatch({
-                type: SAVE_SPOT,
-				payload: {
-                    errorMsg: error.message,
-					savingSpot: false
-				}
-			});
-		})
-	}
+        })
+            .then(() => {
+                dispatch({
+                    type: SAVE_SPOT,
+                    payload: {
+                        errorMsg: SPOT_SAVED,
+                        savingSpot: false
+                    }
+                });
+            })
+            .then(() => {
+                // once the placeId has been added to Firestore, get the data for that spot
+                fetchSavedSpotsDetails([placeId])(dispatch);
+            })
+            .catch(error => {
+                dispatch({
+                    type: SAVE_SPOT,
+                    payload: {
+                        errorMsg: error.message,
+                        savingSpot: false
+                    }
+                });
+            })
+    }
 }
 
-// removes the placeId from the user's Firestore array of saved spots
+// removes the placeId from the user's Firestore array of saved spots, then 
+// dispatches to remove the place data from redux store
 export const removeSavedSpot = (placeId) => (dispatch) => {
+    dispatch({
+        type: REMOVE_SAVED_SPOT,
+        payload: {
+            removingSpot: true
+        }
+    });
 
-} 
+    const firebase = getFirebase(); // connect to firebase
+    const firestore = getFirebase().firestore();
+    const user = firebase.auth().currentUser;
+
+    if (!user) {
+        // user isn't signed in
+        dispatch({
+            type: REMOVE_SAVED_SPOT,
+            payload: {
+                errorMsg: USER_NOT_SIGNED_IN,
+                removingSpot: false
+            }
+        })
+    } else {
+        // user is signed in; save placeId to their spots and fetch details
+
+        var userRef = firestore.collection("users").doc(user.uid.toString());
+
+        // Atomically remove the placeId from the savedSpots array field.
+        userRef.update({
+            savedSpots: firebase.firestore.FieldValue.arrayRemove(placeId)
+        })
+            .then(() => {
+                dispatch({
+                    type: REMOVE_SAVED_SPOT,
+                    payload: {
+                        errorMsg: SPOT_REMOVED,
+                        removingSpot: false,
+                        placeId: placeId
+                    }
+                });
+            })
+            .catch(error => {
+                dispatch({
+                    type: REMOVE_SAVED_SPOT,
+                    payload: {
+                        errorMsg: error.message,
+                        removingSpot: false
+                    }
+                });
+            })
+    }
+}
