@@ -16,7 +16,10 @@ export const checkAuth = () => dispatch => {
 			dispatch({ type: SIGN_IN_SUCCESS });
 			fetchUserData()(dispatch);
 		} else {
-			dispatch({ type: SIGN_IN_FAILURE });
+			dispatch({ 
+				type: SIGN_IN_FAILURE,
+				payload: USER_NOT_SIGNED_IN
+			});
 		}
 	});
 }
