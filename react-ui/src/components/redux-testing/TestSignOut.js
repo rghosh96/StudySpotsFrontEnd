@@ -5,6 +5,7 @@ import '../../styling/master.scss'
 import { connect } from 'react-redux';
 import { userSignOut, fetchUserData, userSignIn } from '../../redux/actions/accountActions';
 import PropTypes from 'prop-types';
+import Header from '../nav/Header'
 
 class TestSignOut extends React.Component {
     state = {
@@ -41,6 +42,7 @@ class TestSignOut extends React.Component {
         
         return (
            <div>  
+               <Header />
                 <Form onSubmit={this.handleSignIn}>
                 <Form.Group  controlId="formGridEmail">
                     <Form.Label>Email</Form.Label>

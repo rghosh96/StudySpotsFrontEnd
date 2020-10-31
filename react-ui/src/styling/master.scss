@@ -17,16 +17,25 @@ body, html, #root, .App {
   min-height: 100vh;
   width: 100%;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
 }
 
-.header {
-  top: 0px;
-  left: 0px;
-  position: absolute;
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
   width: 100%;
-  // background-color: $primary; // idk why this doesn't work
+}
+
+.signUpContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+  width: 100%;
+  margin-top: 50px;
+  margin-bottom: 50px;
 }
 
 Form {
@@ -62,7 +71,7 @@ Button {
 }
 
 @include tiny {
-  body {
+  .container, .signUpContainer {
     padding: 1rem;
   }
   Form {
@@ -71,7 +80,7 @@ Button {
 }
 
 @include tablet {
-  body {
+  .container, .signUpContainer {
     padding-left: 3rem;
     padding-right: 3rem;
   }
@@ -81,7 +90,7 @@ Button {
 }
 
 @include desktop {
-  body {
+  .container, .signUpContainer {
     padding: 3rem;
   }
   Form {

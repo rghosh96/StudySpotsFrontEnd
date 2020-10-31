@@ -1,6 +1,6 @@
 import React from 'react';
 import '../../styling/master.scss'
-
+import Header from '../nav/Header'
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { userSignUp, userSignIn, updateUserAccount } from '../../redux/actions/accountActions';
@@ -65,6 +65,7 @@ class TestAccountActions extends React.Component {
 
         return (
             <div>
+                <Header />
                 <button onClick={goodSignUp}>good sign up</button><br/>
                 <button onClick={badSignUp}>bad sign up</button><br/>
                 <button onClick={goodSignIn}>good sign in</button><br/>

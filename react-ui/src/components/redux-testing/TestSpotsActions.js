@@ -1,6 +1,6 @@
 import React from 'react';
 import '../../styling/master.scss'
-
+import Header from '../nav/Header'
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { fetchNearbySpots, fetchSpotDetails, fetchSpotsConstants } from '../../redux/actions/spotsActions';
@@ -47,6 +47,7 @@ class TestSpotsActions extends React.Component {
 
         return (
             <div style={{position: "absolute", top: "200px"}}>
+                <Header />
                 <button onClick={fetchSpotsConstants}>fetch spots constants</button><br />
 
                 <div>fetchingSpots...{this.props.fetchingSpots.toString()}</div>
