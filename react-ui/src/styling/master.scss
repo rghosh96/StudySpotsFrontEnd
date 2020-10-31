@@ -24,6 +24,7 @@ body, html, #root, .App {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
   min-height: 90vh;
   width: 100%;
 }
@@ -32,6 +33,7 @@ body, html, #root, .App {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
   min-height: 90vh;
   width: 100%;
   margin-top: 50px;
@@ -52,8 +54,8 @@ p {
   color: $grey;
 }
 
-.text-secondary {
-  color: $primary !important;
+.secondary {
+  color: $secondary !important;
 }
 
 label {

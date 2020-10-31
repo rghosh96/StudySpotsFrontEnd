@@ -18,7 +18,7 @@ export default function Header() {
     return (
         <div className="header">
             <Navbar bg="light" expand="lg">
-                <Navbar.Brand as={Link} to="/">Study Spots</Navbar.Brand>
+                <Navbar.Brand as={Link} to="/">STUDY SPOTS</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">

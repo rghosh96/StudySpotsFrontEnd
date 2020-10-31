@@ -24,7 +24,7 @@ class Spotlight extends React.Component {
                 <div>
                     <Header />
                     <div className="container">
-                        <h1>spot<span className="text-secondary">light</span></h1>
+                        <h1>spotlight</h1>
                         <Button>click me!</Button>
                     </div>
                 </div>

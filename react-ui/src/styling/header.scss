@@ -29,6 +29,7 @@
 .nav-link, .dropdown-item {
     @include text();
     color: $white !important;
+    border-radius: 5px;
     @include easeOut();
     &:hover {
         background-color: $accent !important;
