@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './styling/master.scss';
 import { BrowserRouter, Route } from 'react-router-dom';
+import { useDispatch } from "react-redux";
+import { checkAuth } from "./redux/actions/accountActions";
+
 import MySpots from './components/pages/MySpots.js'
 import Reviews from './components/pages/Reviews.js'
 import Settings from './components/pages/Settings.js'
@@ -14,8 +17,13 @@ import TestAccountActions from './components/redux-testing/TestAccountActions';
 import TestSpotsActions from './components/redux-testing/TestSpotsActions';
 import TestSignOut from './components/redux-testing/TestSignOut';
 
-
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(checkAuth());
+  }, []);
+
   return (
     <div className="App">
       <BrowserRouter>
