@@ -3,7 +3,10 @@ import '../../styling/master.scss'
 
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { fetchNearbySpots, fetchSpotDetails, fetchSpotsConstants } from '../../redux/actions/spotsActions';
+import { 
+    fetchNearbySpots, fetchSpotDetails, fetchSpotsConstants,
+    saveSpot, removeSavedSpot, fetchSavedSpotsDetails
+} from '../../redux/actions/spotsActions';
 
 class TestSpotsActions extends React.Component {
     constructor() {
@@ -14,6 +17,7 @@ class TestSpotsActions extends React.Component {
             rb: '',
             t: '',
             k: '',
+            // some examples: ChIJa00m55kayYcRnz5WcvjDiMI, ChIJnQKsxvQPyYcRxqw3vavZ3jY
             placeId: '',
         }
     }
@@ -40,15 +44,28 @@ class TestSpotsActions extends React.Component {
         const fetchSpotsConstants = () => {
             this.props.fetchSpotsConstants();
         };
-        
-        const shortener = (key, value) => {
-            return value.toString().slice(0, 20) + "...";
+
+        const fetchSavedSpotsDetails = () => {
+            this.props.fetchSavedSpotsDetails(this.props.userData.savedSpots);
         };
 
         return (
             <div style={{position: "absolute", top: "200px"}}>
-                <button onClick={fetchSpotsConstants}>fetch spots constants</button><br />
+                <div>savingSpot...{this.props.savingSpot.toString()}</div>
+                <div>removingSpot...{this.props.removingSpot.toString()}</div>
+                <input type="text" placeholder="placeId" onChange={e => this.setState({placeId: e.target.value})} />
+                <br/>
+                <button onClick={() => this.props.saveSpot(this.state.placeId)}>save spot</button><br/>
+                <button onClick={() => this.props.removeSavedSpot(this.state.placeId)}>remove spot</button><br/>
+                <button onClick={fetchSavedSpotsDetails}>fetched saved spots</button><br/>
+                <div>userData...</div>
+                <div style={{maxHeight: "1000px", maxWidth: "1200px", overflow: "auto"}}><pre>{JSON.stringify(this.props.userData, null, 2)}</pre></div>
+                <br/>
+                <div>savedSpots...</div>
+                <div style={{maxHeight: "1000px", maxWidth: "1200px", overflow: "auto"}}><pre>{JSON.stringify(this.props.savedSpots, null, 2)}</pre></div>
+                <br/>
 
+                <button onClick={fetchSpotsConstants}>fetch spots constants</button><br />
                 <div>fetchingSpots...{this.props.fetchingSpots.toString()}</div>
                 <div>spotsFetched...{this.props.spotsFetched.toString()}</div>
                 <div>errorMsg...{this.props.errorMsg.toString()}</div>
@@ -118,19 +135,31 @@ const mapStateToProps = state => ({
     priceLevelConstants: state.spots.priceLevelConstants,
     rankByConstants: state.spots.rankByConstants,
     typeConstants: state.spots.typeConstants,
+    
+    savingSpot: state.spots.savingSpot,
+    removingSpot: state.spots.removingSpot,
+    savedSpots: state.spots.savedSpots,
+    
+    userData: state.account.userData
 });
 
 // tell redux what actions we want to use (the same ones we imported at the top)
 const mapDispatchToProps = {
     fetchNearbySpots,
     fetchSpotsConstants,
-    fetchSpotDetails
+    fetchSpotDetails,
+    saveSpot,
+    removeSavedSpot,
+    fetchSavedSpotsDetails: fetchSavedSpotsDetails,
 }
 
 // tell this component what it will be getting from redux. these members can be accessed using this.props
 TestSpotsActions.propTypes = {
+    savingSpot: PropTypes.bool.isRequired,
+    removingSpot: PropTypes.bool.isRequired,
     fetchingSpots: PropTypes.bool.isRequired,
     spotsFetched: PropTypes.bool.isRequired,
+    savedSpots: PropTypes.array.isRequired,
     spots: PropTypes.array.isRequired,
     errorMsg: PropTypes.string.isRequired,
     businessStatusConstants: PropTypes.array.isRequired,
@@ -138,8 +167,16 @@ TestSpotsActions.propTypes = {
     priceLevelConstants: PropTypes.array.isRequired,
     rankByConstants: PropTypes.array.isRequired,
     typeConstants: PropTypes.array.isRequired,
+    
+    fetchSpotsConstants: PropTypes.func.isRequired,
     fetchNearbySpots: PropTypes.func.isRequired,
     fetchSpotDetails: PropTypes.func.isRequired,
+    
+    saveSpot: PropTypes.func.isRequired,
+    removeSpot: PropTypes.func.isRequired,
+    fetchSavedSpotsDetails: PropTypes.func.isRequired,
+    
+    userData: PropTypes.object.isRequired
 };
 
 // finally, link this component to the redux actions and global properties using the function we imported

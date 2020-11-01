@@ -1,14 +1,22 @@
-import {  SIGN_UP_REQUEST, SIGN_UP_FAILURE, SIGN_UP_SUCCESS, SIGN_OUT_REQUEST, SIGN_OUT_SUCCESS, SIGN_OUT_FAILURE,
-    UPDATE_ACCOUNT_REQUEST, UPDATE_ACCOUNT_SUCCESS, UPDATE_ACCOUNT_FAILURE, 
-    SIGN_IN_REQUEST, SIGN_IN_SUCCESS, SIGN_IN_FAILURE, 
-    FETCH_USERDATA_REQUEST, FETCH_USERDATA_SUCCESS, FETCH_USERDATA_FAILURE } from '../actions/types';
-import { INTERNAL_SERVER, EXISTING_ACCOUNT, BAD_CREDENTIALS, USER_NOT_SIGNED_IN } from '../errorMessages';
-import { getFirebase } from 'react-redux-firebase'
+import {
+	SIGN_UP_REQUEST, SIGN_UP_FAILURE, SIGN_UP_SUCCESS, SIGN_OUT_REQUEST, SIGN_OUT_SUCCESS, SIGN_OUT_FAILURE,
+	UPDATE_ACCOUNT_REQUEST, UPDATE_ACCOUNT_SUCCESS, UPDATE_ACCOUNT_FAILURE,
+	SIGN_IN_REQUEST, SIGN_IN_SUCCESS, SIGN_IN_FAILURE,
+	FETCH_USERDATA_REQUEST, FETCH_USERDATA_SUCCESS, FETCH_USERDATA_FAILURE,
+} from '../actions/types';
+import {
+	EXISTING_ACCOUNT, BAD_CREDENTIALS, USER_NOT_SIGNED_IN,
+	SPOT_SAVED
+} from '../errorMessages';
+import {
+    placesPeriodsReducer, placesPhotosReducer, placesReviewsReducer, placesTypesReducer
+} from '../../helpers/dataStructureHelpers';
+import { getFirebase } from 'react-redux-firebase';
 
 
 export const checkAuth = () => dispatch => {
 	const firebase = getFirebase(); //connect to firebase
-	
+
 	// what if guest user? what happens when they refresh and have no acct?
 	// maybe include a link to signin on the signup page
 	firebase.auth().onAuthStateChanged((user) => {
@@ -31,11 +39,11 @@ export const checkAuth = () => dispatch => {
 } */
 export const userSignIn = (signInData) => dispatch => {
 	dispatch({ type: SIGN_IN_REQUEST });
-	
+
 	const firebase = getFirebase(); //connect to firebase
-	
+
 	firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION)
-	.then(() => {
+		.then(() => {
 			// Existing and future Auth states are now persisted in the current
 			// session only. Closing the window would clear any existing state even
 			// if a user forgets to sign out.
@@ -62,10 +70,10 @@ export const fetchUserData = () => dispatch => {
 	const firestore = getFirebase().firestore();
 
 	const user = firebase.auth().currentUser;
-	
+
 	if (user) {
 		firestore.collection('users').doc(user.uid.toString()).get()
-		.then(doc => {
+			.then(doc => {
 				const userData = doc.data();
 				dispatch({
 					type: FETCH_USERDATA_SUCCESS,
@@ -101,9 +109,9 @@ export const fetchUserData = () => dispatch => {
 } */
 export const userSignUp = (signUpData) => dispatch => {
 	dispatch({ type: SIGN_UP_REQUEST });
-	
+
 	const firebase = getFirebase(); //connect to firebase
-	
+
 	firebase.auth().createUserWithEmailAndPassword( //create user
 		signUpData.email,
 		signUpData.password
@@ -118,6 +126,12 @@ export const userSignUp = (signUpData) => dispatch => {
 		})
 	})
 };
+
+// // Atomically remove a region from the "regions" array field.
+// washingtonRef.update({
+// 	regions: firebase.firestore.FieldValue.arrayRemove("east_coast")
+// });
+
 
 /* userData = {
 	fName: <string>,
@@ -137,26 +151,33 @@ export const updateUserAccount = (userData) => dispatch => {
 
 	const firebase = getFirebase(); //connect to firebase
 	const firestore = getFirebase().firestore();
+	const user = firebase.auth().currentUser;
 
-	firestore.collection('users').doc(firebase.auth().currentUser.uid.toString()).set({
-		fName: userData.fName,
-		lName: userData.lName,
-		state: userData.state,
-		zipcode: userData.zipcode,
-		musicPref: userData.musicPref,
-		spacePref: userData.spacePref,
-		lightingPref: userData.lightingPref,
-		foodPref: userData.foodPref
-		//### currently not sending all data(only firstname lastname)
-	}).then(() => {
-		dispatch({ type: UPDATE_ACCOUNT_SUCCESS });
-		// should we call fetchUserData() here just in case?
-	}).catch(error => {
-		dispatch({ 
+	if (!user) {
+		dispatch({
 			type: UPDATE_ACCOUNT_FAILURE,
-			payload: error.message
-		});
-	})
+			errorMsg: USER_NOT_SIGNED_IN
+		})
+	} else {
+		firestore.collection('users').doc(user.uid.toString()).set({
+			fName: userData.fName,
+			lName: userData.lName,
+			state: userData.state,
+			zipcode: userData.zipcode,
+			musicPref: userData.musicPref,
+			spacePref: userData.spacePref,
+			lightingPref: userData.lightingPref,
+			foodPref: userData.foodPref
+		}).then(() => {
+			dispatch({ type: UPDATE_ACCOUNT_SUCCESS });
+			// should we call fetchUserData() here just in case?
+		}).catch(error => {
+			dispatch({
+				type: UPDATE_ACCOUNT_FAILURE,
+				payload: error.message
+			});
+		})
+	}
 };
 
 const wait = time => new Promise((resolve) => setTimeout(resolve, time));
@@ -168,10 +189,10 @@ function mockSignIn(signInData, dispatch) {
 	dispatch({
 		type: SIGN_IN_REQUEST
 	})
-	
+
 	wait(2000)
-	.then(() => {
-		if (signInData.email === 'email' && signInData.password === 'password') {
+		.then(() => {
+			if (signInData.email === 'email' && signInData.password === 'password') {
 				let userData = {
 					fName: 'Faker',
 					lName: 'McFakerson',
@@ -201,7 +222,7 @@ function mockSignUp(signUpData, dispatch) {
 	dispatch({
 		type: SIGN_UP_REQUEST
 	})
-	
+
 	wait(2000)
 		.then(() => {
 			if (signUpData.email === 'email') {
@@ -256,11 +277,11 @@ function mockUpdateAccount(userData, dispatch) {
 }
 
 export const userSignOut = () => dispatch => {
-    dispatch({ type: SIGN_OUT_REQUEST });
+	dispatch({ type: SIGN_OUT_REQUEST });
 	const firebase = getFirebase();
 
-    firebase.auth().signOut().then(() => {
-    	dispatch({ type: SIGN_OUT_SUCCESS });
+	firebase.auth().signOut().then(() => {
+		dispatch({ type: SIGN_OUT_SUCCESS });
 	});
 
 	//Add else SIGN_OUT_FAILURE
