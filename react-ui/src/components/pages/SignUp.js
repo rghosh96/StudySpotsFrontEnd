@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import {Modal} from 'react-bootstrap'
 import { Redirect } from 'react-router-dom';
 import LoadSpinner from './LoadSpinner'
+import Header from '../nav/Header'
 
 
 class SignUp extends React.Component {
@@ -162,6 +163,8 @@ class SignUp extends React.Component {
         )} else {
         return (
             <div>
+                <Header />
+                <div className = "signUpContainer">
                 <Form id="form" onSubmit={this.handleSubmit}>
                     <h1>sign up</h1>
                     <p>Fields marked with (*) are required.</p>
@@ -262,7 +265,7 @@ class SignUp extends React.Component {
                     </Button>
                     </Modal.Footer>
                 </Modal>
-            
+                </div>
             </div>
                 
             )    

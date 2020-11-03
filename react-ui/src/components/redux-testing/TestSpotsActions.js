@@ -1,6 +1,6 @@
 import React from 'react';
 import '../../styling/master.scss'
-
+import Header from '../nav/Header'
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { 
@@ -50,7 +50,10 @@ class TestSpotsActions extends React.Component {
         };
 
         return (
+          <div>
+            <Header />
             <div style={{position: "absolute", top: "200px"}}>
+                <button onClick={fetchSpotsConstants}>fetch spots constants</button><br />
                 <div>savingSpot...{this.props.savingSpot.toString()}</div>
                 <div>removingSpot...{this.props.removingSpot.toString()}</div>
                 <input type="text" placeholder="placeId" onChange={e => this.setState({placeId: e.target.value})} />
@@ -119,6 +122,7 @@ class TestSpotsActions extends React.Component {
                 <div>spots...<div style={{maxHeight: "1000px", maxWidth: "1200px", overflow: "auto"}}><pre>{JSON.stringify(this.props.spots, null, 2)}</pre></div></div>
                 <br/>
             </div>
+          </div>
         )
     }
 }

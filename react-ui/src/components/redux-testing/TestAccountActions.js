@@ -1,6 +1,6 @@
 import React from 'react';
 import '../../styling/master.scss'
-
+import Header from '../nav/Header'
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { userSignUp, userSignIn, updateUserAccount } from '../../redux/actions/accountActions';
@@ -64,18 +64,21 @@ class TestAccountActions extends React.Component {
         }
 
         return (
-            <div style={{position: "absolute", top: "200px"}}>
-                <button onClick={goodSignUp}>good sign up</button><br/>
-                <button onClick={badSignUp}>bad sign up</button><br/>
-                <button onClick={goodSignIn}>good sign in</button><br/>
-                <button onClick={badSignIn}>bad sign in</button><br/>
-                <button onClick={updateAccount}>update account</button><br/>
+            <div>
+                <Header />
+                <div style={{position: "absolute", top: "200px"}}>
+                  <button onClick={goodSignUp}>good sign up</button><br/>
+                  <button onClick={badSignUp}>bad sign up</button><br/>
+                  <button onClick={goodSignIn}>good sign in</button><br/>
+                  <button onClick={badSignIn}>bad sign in</button><br/>
+                  <button onClick={updateAccount}>update account</button><br/>
 
-                <div>signingUp...{this.props.signingUp.toString()}</div>
-                <div>signingIn...{this.props.signingIn.toString()}</div>
-                <div>updatingAccount...{this.props.updatingAccount.toString()}</div>
-                <div>isSignedIn...{this.props.isSignedIn.toString()}</div>
-                <div>errorMsg...{this.props.errorMsg.toString()}</div>
+                  <div>signingUp...{this.props.signingUp.toString()}</div>
+                  <div>signingIn...{this.props.signingIn.toString()}</div>
+                  <div>updatingAccount...{this.props.updatingAccount.toString()}</div>
+                  <div>isSignedIn...{this.props.isSignedIn.toString()}</div>
+                  <div>errorMsg...{this.props.errorMsg.toString()}</div>
+                </div>
             </div>
         )    
     } 

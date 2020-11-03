@@ -14,6 +14,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 // importing the redux actions used in this component
 import { updateSubmittedText, incrementButtonValue } from '../../redux/actions/exampleActions';
+import Header from '../nav/Header'
 
 class ReduxExample extends Component {
     constructor() {
@@ -27,6 +28,7 @@ class ReduxExample extends Component {
     render() {
         return (
             <div>
+                <Header />
                 Type something in the box:
                 <br />
                 {/* standard way of implementing HTML form elements in React with state */}

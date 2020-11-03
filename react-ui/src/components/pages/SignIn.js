@@ -6,8 +6,8 @@ import { connect } from 'react-redux';
 import { userSignUp, userSignIn, updateUserAccount } from '../../redux/actions/accountActions';
 import PropTypes from 'prop-types';
 import {Modal} from 'react-bootstrap'
-import { 
-    Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
+import Header from '../nav/Header'
 
 class SignIn extends React.Component {
     state = {
@@ -67,44 +67,46 @@ class SignIn extends React.Component {
         )} else {
         return (
             <div>
-            <Form onSubmit={this.handleSubmit}>
-                <h1>sign in</h1>
-                <hr></hr>
-                
-                <Form.Group  controlId="formGridEmail">
-                    <Form.Label>Email</Form.Label>
-                    <Form.Control required onChange={this.handleChange} id="email" type="email"  />
-                </Form.Group>
+                <Header />
+                <div className="container">
+                    <Form onSubmit={this.handleSubmit}>
+                        <h1>sign in</h1>
+                        <hr></hr>
+                        
+                        <Form.Group  controlId="formGridEmail">
+                            <Form.Label>Email</Form.Label>
+                            <Form.Control required onChange={this.handleChange} id="email" type="email"  />
+                        </Form.Group>
 
-                <Form.Group controlId="formGridPassword">
-                    <Form.Label>Password</Form.Label>
-                    <Form.Control required onChange={this.handleChange} id="password" type="password"/>
-                </Form.Group>
+                        <Form.Group controlId="formGridPassword">
+                            <Form.Label>Password</Form.Label>
+                            <Form.Control required onChange={this.handleChange} id="password" type="password"/>
+                        </Form.Group>
 
-                <Button type="submit">Sign In</Button>
-            </Form>
+                        <Button type="submit">Sign In</Button>
+                    </Form>
 
-            {/* error modal */}
-            <Modal 
-            show={this.state.modalToggle} 
-            onHide={this.handleClose}
-            size="lg"
-            aria-labelledby="contained-modal-title-vcenter"
-            centered
-        >
-            <Modal.Header>
-                <Modal.Title>Sorry, there was an error.</Modal.Title>
-            </Modal.Header>
-            {/* displays appropriate error message */}
-            <Modal.Body>{this.props.errorMsg.toString()}</Modal.Body>
-            <Modal.Footer>
-            <Button variant="secondary" onClick={this.handleClose}>
-                Close
-            </Button>
-            </Modal.Footer>
-            </Modal>
-
-        </div>
+                    {/* error modal */}
+                    <Modal 
+                    show={this.state.modalToggle} 
+                    onHide={this.handleClose}
+                    size="lg"
+                    aria-labelledby="contained-modal-title-vcenter"
+                    centered
+                >
+                    <Modal.Header>
+                        <Modal.Title>Sorry, there was an error.</Modal.Title>
+                    </Modal.Header>
+                    {/* displays appropriate error message */}
+                    <Modal.Body>{this.props.errorMsg.toString()}</Modal.Body>
+                    <Modal.Footer>
+                    <Button variant="secondary" onClick={this.handleClose}>
+                        Close
+                    </Button>
+                    </Modal.Footer>
+                    </Modal>
+                </div>
+            </div>
         )  
         }  
     } 
