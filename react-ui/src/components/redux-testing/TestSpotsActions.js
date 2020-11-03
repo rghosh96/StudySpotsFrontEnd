@@ -1,16 +1,16 @@
 import React from 'react';
 import '../../styling/master.scss'
-
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { 
     fetchNearbySpots, fetchSpotDetails, fetchSpotsConstants,
     saveSpot, removeSavedSpot, fetchSavedSpotsDetails
 } from '../../redux/actions/spotsActions';
+import PopTimesChart from '../../components/pages/PopTimesChart';
 
 class TestSpotsActions extends React.Component {
     constructor() {
-        super()
+        super();
         this.state = {
             l: '',
             pl: '',
@@ -48,6 +48,14 @@ class TestSpotsActions extends React.Component {
         const fetchSavedSpotsDetails = () => {
             this.props.fetchSavedSpotsDetails(this.props.userData.savedSpots);
         };
+
+        var popularTimes = this.props.activeSpot.popularTimes;
+        var popTimesCharts = null;
+        if (popularTimes && popularTimes.status === "ok") {
+            popTimesCharts = popularTimes.week.map(item => {
+                return <div><PopTimesChart day={item.day} hours={item.hours}/></div>
+            })
+        }
 
         return (
             <div style={{position: "absolute", top: "200px"}}>
@@ -112,6 +120,7 @@ class TestSpotsActions extends React.Component {
 
                 <input type="text" placeholder="placeId" onChange={e => {this.setState({placeId: e.target.value})}}/>
                 <button onClick={fetchSpotDetails}>fetch active spot</button>
+                {popTimesCharts}
                 <div>activeSpot...<div style={{maxHeight: "1000px", maxWidth: "1200px", overflow: "auto"}}><pre>{JSON.stringify(this.props.activeSpot, null, 2)}</pre></div></div>
                 <br/>
                 
