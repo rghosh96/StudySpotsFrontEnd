@@ -27,7 +27,6 @@ class SignIn extends React.Component {
       handleSubmit = (e) => {
         e.preventDefault();
         this.props.userSignIn(this.state)
-        console.log(this.state);
         // wait one second to check if successfully signed in
         setTimeout(() => {
             // if not signed in, show error modal

@@ -1,14 +1,17 @@
 import {
     FETCH_SPOTS_REQUEST, FETCH_SPOTS_SUCCESS, FETCH_SPOTS_FAILURE,
     FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE,
-    FETCH_SPOT_DETAILS_REQUEST, FETCH_SPOT_DETAILS_SUCCESS, FETCH_SPOT_DETAILS_FAILURE,
+    FETCH_SPOT_DETAILS,
+    SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS_DETAILS
 } from '../actions/types';
 import { SUCCESS, BAD_SPOTS_FETCH } from '../errorMessages'
 
 const initialState = {
+    savingSpot: false,
+    removingSpot: false,
     fetchingSpots: false,
-    spotsFetched: false,     // would like to remove this if no one is using
-    constantsFetched: false, // would like to remove this if no one is using
+    spotsFetched: false,
+    constantsFetched: false, 
 
     // the constants are arrays of the form: [{display: <string>, api: <string>}, ...]
     // frontend usage: 
@@ -22,6 +25,7 @@ const initialState = {
     typeConstants: [],
 
     spots: [],
+    savedSpots: [],
     activeSpot: {},
     errorMsg: ''
 };
@@ -70,25 +74,49 @@ export default function (state = initialState, action) {
                 errorMsg: action.payload
             }
 
-        case FETCH_SPOT_DETAILS_REQUEST:
+        case FETCH_SPOT_DETAILS:
             return {
                 ...state,
-                fetchingSpots: true
+                fetchingSpots: action.payload.fetchingSpots,
+                spotsFetched: action.payload.spotsFetched || state.spotsFetched,
+                activeSpot: action.payload.spotDetails || state.activeSpot,
+                errorMsg: action.payload.errorMsg || ''
             }
 
-        case FETCH_SPOT_DETAILS_SUCCESS:
-            return {
-                ...state,
-                fetchingSpots: false,
-                activeSpot: action.payload,
-                errorMsg: SUCCESS
+        case FETCH_SAVED_SPOTS_DETAILS:
+            if (action.payload.spotsDetails) {
+                var updatedSavedSpots = [action.payload.spotsDetails, ...state.savedSpots];
             }
 
-        case FETCH_SPOT_DETAILS_FAILURE:
             return {
                 ...state,
-                fetchingSpots: false,
-                errorMsg: action.payload
+                fetchingSpots: action.payload.fetchingSpots,
+                spotsFetched: action.payload.spotsFetched || state.spotsFetched,
+                errorMsg: action.payload.errorMsg || '',
+                savedSpots: updatedSavedSpots || state.savedSpots
+            }
+
+        case SAVE_SPOT:
+            return {
+                ...state,
+                savingSpot: action.payload.savingSpot,
+                errorMsg: action.payload.errorMsg || '',
+
+            }
+
+        case REMOVE_SAVED_SPOT:
+            if (action.payload.placeId) {
+                var updatedSavedSpots = state.savedSpots.filter(
+                    spot => spot.placeId != action.payload.placeId
+                );
+            }
+
+            return {
+                ...state,
+                removingSpot: action.payload.removingSpot,
+                errorMsg: action.payload.errorMsg || '',
+                // on error, no spot is removed
+                savedSpots: updatedSavedSpots || state.savedSpots
             }
 
         default:

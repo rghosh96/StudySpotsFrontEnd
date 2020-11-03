@@ -1,7 +1,9 @@
 import {  SIGN_UP_REQUEST, SIGN_UP_FAILURE, SIGN_UP_SUCCESS, SIGN_OUT_REQUEST, SIGN_OUT_SUCCESS, SIGN_OUT_FAILURE,
     UPDATE_ACCOUNT_REQUEST, UPDATE_ACCOUNT_SUCCESS, UPDATE_ACCOUNT_FAILURE, 
     SIGN_IN_REQUEST, SIGN_IN_SUCCESS, SIGN_IN_FAILURE, 
-    FETCH_USERDATA_REQUEST, FETCH_USERDATA_SUCCESS, FETCH_USERDATA_FAILURE } from '../actions/types';
+    FETCH_USERDATA_REQUEST, FETCH_USERDATA_SUCCESS, FETCH_USERDATA_FAILURE,
+	SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS
+} from '../actions/types';
 import { SUCCESS } from '../errorMessages'
 
 const initialState = {
@@ -12,6 +14,7 @@ const initialState = {
     updatingAccount: false,
     fetchingUserData: false,
     userDataFetched: false,
+    savingSpot: false,
     userData: {     // might have to init to nulls if frontend has problems
         fName: '',
 	    lName: '',
@@ -21,7 +24,8 @@ const initialState = {
 	    musicPref: [],
 	    spacePref: [],
 	    lightingPref: [],
-	    foodPref: []
+        foodPref: [],
+        savedSpots: [],
     },
     errorMsg: ''
 };
@@ -137,7 +141,7 @@ export default function(state = initialState, action) {
                 fetchingUserData: false,
                 userDataFetched: false,
                 errorMsg: action.payload
-            }
+            }   
 
         default:
             return state
