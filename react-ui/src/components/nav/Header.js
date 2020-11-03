@@ -32,12 +32,13 @@ export default function Header() {
                             <NavDropdown.Item as={Link} to="/redux/testsignout">Sign Out</NavDropdown.Item>
                         </NavDropdown>
                     </Nav>
-                </Navbar.Collapse>
-                        <Navbar.Collapse className="justify-content-end">
+                    <Nav className="justify-content-end">
                             {signedIn ? null : <Nav.Link as={Link} to="/signin">Sign in</Nav.Link> }
                             {signedIn ? null : <Nav.Link as={Link} to="/signup">Sign up</Nav.Link> }
                             {signedIn ? <Nav.Link as={Link} onClick={signOut} to="/">Sign out</Nav.Link> : null }
-                        </Navbar.Collapse>
+                        </Nav>
+                </Navbar.Collapse>
+                        
             </Navbar>
         </div>
     )
