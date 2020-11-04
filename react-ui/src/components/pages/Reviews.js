@@ -1,6 +1,7 @@
 import React from 'react';
 import '../../styling/master.scss'
 import LoadSpinner from './LoadSpinner'
+import Header from '../nav/Header'
 
 class Reviews extends React.Component {
     state = {
@@ -20,7 +21,10 @@ class Reviews extends React.Component {
         } else {
             return (
                 <div>
-                    <h1>reviews</h1>
+                    <Header />
+                    <div className="container">
+                        <h1>reviews</h1>
+                    </div>
                 </div>
             )    
         } 

@@ -2,6 +2,7 @@ import React from 'react';
 import '../../styling/master.scss'
 import { Button } from 'react-bootstrap'
 import LoadSpinner from './LoadSpinner'
+import Header from '../nav/Header'
 
 class Spotlight extends React.Component {
     state = {
@@ -21,8 +22,11 @@ class Spotlight extends React.Component {
         } else {
             return (
                 <div>
-                    <h1>my <span class="text-secondary">spots</span></h1>
-                    <Button>click me!</Button>
+                    <Header />
+                    <div className="container">
+                        <h1>spotlight</h1>
+                        <Button>click me!</Button>
+                    </div>
                 </div>
             )    
         } 

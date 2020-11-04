@@ -1,0 +1,41 @@
+@import "~bootstrap/scss/bootstrap";
+@import 'colors';
+@import 'fonts';
+@import 'config';
+
+
+// to define common properties, and then simply call function
+@mixin easeOut {
+  transition: all .5s ease-out !important;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.header {
+  width: 100%;
+}
+
+.navbar, .dropdown-menu {
+  background-color: $primary !important;
+}
+
+.navbar-brand {
+    @include header();
+    color: $white !important;
+}
+
+.nav-link, .dropdown-item {
+    @include text();
+    color: $white !important;
+    border-radius: 5px;
+    @include easeOut();
+    &:hover {
+        background-color: $accent !important;
+        letter-spacing: 1px;
+  }
+}
+
+
+

@@ -1,6 +1,7 @@
 import React from 'react';
 import '../../styling/master.scss'
 import LoadSpinner from './LoadSpinner'
+import Header from '../nav/Header'
 
 class MySpots extends React.Component {
     state = {
@@ -19,7 +20,10 @@ class MySpots extends React.Component {
         } else {
             return (
                 <div>
-                    <h1>myspots</h1>
+                    <Header />
+                    <div className="container">
+                        <h1>myspots</h1>
+                    </div> 
                 </div>
             )    
         } 
