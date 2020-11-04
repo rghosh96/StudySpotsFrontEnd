@@ -86,7 +86,7 @@ class TestSpotsActions extends React.Component {
                 <select onChange={(e) => {this.setState({l: e.target.value})}}>
                     <option value="" selected disabled hidden>Choose...</option>
                     {this.props.languageConstants.map(l => {
-                        return <option value={l.api}>{l.display}</option>
+                        return <option key={l.api} value={l.api}>{l.display}</option>
                     })}
                 </select>
                 <br/>
@@ -95,7 +95,7 @@ class TestSpotsActions extends React.Component {
                 <select onChange={(e) => {this.setState({pl: e.target.value})}}>
                     <option value="" selected disabled hidden>Choose...</option>
                     {this.props.priceLevelConstants.map(pl => {
-                        return <option value={pl.api}>{pl.display}</option>
+                        return <option key={pl.api} value={pl.api}>{pl.display}</option>
                     })}
                 </select>
                 <br/>
@@ -104,7 +104,7 @@ class TestSpotsActions extends React.Component {
                 <select onChange={(e) => {this.setState({rb: e.target.value})}}>
                     <option value="" selected disabled hidden>Choose...</option>
                     {this.props.rankByConstants.map(rb => {
-                        return <option value={rb.api}>{rb.display}</option>
+                        return <option key={rb.api} value={rb.api}>{rb.display}</option>
                     })}
                 </select>
                 <br/>
@@ -113,7 +113,7 @@ class TestSpotsActions extends React.Component {
                 <select onChange={(e) => {this.setState({t: [e.target.value]})}}>
                     <option value="" selected disabled hidden>Choose...</option>
                     {this.props.typeConstants.map(t => {
-                        return <option value={t.api}>{t.display}</option>
+                        return <option key={t.api} value={t.api}>{t.display}</option>
                     })}
                 </select>
                 <br/>
@@ -182,7 +182,7 @@ TestSpotsActions.propTypes = {
     fetchSpotDetails: PropTypes.func.isRequired,
     
     saveSpot: PropTypes.func.isRequired,
-    removeSpot: PropTypes.func.isRequired,
+    removeSavedSpot: PropTypes.func.isRequired,
     fetchSavedSpotsDetails: PropTypes.func.isRequired,
     
     userData: PropTypes.object.isRequired

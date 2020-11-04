@@ -4,7 +4,7 @@ import React from 'react';
 // var CanvasJS = CanvasJSReact.CanvasJS;
 // var CanvasJSChart = CanvasJSReact.CanvasJSChart;
 import { Bar, Chart } from 'react-chartjs-2';
-import '../../styling/master.scss'
+import '../../styling/master.scss';
 
 Chart.defaults.global.defaultFontSize = 36;
 

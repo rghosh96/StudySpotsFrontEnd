@@ -42,14 +42,14 @@ import {
 } from '../actions/types';
 import {
     SUCCESS, INTERNAL_SERVER, SPOT_CONSTANTS_ERROR, USER_DENIED_LOCATION, USER_NOT_SIGNED_IN,
-    SPOT_SAVED, SPOT_REMOVED, MISSING_PLACE_IDS
+    SPOT_SAVED, SPOT_REMOVED, MISSING_PLACE_IDS, STATUS_UNAVAILABLE
 } from '../errorMessages';
-import { getFirebase, reactReduxFirebase } from 'react-redux-firebase';
+import { getFirebase } from 'react-redux-firebase';
 import {
     mapify, mapGetArray, placesPeriodsReducer, placesPhotosReducer, placesReviewsReducer, placesTypesReducer
 } from '../../helpers/dataStructureHelpers';
 import popularTimes from '../../services/popularTimes';
-import e from 'express';
+
 
 // these maps are used to turn enums returned by api calls into text that can
 // be displayed to the user (the values from Firestore). 
@@ -62,7 +62,6 @@ var businessStatusMap = undefined;
 var typesMap = undefined;
 var priceLevelMap = undefined;
 
-const PLACES_NEARBY_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
 const NEARBY_SEARCH_RADIUS = 10000; // in meters (about 6 miles). max is 50000
 
 
@@ -115,113 +114,112 @@ export const fetchSpotsConstants = () => (dispatch) => {
 export const fetchNearbySpots = (params) => (dispatch) => {
     dispatch({ type: FETCH_SPOTS_REQUEST });
 
-    // this will force a browser popup that asks permission to use the user's location
-    navigator.geolocation.getCurrentPosition(
-        function (position) {
-            var latitude = position.coords.latitude;
-            var longitude = position.coords.longitude;
+    try {
+        // this will force a browser popup that asks permission to use the user's location
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                var latitude = position.coords.latitude;
+                var longitude = position.coords.longitude;
 
-            if (latitude && longitude) {
-                var here = new window.google.maps.LatLng(latitude, longitude);
-                // var map = new google.maps.Map(document.getElementById('map'), {
-                //     center: here,
-                //     zoom: 15
-                // })
+                if (latitude && longitude) {
+                    var here = new window.google.maps.LatLng(latitude, longitude);
+                    // var map = new google.maps.Map(document.getElementById('map'), {
+                    //     center: here,
+                    //     zoom: 15
+                    // })
 
-                // use map from above instead of createElement to integrate Google maps 
-                var service = new window.google.maps.places.PlacesService(document.createElement('div')); // a dummy element
-                service.nearbySearch(
-                    // request params
-                    {
-                        location: here,
-                        radius: NEARBY_SEARCH_RADIUS,
-                        type: params.type || null,
-                        language: params.language || null,
-                        keyword: params.keyword || null,
-                        openNow: params.openNow || null,
-                        rankBy: params.rankBy || null,
-                        minPriceLevel: params.minPriceLevel || null,
-                        maxPriceLevel: params.maxPriceLevel || null,
-                        pageToken: params.pageToken || null,
-                    },
+                    // use map from above instead of createElement to integrate Google maps 
+                    var service = new window.google.maps.places.PlacesService(document.createElement('div')); // a dummy element
+                    service.nearbySearch(
+                        // request params
+                        {
+                            location: here,
+                            radius: NEARBY_SEARCH_RADIUS,
+                            type: params.type || null,
+                            language: params.language || null,
+                            keyword: params.keyword || null,
+                            openNow: params.openNow || null,
+                            rankBy: params.rankBy || null,
+                            minPriceLevel: params.minPriceLevel || null,
+                            maxPriceLevel: params.maxPriceLevel || null,
+                            pageToken: params.pageToken || null,
+                        },
 
-                    // callback to handle response/errors
-                    async (results, status) => {
-                        if (status == window.google.maps.places.PlacesServiceStatus.OK) {
-                            // use for maps integration
-                            // for (var i = 0; i < results.length; i++) {
-                            //     createMarker(results[i]);
-                            // }
+                        // callback to handle response/errors
+                        async (results, status) => {
+                            if (status == window.google.maps.places.PlacesServiceStatus.OK) {
+                                // use for maps integration
+                                // for (var i = 0; i < results.length; i++) {
+                                //     createMarker(results[i]);
+                                // }
 
-                            Promise.all(await results.map(async r => {
-                                return new Promise(async () => {
-                                    console.log(r)
+                                Promise.all(await results.map(async r => {
+                                    var urlService = new window.google.maps.places.PlacesService(document.createElement('div'));
 
-                                    let placeUrl;
+                                    return new Promise(async (resolve, reject) => {
+                                        // get the url of the place since it is not returned by nearbySearch
+                                        await urlService.getDetails(
+                                            {
+                                                placeId: r.place_id,
+                                                fields: ["url"]
+                                            },
 
-                                    // get the url of the place since it is not returned by nearbySearch
-                                    service.getDetails(
-                                        {
-                                            placeId: r.place_id,
-                                            fields: ["url"]
-                                        },
+                                            async (results, status) => {
+                                                try {
+                                                    if (status == window.google.maps.places.PlacesServiceStatus.OK) {
+                                                        let popTimes = await popularTimes(await results.url);
 
-                                        async (urlResult, status) => {
-                                            placeUrl = urlResult.url;
-                                        }
-                                    );
+                                                        let spot = {
+                                                            placeId: r.place_id,
+                                                            name: r.name,
+                                                            businessStatus: businessStatusMap ? businessStatusMap.get(r.business_status) : STATUS_UNAVAILABLE,
+                                                            iconUrl: r.icon,
+                                                            openNow: r.opening_hours ? r.opening_hours.isOpen() : null,
+                                                            popularTimes: await popTimes,
+                                                            vicinity: r.vicinity, // almost always an address
+                                                            photos: r.photos, // [{ height, premade html element, width }]
+                                                            types: typesMap && r.types ? mapGetArray(typesMap, r.types) : [],
+                                                            rating: r.rating,
+                                                            userRatingsTotal: r.user_ratings_total,
+                                                            url: results.url
+                                                        };
 
-                                    Promise.resolve({
-                                        ...r,
-                                        url: await placeUrl
+                                                        resolve(await spot);
+                                                    } else {
+                                                        throw new Error(placesRequestStatusMap ? placesRequestStatusMap.get(status) : SPOT_CONSTANTS_ERROR);
+                                                    }
+                                                } catch(error) { 
+                                                    dispatch({
+                                                        type: FETCH_SPOTS_FAILURE,
+                                                        payload: error.message
+                                                    });
+                                                }
+                                            }
+                                        );
                                     });
-                                })
-                            }))
-                                .then(async results => {
-                                    return await results.map(async r => {
-                                        let popTimes = await popularTimes(await r.url);
-                                        
-                                        console.log(await popTimes)
-                                        
-                                        return {
-                                            placeId: r.place_id,
-                                            name: r.name,
-                                            businessStatus: businessStatusMap ? businessStatusMap.get(r.business_status) : '',
-                                            iconUrl: r.icon,
-                                            openNow: r.opening_hours ? r.opening_hours.isOpen() : null,
-                                            popularTimes: await popTimes,
-                                            vicinity: r.vicinity, // almost always an address
-                                            photos: r.photos, // [{ height, premade html element, width }]
-                                            types: typesMap && r.types ? mapGetArray(typesMap, r.types) : [],
-                                            rating: r.rating,
-                                            userRatingsTotal: r.user_ratings_total,
-                                            url: r.url
-                                        }
+                                }))
+                                    .then(async spots => {
+                                        dispatch({
+                                            type: FETCH_SPOTS_SUCCESS,
+                                            payload: await spots
+                                        });
                                     })
-                                })
-                                .then(spots => {
-                                    dispatch({
-                                        type: FETCH_SPOTS_SUCCESS,
-                                        payload: spots
-                                    })
-                                })
-                        } else {
-                            dispatch({
-                                type: FETCH_SPOTS_FAILURE,
-                                payload: placesRequestStatusMap ?
-                                    placesRequestStatusMap.get(status) : INTERNAL_SERVER
-                            })
+                            } else {
+                                throw new Error(placesRequestStatusMap ? placesRequestStatusMap.get(status) : SPOT_CONSTANTS_ERROR);
+                            }
                         }
-                    }
-                );
-            } else {
-                dispatch({
-                    type: FETCH_SPOTS_FAILURE,
-                    payload: USER_DENIED_LOCATION
-                })
+                    );
+                } else {
+                    throw new Error(USER_DENIED_LOCATION);
+                }
             }
-        }
-    );
+        );
+    } catch (error) {
+        dispatch({
+            type: FETCH_SPOTS_FAILURE,
+            payload: error.message
+        });
+    }
 };
 
 
