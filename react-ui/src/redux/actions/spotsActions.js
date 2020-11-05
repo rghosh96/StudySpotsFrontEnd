@@ -243,6 +243,7 @@ const fetchAPISpotDetails = (placeId, onSuccess, onFailure) => {
 
 // calls fetchAPISpotDetails with the appropriate dispatches
 export const fetchSpotDetails = (placeId) => dispatch => {
+    console.log(placeId)
     dispatch({
         type: FETCH_SPOT_DETAILS,
         payload: {

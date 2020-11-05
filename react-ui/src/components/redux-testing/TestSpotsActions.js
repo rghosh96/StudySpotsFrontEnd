@@ -49,6 +49,8 @@ class TestSpotsActions extends React.Component {
             this.props.fetchSavedSpotsDetails(this.props.userData.savedSpots);
         };
 
+        console.log(this.state)
+
         return (
           <div>
             <Header />
