@@ -17,13 +17,19 @@
     "react-ui/node_modules"
   ],
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.32",
+    "@fortawesome/free-brands-svg-icons": "^5.15.1",
+    "@fortawesome/free-regular-svg-icons": "^5.15.1",
+    "@fortawesome/free-solid-svg-icons": "^5.15.1",
+    "@fortawesome/react-fontawesome": "^0.1.12",
     "body-parser": "^1.19.0",
     "cluster": "^0.7.7",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "morgan": "^1.10.0",
     "os": "^0.1.1",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "react-icons": "^3.11.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.4"

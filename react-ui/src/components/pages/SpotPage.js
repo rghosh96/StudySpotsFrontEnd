@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../nav/Header';
 import '../../styling/master.scss';
+import '../../styling/ratings.scss';
 import LoadSpinner from './LoadSpinner';
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { fetchSpotDetails } from "../../redux/actions/spotsActions";
 import { Tab, Tabs } from 'react-bootstrap'
-import StarRating from 'react-star-rating'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCoffee, faHamburger, faSmileBeam } from '@fortawesome/free-solid-svg-icons'
+import Ratings from './Ratings.js'
 
 
 export default function SpotPage() {
   const [loading, setLoading] = useState(true);
+  const [cRating, setCRating] = useState(3)
+  const [fRating, setFRating] = useState(5)
+  const [aRating, setARating] = useState(4)
   const spot = useSelector(state => state.spots.activeSpot)
     console.log("Hello")
     const dispatch = useDispatch();
@@ -62,7 +68,12 @@ export default function SpotPage() {
                 <div class="center">
                 <h2>at a glance</h2>
                 <p>ratings will go here</p>
-
+                <Ratings icon={faCoffee} updateRating={setCRating} currentRating={cRating}/>
+                <Ratings icon={faHamburger} updateRating={setFRating} currentRating={fRating}/>
+                <Ratings icon={faSmileBeam} updateRating={setARating} currentRating={aRating}/>
+                {console.log("spotpage coffee: " + cRating)}
+                {console.log("spotpage food: " + fRating)}
+                {console.log("spotpage atmosphere: " + aRating)}
                 </div>
                 
             </div>
