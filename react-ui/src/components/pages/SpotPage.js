@@ -66,17 +66,30 @@ export default function SpotPage() {
                 </div>
                 
                 <div class="center">
-                <h2>at a glance</h2>
-                <p>ratings will go here</p>
-                <Ratings icon={faCoffee} updateRating={setCRating} currentRating={cRating}/>
-                <Ratings icon={faHamburger} updateRating={setFRating} currentRating={fRating}/>
-                <Ratings icon={faSmileBeam} updateRating={setARating} currentRating={aRating}/>
-                {console.log("spotpage coffee: " + cRating)}
-                {console.log("spotpage food: " + fRating)}
-                {console.log("spotpage atmosphere: " + aRating)}
+                  <h2>at a glance</h2>
+                  <div class = "info">
+                    <div class= "infoSection">
+                      <p>coffee:</p>
+                      <Ratings icon={faCoffee} updateRating={setCRating} currentRating={cRating}/>
+                      <p>your rating: unrated</p>
+                    </div>
+                    <div class= "infoSection">
+                      <p>food:</p>
+                      <Ratings icon={faHamburger} updateRating={setFRating} currentRating={fRating}/>
+                      <p>your rating: unrated</p>
+                    </div>
+                    <div class= "infoSection">
+                      <p>atmosphere:</p>
+                      <Ratings icon={faSmileBeam} updateRating={setARating} currentRating={aRating}/>
+                      <p>your rating: unrated</p>
+                    </div>
+                    {console.log("spotpage coffee: " + cRating)}
+                    {console.log("spotpage food: " + fRating)}
+                    {console.log("spotpage atmosphere: " + aRating)}
+                    </div>
+                  </div>
                 </div>
-                
-            </div>
+
             <Tabs defaultActiveKey="reviews" id="uncontrolled-tab-example">
                   <Tab eventKey="reviews" title="Reviews">
                     <p>reviews</p>
