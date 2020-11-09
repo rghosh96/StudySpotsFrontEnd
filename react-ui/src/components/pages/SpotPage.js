@@ -79,9 +79,9 @@ export default function SpotPage() {
                       <p>your rating: unrated</p>
                     </div>
                     <div class= "infoSection">
-                      <p>atmosphere:</p>
-                      <Ratings icon={faSmileBeam} updateRating={setARating} currentRating={aRating}/>
-                      <p>your rating: unrated</p>
+                    <p>atmosphere:</p>
+                    <Ratings icon={faSmileBeam} updateRating={setARating} currentRating={aRating}/>
+                    <p>your rating: unrated</p>
                     </div>
                     {console.log("spotpage coffee: " + cRating)}
                     {console.log("spotpage food: " + fRating)}
