@@ -3,6 +3,7 @@ export const SUCCESS = "success";
 export const SPOT_SAVED = "Spot saved to My Spots.";
 export const SPOT_REMOVED = "Spot removed from My Spots.";
 export const MISSING_PLACE_IDS = "Expected a non-empty array of placeId's in fetchSavedSpotsDetails";
+export const STATUS_UNAVAILABLE = "unavailable";
 
 export const INTERNAL_SERVER = "Something went wrong on our end. Please try refreshing the page and doing that again.";
 export const EXISTING_ACCOUNT = "There is already an account registered with that email address.";
