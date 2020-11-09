@@ -7,7 +7,6 @@ import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { fetchSpotDetails } from "../../redux/actions/spotsActions";
 import { Tab, Tabs } from 'react-bootstrap'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCoffee, faHamburger, faSmileBeam } from '@fortawesome/free-solid-svg-icons'
 import Ratings from './Ratings.js'
 
@@ -23,16 +22,12 @@ export default function SpotPage() {
     const fetchSpots = () => {
         dispatch(fetchSpotDetails('ChIJa00m55kayYcRnz5WcvjDiMI'));
     }
-    // const fetchConstants = () => {
-    //     dispatch(fetchSpotsConstants());
-    // };
     
   useEffect(() => {
     setTimeout(() => { 
         setLoading(false)
         fetchSpots();
     },1000)
-    // dispatch(fetchSpotsConstants());
     
   }, []);
 
