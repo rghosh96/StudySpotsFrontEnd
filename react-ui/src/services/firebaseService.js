@@ -1,8 +1,5 @@
 import { getFirebase } from 'react-redux-firebase';
 
-export const OK = 'OK';
-export const ERROR = 'ERROR';
-
 const safeCall = (callback) => {
     return new Promise(async (resolve, reject) => {
         try {
