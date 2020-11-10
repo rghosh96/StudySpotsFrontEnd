@@ -18,12 +18,58 @@ body, html, #root, .App {
   width: 100%;
 }
 
+.cardTitle {
+  color: $primary;;
+  font-size: 1.6rem!important;
+  font-weight: 200!important;
+  height: 50px!important;
+  width: 300px!important;
+  border: none!important;
+  margin: 0px;
+  text-align: left;
+
+}
+
+.card {
+  border: 1rem!important;
+  border-color: #865640!important;
+}
+
+.open {
+  width: 50px;
+  height: 25px;
+  background-color: #687E63;
+  color: white;
+  text-align: center;
+  border-radius: 25px;
+}
+
+.format {
+  border-color: #687E63;
+  border-radius: 25px;
+}
+
+.cardBody {
+  //width: 300px!important;
+  height: 100px!important;
+}
+
+.image {
+  width: 100px!important;
+  height: 100px!important;
+}
+
+.text {
+  font-size: small;
+}
+
 .container {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 90vh;
+  justify-content: flex-start;
+  align-items: flex-start;
   width: 100%;
+  flex-direction: column;
+  margin: 50px!important;
 }
 
 .signUpContainer {
