@@ -8,7 +8,6 @@ import '../../styling/header.scss'
 
 export default function Header() {
     const signedIn = useSelector(state => state.account.isSignedIn)
-    console.log(signedIn)
 
     const dispatch = useDispatch()
     const signOut = () => {

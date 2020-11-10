@@ -38,17 +38,20 @@ import {
     FETCH_SPOTS_REQUEST, FETCH_SPOTS_SUCCESS, FETCH_SPOTS_FAILURE,
     FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE,
     FETCH_SPOT_DETAILS,
-    SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS_DETAILS
+    SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS_DETAILS,
+    SUBMIT_RATING, UPDATE_RATING
 } from '../actions/types';
 import {
     SUCCESS, INTERNAL_SERVER, SPOT_CONSTANTS_ERROR, USER_DENIED_LOCATION, USER_NOT_SIGNED_IN,
-    SPOT_SAVED, SPOT_REMOVED, MISSING_PLACE_IDS, STATUS_UNAVAILABLE
+    SPOT_SAVED, SPOT_REMOVED, MISSING_PLACE_IDS, STATUS_UNAVAILABLE, INVALID_ARGS
 } from '../errorMessages';
 import { getFirebase } from 'react-redux-firebase';
 import {
     mapify, mapGetArray, placesPeriodsReducer, placesPhotosReducer, placesReviewsReducer, placesTypesReducer
 } from '../../helpers/dataStructureHelpers';
 import popularTimes from '../../services/popularTimes';
+
+import {getUserId, setDocumentData, getDocumentData, getNestedDocumentData, setNestedDocumentData, appendToDocArray, removeFromDocArray, updateRatings} from '../../services/firebaseService'; 
 
 
 // these maps are used to turn enums returned by api calls into text that can
@@ -396,49 +399,32 @@ export const saveSpot = (placeId) => (dispatch) => {
         }
     });
 
-    const firebase = getFirebase(); // connect to firebase
-    const firestore = getFirebase().firestore();
-    const user = firebase.auth().currentUser;
-
-    if (!user) {
-        // user isn't signed in
-        dispatch({
-            type: SAVE_SPOT,
-            payload: {
-                errorMsg: USER_NOT_SIGNED_IN,
-                savingSpot: false
-            }
+    getUserId()
+        .then(userId => {
+            return appendToDocArray("users", userId, "savedSpots", placeId)
         })
-    } else {
-        var userRef = firestore.collection("users").doc(user.uid.toString());
-
-        // Atomically add a new placeId to the savedSpots array field.
-        userRef.update({
-            savedSpots: firebase.firestore.FieldValue.arrayUnion(placeId)
+        .then(docRef => {
+            dispatch({
+                type: SAVE_SPOT,
+                payload: {
+                    errorMsg: SPOT_SAVED,
+                    savingSpot: false
+                }
+            });
         })
-            .then(() => {
-                dispatch({
-                    type: SAVE_SPOT,
-                    payload: {
-                        errorMsg: SPOT_SAVED,
-                        savingSpot: false
-                    }
-                });
-            })
-            .then(() => {
-                // once the placeId has been added to Firestore, get the data for that spot
-                fetchSavedSpotsDetails([placeId])(dispatch);
-            })
-            .catch(error => {
-                dispatch({
-                    type: SAVE_SPOT,
-                    payload: {
-                        errorMsg: error.message,
-                        savingSpot: false
-                    }
-                });
-            })
-    }
+        .then(() => {
+            // once the placeId has been added to Firestore, get the data for that spot
+            fetchSavedSpotsDetails([placeId])(dispatch);
+        })
+        .catch(error => {
+            dispatch({
+                type: SAVE_SPOT,
+                payload: {
+                    errorMsg: error.message,
+                    savingSpot: false
+                }
+            });
+        });
 }
 
 
@@ -452,46 +438,130 @@ export const removeSavedSpot = (placeId) => (dispatch) => {
         }
     });
 
-    const firebase = getFirebase(); // connect to firebase
-    const firestore = getFirebase().firestore();
-    const user = firebase.auth().currentUser;
-
-    if (!user) {
-        // user isn't signed in
-        dispatch({
-            type: REMOVE_SAVED_SPOT,
-            payload: {
-                errorMsg: USER_NOT_SIGNED_IN,
-                removingSpot: false
-            }
+    getUserId()
+        .then(userId => {
+            return removeFromDocArray("users", userId, "savedSpots", placeId);
         })
-    } else {
-        // user is signed in; save placeId to their spots and fetch details
-
-        var userRef = firestore.collection("users").doc(user.uid.toString());
-
-        // Atomically remove the placeId from the savedSpots array field.
-        userRef.update({
-            savedSpots: firebase.firestore.FieldValue.arrayRemove(placeId)
+        .then(() => {
+            dispatch({
+                type: REMOVE_SAVED_SPOT,
+                payload: {
+                    errorMsg: SPOT_REMOVED,
+                    removingSpot: false,
+                    placeId: placeId
+                }
+            });
         })
-            .then(() => {
-                dispatch({
-                    type: REMOVE_SAVED_SPOT,
-                    payload: {
-                        errorMsg: SPOT_REMOVED,
-                        removingSpot: false,
-                        placeId: placeId
-                    }
-                });
-            })
-            .catch(error => {
-                dispatch({
-                    type: REMOVE_SAVED_SPOT,
-                    payload: {
-                        errorMsg: error.message,
-                        removingSpot: false
-                    }
-                });
-            })
+        .catch(error => {
+            dispatch({
+                type: REMOVE_SAVED_SPOT,
+                payload: {
+                    errorMsg: error.message,
+                    removingSpot: false
+                }
+            });
+        });
+}
+
+/* rating = {
+    overall: <string '1'-'5'>,
+    food: <string '1'-'5'>,
+    drink: <string '1'-'5'>,
+    music: <string '1'-'5'>,
+    lighting: <string '1'-'5'>    
+} */
+export const submitRating = (placeId, rating) => async (dispatch) => {
+    const formattedRating = {
+        overall: parseInt(rating.overall),
+        lighting: parseInt(rating.lighting),
+        music: parseInt(rating.music),
+        food: parseInt(rating.food),
+        drink: parseInt(rating.drink),
     }
+
+    // make sure rating data is legal before proceeding
+    for (const [key, value] of Object.entries(formattedRating)) {
+        if (isNaN(value) || value < 1 || value > 5) {
+            dispatch({
+                type: SUBMIT_RATING,
+                payload: {
+                    submittingRating: false,
+                    errorMsg: INVALID_ARGS
+                }
+            });
+            return;
+        }
+    }
+
+    dispatch({
+        type: SUBMIT_RATING,
+        payload: {
+            submittingRating: true
+        }
+    });
+
+    const userId = await getUserId();
+    const oldRatingsAgg = await getDocumentData("spots", placeId);
+    var newRatingsAgg = {};
+
+    getNestedDocumentData("spots", placeId, "ratings", userId)
+        .then(existingRating => {
+
+            // case where no users have ever rated this spot
+            if (oldRatingsAgg == null) {
+                newRatingsAgg = {
+                    numRatings: 1,
+                    avgOverallRating: formattedRating.overall,
+                    avgMusicRating: formattedRating.music,
+                    avgLightingRating: formattedRating.lighting,
+                    avgDrinkRating: formattedRating.drink,
+                    avgFoodRating: formattedRating.food,
+                };
+            }
+
+            // case where 1 or more users have rated this spot, but not the signed-in user
+            else if (existingRating == null) {
+                const { numRatings, avgOverallRating, avgMusicRating, avgLightingRating, avgDrinkRating, avgFoodRating } = oldRatingsAgg;
+
+                let newNumRatings = numRatings + 1;
+                newRatingsAgg = {
+                    numRatings: newNumRatings,
+                    avgOverallRating: ((avgOverallRating * numRatings) + formattedRating.overall) / newNumRatings,
+                    avgMusicRating: ((avgMusicRating * numRatings) + formattedRating.lighting) / newNumRatings,
+                    avgLightingRating: ((avgLightingRating * numRatings) + formattedRating.music) / newNumRatings,
+                    avgDrinkRating: ((avgDrinkRating * numRatings) + formattedRating.food) / newNumRatings,
+                    avgFoodRating: ((avgFoodRating * numRatings) + formattedRating.drink) / newNumRatings,
+                }
+            }
+
+            // case where this user has rated the spot in the past
+            else if (existingRating != null) {
+                const { numRatings, avgOverallRating, avgMusicRating, avgLightingRating, avgDrinkRating, avgFoodRating } = oldRatingsAgg;
+
+                newRatingsAgg = {
+                    numRatings: numRatings,
+                    avgOverallRating: ((avgOverallRating * numRatings) + formattedRating.overall - existingRating.overall) / numRatings,
+                    avgMusicRating: ((avgMusicRating * numRatings) + formattedRating.lighting - existingRating.lighting) / numRatings,
+                    avgLightingRating: ((avgLightingRating * numRatings) + formattedRating.music - existingRating.music) / numRatings,
+                    avgDrinkRating: ((avgDrinkRating * numRatings) + formattedRating.food - existingRating.food) / numRatings,
+                    avgFoodRating: ((avgFoodRating * numRatings) + formattedRating.drink - existingRating.drink) / numRatings,
+                };
+            }
+
+            // set the new aggregate ratings fields
+            return setDocumentData("spots", placeId, newRatingsAgg);
+        })
+        .then(() => {
+            // update the user's rating
+            return setNestedDocumentData("spots", placeId, "ratings", userId, formattedRating);
+        })
+        .catch(error => {
+            dispatch({
+                type: SUBMIT_RATING,
+                payload: {
+                    submittingRating: false,
+                    errorMsg: error.message
+                }
+            });
+        });      
 }
