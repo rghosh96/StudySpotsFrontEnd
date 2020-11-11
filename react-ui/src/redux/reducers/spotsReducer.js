@@ -2,13 +2,15 @@ import {
     FETCH_SPOTS_REQUEST, FETCH_SPOTS_SUCCESS, FETCH_SPOTS_FAILURE,
     FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE,
     FETCH_SPOT_DETAILS,
-    SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS_DETAILS
+    SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS_DETAILS,
+    SUBMIT_RATING, UPDATE_RATING, FETCH_RATINGS
 } from '../actions/types';
 import { SUCCESS, BAD_SPOTS_FETCH } from '../errorMessages'
 
 const initialState = {
     savingSpot: false,
     removingSpot: false,
+    submittingRating: false,
     fetchingSpots: false,
     spotsFetched: false,
     constantsFetched: false, 
@@ -117,6 +119,20 @@ export default function (state = initialState, action) {
                 errorMsg: action.payload.errorMsg || '',
                 // on error, no spot is removed
                 savedSpots: updatedSavedSpots || state.savedSpots
+            }
+
+        case SUBMIT_RATING:
+            return {
+                ...state,
+                submittingRating: action.payload.submittingRating,
+                errorMsg: action.payload.errorMsg || '',
+            }
+
+        case UPDATE_RATING:
+            return {
+                ...state,
+                submittingRating: action.payload.submittingRating,
+                errorMsg: action.payload.errorMsg || '',
             }
 
         default:
