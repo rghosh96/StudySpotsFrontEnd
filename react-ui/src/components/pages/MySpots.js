@@ -63,15 +63,15 @@ class MySpots extends React.Component {
                     <Header />
 
                     <div className="filterArea">
-                    <Form.Control onChange={this.handleChange} id="selection" as="select" >
+                    {/* <Form.Control onChange={this.handleChange} id="selection" as="select" >
                     <option value="filter0">select an option...</option>
                     <option value="filter1">Price</option>
                     <option value="filter2">Location Type</option>
                     <option value="filter3">Importance</option>
-                    </Form.Control>
+                    </Form.Control> */}
             
                 
-                    {this.state.selection == 'filter1' ? 
+                    {/* {this.state.selection == 'filter1' ? 
                     <div>
                     <Dropdown>
                         <Dropdown.Toggle variant="success" id="dropdown-basic">
@@ -122,7 +122,7 @@ class MySpots extends React.Component {
                     </Dropdown>
                     </div>
                                     : null
-                    }
+                    } */}
 
 
                     <h1>myspots</h1>
