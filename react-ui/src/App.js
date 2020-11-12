@@ -26,7 +26,7 @@ function App() {
     dispatch(checkAuth());
 
     dispatch(fetchSpotsConstants())
-  }, []);
+  });
 
   return (
     <div className="App">
