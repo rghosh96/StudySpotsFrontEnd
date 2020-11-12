@@ -29,7 +29,7 @@ const Ratings = ({icon, updateRating, currentRating}) => {
                 <FontAwesomeIcon className="star" 
                     color={ratingValue <= (hover || currentRating) ? "#c29257" : "#7f7f7f"}
                     icon={icon} 
-                    size='3x'
+                    size='2x'
                     onMouseEnter={()=>setHover(ratingValue)}
                     onMouseLeave={()=>setHover(null)}
                     />

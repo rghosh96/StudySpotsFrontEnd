@@ -7,15 +7,17 @@ import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { fetchSpotDetails } from "../../redux/actions/spotsActions";
 import { Tab, Tabs } from 'react-bootstrap'
-import { faCoffee, faHamburger, faSmileBeam } from '@fortawesome/free-solid-svg-icons'
+import { faStore, faHamburger, faSmileBeam, faMusic, faAdjust } from '@fortawesome/free-solid-svg-icons'
 import Ratings from './Ratings.js'
 
 
 export default function SpotPage() {
   const [loading, setLoading] = useState(true);
-  const [cRating, setCRating] = useState(3)
-  const [fRating, setFRating] = useState(5)
-  const [aRating, setARating] = useState(4)
+  const [mRating, setMRating] = useState(3)
+  const [sRating, setSRating] = useState(4)
+  const [lRating, setLRating] = useState(2)
+  const [fRating, setFRating] = useState(1)
+  const [oRating, setORating] = useState(4)
   const spot = useSelector(state => state.spots.activeSpot)
     console.log("Hello")
     const dispatch = useDispatch();
@@ -41,7 +43,6 @@ export default function SpotPage() {
             <div class="container">
                 <h1>{spot.name}</h1>
                 <p>{spot.formattedAddress}</p>
-
                 <div class = "info">
                     {spot.photos ? <img src={spot.photos[0].url} /> : null }
                     <div class= "infoSection">
@@ -57,15 +58,24 @@ export default function SpotPage() {
                       <h2>popular times</h2>
                       <p>pop times will go here</p>
                     </div>
-                    
                 </div>
                 
                 <div class="center">
                   <h2>at a glance</h2>
                   <div class = "info">
                     <div class= "infoSection">
-                      <p>coffee:</p>
-                      <Ratings icon={faCoffee} updateRating={setCRating} currentRating={cRating}/>
+                      <p>music:</p>
+                      <Ratings icon={faMusic} updateRating={setMRating} currentRating={mRating}/>
+                      <p>your rating: unrated</p>
+                    </div>
+                    <div class= "infoSection">
+                      <p>space:</p>
+                      <Ratings icon={faStore} updateRating={setSRating} currentRating={sRating}/>
+                      <p>your rating: unrated</p>
+                    </div>
+                    <div class= "infoSection">
+                      <p>lighting:</p>
+                      <Ratings icon={faAdjust} updateRating={setLRating} currentRating={lRating}/>
                       <p>your rating: unrated</p>
                     </div>
                     <div class= "infoSection">
@@ -74,16 +84,19 @@ export default function SpotPage() {
                       <p>your rating: unrated</p>
                     </div>
                     <div class= "infoSection">
-                    <p>atmosphere:</p>
-                    <Ratings icon={faSmileBeam} updateRating={setARating} currentRating={aRating}/>
-                    <p>your rating: unrated</p>
+                      <p>overall:</p>
+                      <Ratings icon={faSmileBeam} updateRating={setORating} currentRating={oRating}/>
+                      <p>your rating: unrated</p>
                     </div>
-                    {console.log("spotpage coffee: " + cRating)}
+                    
+                    {console.log("spotpage music: " + mRating)}
+                    {console.log("spotpage space: " + sRating)}
+                    {console.log("spotpage lighting: " + lRating)}
                     {console.log("spotpage food: " + fRating)}
-                    {console.log("spotpage atmosphere: " + aRating)}
-                    </div>
+                    {console.log("spotpage overall: " + oRating)}
                   </div>
                 </div>
+              </div>
 
             <Tabs defaultActiveKey="reviews" id="uncontrolled-tab-example">
                   <Tab eventKey="reviews" title="Reviews">
@@ -105,4 +118,4 @@ export default function SpotPage() {
         </div>
     );
   }
-}
+} 
