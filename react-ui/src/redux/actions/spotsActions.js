@@ -118,7 +118,6 @@ export const fetchSpotsConstants = () => (dispatch) => {
 */
 export const fetchNearbySpots = (params) => (dispatch) => {
     dispatch({ type: FETCH_SPOTS_REQUEST });
-    console.log(params)
     try {
         // this will force a browser popup that asks permission to use the user's location
         navigator.geolocation.getCurrentPosition(
@@ -152,8 +151,6 @@ export const fetchNearbySpots = (params) => (dispatch) => {
 
                         // callback to handle response/errors
                         async (results, status) => {
-                            console.log(status)
-                            console.log(results)
                             if (status == window.google.maps.places.PlacesServiceStatus.OK) {
                                 // use for maps integration
                                 // for (var i = 0; i < results.length; i++) {
@@ -172,8 +169,6 @@ export const fetchNearbySpots = (params) => (dispatch) => {
                                             },
 
                                             async (results, status) => {
-                                                console.log(status)
-                                                console.log(results)
                                                 try {
                                                     if (status == window.google.maps.places.PlacesServiceStatus.OK) {
                                                         let popTimes = await popularTimes(await results.url);
