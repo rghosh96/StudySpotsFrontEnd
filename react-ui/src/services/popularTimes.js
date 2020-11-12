@@ -25,7 +25,7 @@ const extract_data = async html => {
     let str = ['APP_INITIALIZATION_STATE=', 'window.APP_FLAGS']
     let script = html.substring(html.lastIndexOf(str[0]) + str[0].length, html.lastIndexOf(str[1]));
 
-    let first = eval(script)
+    let first = eval(script);
     let second = eval(first[3][6].replace(")]}'", ""));
 
     return second[6][84];
@@ -65,11 +65,6 @@ const fetch_html = async (url) => {
         // some kind soul has built this server that lets us bypass the no 
         // Access-Control-Allow-Origin error recieved from a plain ol' fetch
         const proxyUrl = "https://cors-anywhere.herokuapp.com/";
-
-        var headers = new Headers({
-            'Content-Type': 'text/html; charset=UTF-8',
-            'Access-Control-Allow-Headers': '*'
-        });
 
         const html = await fetch(proxyUrl + url, {
             method: 'GET',

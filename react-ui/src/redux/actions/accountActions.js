@@ -1,16 +1,10 @@
 import {
-	SIGN_UP_REQUEST, SIGN_UP_FAILURE, SIGN_UP_SUCCESS, SIGN_OUT_REQUEST, SIGN_OUT_SUCCESS, SIGN_OUT_FAILURE,
+	SIGN_UP_REQUEST, SIGN_UP_FAILURE, SIGN_UP_SUCCESS, SIGN_OUT_REQUEST, SIGN_OUT_SUCCESS,
 	UPDATE_ACCOUNT_REQUEST, UPDATE_ACCOUNT_SUCCESS, UPDATE_ACCOUNT_FAILURE,
 	SIGN_IN_REQUEST, SIGN_IN_SUCCESS, SIGN_IN_FAILURE,
 	FETCH_USERDATA_REQUEST, FETCH_USERDATA_SUCCESS, FETCH_USERDATA_FAILURE,
 } from '../actions/types';
-import {
-	EXISTING_ACCOUNT, BAD_CREDENTIALS, USER_NOT_SIGNED_IN,
-	SPOT_SAVED
-} from '../errorMessages';
-import {
-    placesPeriodsReducer, placesPhotosReducer, placesReviewsReducer, placesTypesReducer
-} from '../../helpers/dataStructureHelpers';
+import { EXISTING_ACCOUNT, BAD_CREDENTIALS, USER_NOT_SIGNED_IN } from '../errorMessages';
 import { getFirebase } from 'react-redux-firebase';
 
 
