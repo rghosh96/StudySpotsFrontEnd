@@ -11,10 +11,15 @@ export const mapify = (arr, keyAttr, valueAttr) => {
 };
 
 // given a map of key/value pairs and an array of keys, returns an array of ordered values
+// only include values that have entries in the map
 export const mapGetArray = (map, arr) => {
-    arr.map(a => {
-        return map.get(a);
+    let newArr = [];
+
+    arr.forEach(a => {
+        if (map.get(a)) newArr.push(map.get(a));
     });
+
+    return newArr;
 };
 
 // takes an array of periods info returned from Google Places API.
@@ -36,10 +41,10 @@ export const placesPeriodsReducer = (periods) => {
 export const placesPhotosReducer = (photos) => {
     return photos.map(p => {
         return {
-            url: p.getUrl(),
-            height: p.height,
-            width: p.width,
-        };
+            height: p.height || null,
+            width: p.width || null,
+            url: p.getUrl() || null,
+        }
     });
 };
 

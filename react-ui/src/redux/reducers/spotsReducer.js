@@ -2,13 +2,15 @@ import {
     FETCH_SPOTS_REQUEST, FETCH_SPOTS_SUCCESS, FETCH_SPOTS_FAILURE,
     FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE,
     FETCH_SPOT_DETAILS,
-    SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS_DETAILS
+    SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS_DETAILS,
+    SUBMIT_RATING, UPDATE_RATING
 } from '../actions/types';
-import { SUCCESS, BAD_SPOTS_FETCH } from '../errorMessages'
+import { SUCCESS } from '../errorMessages'
 
 const initialState = {
     savingSpot: false,
     removingSpot: false,
+    submittingRating: false,
     fetchingSpots: false,
     spotsFetched: false,
     constantsFetched: false, 
@@ -31,6 +33,8 @@ const initialState = {
 };
 
 export default function (state = initialState, action) {
+    var updatedSavedSpots = null;
+
     switch (action.type) {
 
         case FETCH_SPOTS_REQUEST:
@@ -84,8 +88,9 @@ export default function (state = initialState, action) {
             }
 
         case FETCH_SAVED_SPOTS_DETAILS:
+            updatedSavedSpots = null;
             if (action.payload.spotsDetails) {
-                var updatedSavedSpots = [action.payload.spotsDetails, ...state.savedSpots];
+                updatedSavedSpots = [action.payload.spotsDetails, ...state.savedSpots];
             }
 
             return {
@@ -105,9 +110,10 @@ export default function (state = initialState, action) {
             }
 
         case REMOVE_SAVED_SPOT:
+            updatedSavedSpots = null;
             if (action.payload.placeId) {
-                var updatedSavedSpots = state.savedSpots.filter(
-                    spot => spot.placeId != action.payload.placeId
+                updatedSavedSpots = state.savedSpots.filter(
+                    spot => spot.placeId !== action.payload.placeId
                 );
             }
 
@@ -117,6 +123,20 @@ export default function (state = initialState, action) {
                 errorMsg: action.payload.errorMsg || '',
                 // on error, no spot is removed
                 savedSpots: updatedSavedSpots || state.savedSpots
+            }
+
+        case SUBMIT_RATING:
+            return {
+                ...state,
+                submittingRating: action.payload.submittingRating,
+                errorMsg: action.payload.errorMsg || '',
+            }
+
+        case UPDATE_RATING:
+            return {
+                ...state,
+                submittingRating: action.payload.submittingRating,
+                errorMsg: action.payload.errorMsg || '',
             }
 
         default:

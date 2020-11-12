@@ -17,7 +17,7 @@ export default function PopTimesChart(props) {
     };
 
     // setup for conditional bar color
-    var date = new Date;
+    var date = new Date();
     var currentHour = date.getHours();
 
     // setup to normalize the opacity of the bar color

@@ -38,17 +38,22 @@ import {
     FETCH_SPOTS_REQUEST, FETCH_SPOTS_SUCCESS, FETCH_SPOTS_FAILURE,
     FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE,
     FETCH_SPOT_DETAILS,
-    SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS_DETAILS
+    SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS_DETAILS,
+    SUBMIT_RATING
 } from '../actions/types';
 import {
-    SUCCESS, INTERNAL_SERVER, SPOT_CONSTANTS_ERROR, USER_DENIED_LOCATION, USER_NOT_SIGNED_IN,
-    SPOT_SAVED, SPOT_REMOVED, MISSING_PLACE_IDS, STATUS_UNAVAILABLE
+    SUCCESS, SPOT_CONSTANTS_ERROR, USER_DENIED_LOCATION,
+    SPOT_SAVED, SPOT_REMOVED, MISSING_PLACE_IDS, STATUS_UNAVAILABLE, INVALID_ARGS
 } from '../errorMessages';
 import { getFirebase } from 'react-redux-firebase';
 import {
     mapify, mapGetArray, placesPeriodsReducer, placesPhotosReducer, placesReviewsReducer, placesTypesReducer
 } from '../../helpers/dataStructureHelpers';
+import { euclidDistance } from '../../helpers/distanceCalculator';
 import popularTimes from '../../services/popularTimes';
+import {
+    getUserId, setDocumentData, getDocumentData, getNestedDocumentData, setNestedDocumentData, appendToDocArray, removeFromDocArray
+} from '../../services/firebaseService';
 
 
 // these maps are used to turn enums returned by api calls into text that can
@@ -62,7 +67,7 @@ var businessStatusMap = undefined;
 var typesMap = undefined;
 var priceLevelMap = undefined;
 
-const NEARBY_SEARCH_RADIUS = 500; // in meters (about 6 miles). max is 50000
+const NEARBY_SEARCH_RADIUS = 1500; // in meters (about 6 miles). max is 50000
 
 
 // fetches the constants from Firestore which are necessary to make API calls
@@ -172,27 +177,30 @@ export const fetchNearbySpots = (params) => (dispatch) => {
                                                 try {
                                                     if (status == window.google.maps.places.PlacesServiceStatus.OK) {
                                                         let popTimes = await popularTimes(await results.url);
+                                                        let distance = euclidDistance(latitude, longitude, r.geometry.location.lat(), r.geometry.location.lng());
+                                                        let types = typesMap && r.types ? mapGetArray(typesMap, r.types) : (r.types ? r.types : []);
 
                                                         let spot = {
                                                             placeId: r.place_id,
                                                             name: r.name,
                                                             businessStatus: businessStatusMap ? businessStatusMap.get(r.business_status) : STATUS_UNAVAILABLE,
-                                                            iconUrl: r.icon,
+                                                            iconUrl: r.icon || null,
+                                                            vicinity: r.vicinity || null, // almost always an address
+                                                            distance: distance,
+                                                            photos: placesPhotosReducer(r.photos),
+                                                            types: types,
+                                                            rating: r.rating || null,
+                                                            userRatingsTotal: r.user_ratings_total || null,
+                                                            url: results.url || null,
                                                             openNow: r.opening_hours ? r.opening_hours.isOpen() : null,
                                                             popularTimes: await popTimes,
-                                                            vicinity: r.vicinity, // almost always an address
-                                                            photos: r.photos, // [{ height, premade html element, width }]
-                                                            types: typesMap && r.types ? mapGetArray(typesMap, r.types) : [],
-                                                            rating: r.rating,
-                                                            userRatingsTotal: r.user_ratings_total,
-                                                            url: results.url
                                                         };
 
                                                         resolve(await spot);
                                                     } else {
                                                         throw new Error(placesRequestStatusMap ? placesRequestStatusMap.get(status) : SPOT_CONSTANTS_ERROR);
                                                     }
-                                                } catch(error) { 
+                                                } catch (error) {
                                                     dispatch({
                                                         type: FETCH_SPOTS_FAILURE,
                                                         payload: error.message
@@ -200,7 +208,25 @@ export const fetchNearbySpots = (params) => (dispatch) => {
                                                 }
                                             }
                                         );
-                                    });
+                                    })
+                                        // add the aggregate ratings to the spot details
+                                        .then(async spot => {
+                                            const data = await getDocumentData("spots", spot.placeId);
+
+                                            var newSpot = {
+                                                ...spot,
+                                                studySpotsRatings: {
+                                                    numRatings: data == null ? null : data.numRatings,
+                                                    overall: data == null ? null : data.avgOverallRating,
+                                                    lighting: data == null ? null : data.avgLightingRating,
+                                                    music: data == null ? null : data.avgMusicRating,
+                                                    food: data == null ? null : data.avgFoodRating,
+                                                    drink: data == null ? null : data.avgDrinkRating,
+                                                }
+                                            };
+
+                                            return await newSpot;
+                                        });
                                 }))
                                     .then(async spots => {
                                         dispatch({
@@ -209,13 +235,18 @@ export const fetchNearbySpots = (params) => (dispatch) => {
                                         });
                                     })
                             } else {
-                                //stops application
-                                throw new Error(placesRequestStatusMap ? placesRequestStatusMap.get(status) : SPOT_CONSTANTS_ERROR);
+                                dispatch({
+                                    type: FETCH_SPOTS_FAILURE,
+                                    payload: placesRequestStatusMap ? placesRequestStatusMap.get(status) : SPOT_CONSTANTS_ERROR
+                                });
                             }
                         }
                     );
                 } else {
-                    throw new Error(USER_DENIED_LOCATION);
+                    dispatch({
+                        type: FETCH_SPOTS_FAILURE,
+                        payload: USER_DENIED_LOCATION
+                    });
                 }
             }
         );
@@ -234,57 +265,95 @@ export const fetchNearbySpots = (params) => (dispatch) => {
 // onSuccess(spot): a callback which takes the spot details and dispatches accordingly
 // onFailure(status): a callback which dispatches in case of failure, takes the status of the request
 const fetchAPISpotDetails = (placeId, onSuccess, onFailure) => {
-    var service = new window.google.maps.places.PlacesService(document.createElement('div'));
+    try {
+        // this will force a browser popup that asks permission to use the user's location
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                var latitude = position.coords.latitude;
+                var longitude = position.coords.longitude;
 
-    service.getDetails(
-        {
-            placeId: placeId,
-            // return only the fields specified
-            fields: [
-                "place_id",
-                "name",
-                "business_status",
-                "formatted_address",
-                "formatted_phone_number",
-                "icon",
-                "types",
-                "opening_hours",
-                "photos",
-                "price_level",
-                "rating",
-                "review",
-                "url"
-            ]
-        },
+                if (latitude && longitude) {
+                    // try getting ratings data
+                    getDocumentData("spots", placeId)
+                        .then(data => {
+                            var studySpotsRatings = {
+                                numRatings: data && data.numRatings ? data.numRatings : null,
+                                overall: data && data.avgOverallRating ? data.avgOverallRating : null,
+                                lighting: data && data.avgLightingRating ? data.avgLightingRating : null,
+                                music: data && data.avgMusicRating ? data.avgMusicRating : null,
+                                food: data && data.avgFoodRating ? data.avgFoodRating : null,
+                                drink: data && data.avgDrinkRating ? data.avgDrinkRating : null,
+                            }
 
-        async (results, status) => {
-            if (status == window.google.maps.places.PlacesServiceStatus.OK) {
-                let popTimes = await popularTimes(results.url);
+                            // now get the rest of spot details from Places API
+                            var service = new window.google.maps.places.PlacesService(document.createElement('div'));
 
-                // createMarker(place); // for usage with map
-                let spotDetails = {
-                    placeId: results.place_id,
-                    name: results.name,
-                    businessStatus: businessStatusMap.get(results.business_status),
-                    formattedAddress: results.formatted_address,
-                    formattedPhoneNumber: results.formatted_phone_number,
-                    iconUrl: results.icon,
-                    types: placesTypesReducer(results.types),
-                    openNow: results.opening_hours.isOpen(),
-                    openHours: placesPeriodsReducer(results.opening_hours.periods),
-                    popularTimes: await popTimes,
-                    photos: placesPhotosReducer(results.photos),
-                    priceLevel: priceLevelMap.get(results.price_level),
-                    rating: results.rating,
-                    reviews: placesReviewsReducer(results.reviews),
+                            service.getDetails(
+                                {
+                                    placeId: placeId,
+                                    // return only the fields specified
+                                    fields: [
+                                        "place_id",
+                                        "name",
+                                        "business_status",
+                                        "geometry",
+                                        "formatted_address",
+                                        "formatted_phone_number",
+                                        "icon",
+                                        "types",
+                                        "opening_hours",
+                                        "photos",
+                                        "price_level",
+                                        "rating",
+                                        "review",
+                                        "url"
+                                    ]
+                                },
+
+                                async (results, status) => {
+                                    if (status == window.google.maps.places.PlacesServiceStatus.OK) {
+                                        let popTimes = await popularTimes(results.url);
+                                        let distance = euclidDistance(latitude, longitude, results.geometry.location.lat(), results.geometry.location.lng());
+                                        let types = typesMap && results.types ? mapGetArray(typesMap, results.types) : (results.types ? results.types : []);
+
+                                        // createMarker(place); // for usage with map
+                                        let spotDetails = {
+                                            placeId: results.place_id,
+                                            name: results.name,
+                                            businessStatus: businessStatusMap.get(results.business_status),
+                                            distance: distance || null,
+                                            formattedAddress: results.formatted_address,
+                                            formattedPhoneNumber: results.formatted_phone_number,
+                                            iconUrl: results.icon || null,
+                                            types: types,
+                                            openNow: results.opening_hours.isOpen(),
+                                            openHours: placesPeriodsReducer(results.opening_hours.periods),
+                                            popularTimes: await popTimes,
+                                            photos: placesPhotosReducer(results.photos),
+                                            priceLevel: priceLevelMap.get(results.price_level),
+                                            rating: results.rating || null,
+                                            reviews: placesReviewsReducer(results.reviews),
+                                            studySpotsRatings: studySpotsRatings,
+                                        }
+
+                                        onSuccess(spotDetails);
+                                    } else {
+                                        onFailure(status);
+                                    }
+                                }
+                            );
+                        })
+                        .catch(error => {
+                            onFailure(error.message);
+                        });
+                } else {
+                    onFailure(USER_DENIED_LOCATION);
                 }
-
-                onSuccess(spotDetails);
-            } else {
-                onFailure(status);
             }
-        }
-    );
+        );
+    } catch (error) {
+        onFailure(error.message);
+    }
 }
 
 
@@ -326,7 +395,6 @@ export const fetchSpotDetails = (placeId) => dispatch => {
 
     fetchAPISpotDetails(placeId, onSuccess, onFailure);
 }
-
 
 // given an array of placeIds, fetches the data for each placeId that was 
 // passed and sends spot details to reducer
@@ -401,49 +469,32 @@ export const saveSpot = (placeId) => (dispatch) => {
         }
     });
 
-    const firebase = getFirebase(); // connect to firebase
-    const firestore = getFirebase().firestore();
-    const user = firebase.auth().currentUser;
-
-    if (!user) {
-        // user isn't signed in
-        dispatch({
-            type: SAVE_SPOT,
-            payload: {
-                errorMsg: USER_NOT_SIGNED_IN,
-                savingSpot: false
-            }
+    getUserId()
+        .then(userId => {
+            return appendToDocArray("users", userId, "savedSpots", placeId)
         })
-    } else {
-        var userRef = firestore.collection("users").doc(user.uid.toString());
-
-        // Atomically add a new placeId to the savedSpots array field.
-        userRef.update({
-            savedSpots: firebase.firestore.FieldValue.arrayUnion(placeId)
+        .then(docRef => {
+            dispatch({
+                type: SAVE_SPOT,
+                payload: {
+                    errorMsg: SPOT_SAVED,
+                    savingSpot: false
+                }
+            });
         })
-            .then(() => {
-                dispatch({
-                    type: SAVE_SPOT,
-                    payload: {
-                        errorMsg: SPOT_SAVED,
-                        savingSpot: false
-                    }
-                });
-            })
-            .then(() => {
-                // once the placeId has been added to Firestore, get the data for that spot
-                fetchSavedSpotsDetails([placeId])(dispatch);
-            })
-            .catch(error => {
-                dispatch({
-                    type: SAVE_SPOT,
-                    payload: {
-                        errorMsg: error.message,
-                        savingSpot: false
-                    }
-                });
-            })
-    }
+        .then(() => {
+            // once the placeId has been added to Firestore, get the data for that spot
+            fetchSavedSpotsDetails([placeId])(dispatch);
+        })
+        .catch(error => {
+            dispatch({
+                type: SAVE_SPOT,
+                payload: {
+                    errorMsg: error.message,
+                    savingSpot: false
+                }
+            });
+        });
 }
 
 
@@ -457,46 +508,132 @@ export const removeSavedSpot = (placeId) => (dispatch) => {
         }
     });
 
-    const firebase = getFirebase(); // connect to firebase
-    const firestore = getFirebase().firestore();
-    const user = firebase.auth().currentUser;
-
-    if (!user) {
-        // user isn't signed in
-        dispatch({
-            type: REMOVE_SAVED_SPOT,
-            payload: {
-                errorMsg: USER_NOT_SIGNED_IN,
-                removingSpot: false
-            }
+    getUserId()
+        .then(userId => {
+            return removeFromDocArray("users", userId, "savedSpots", placeId);
         })
-    } else {
-        // user is signed in; save placeId to their spots and fetch details
-
-        var userRef = firestore.collection("users").doc(user.uid.toString());
-
-        // Atomically remove the placeId from the savedSpots array field.
-        userRef.update({
-            savedSpots: firebase.firestore.FieldValue.arrayRemove(placeId)
+        .then(() => {
+            dispatch({
+                type: REMOVE_SAVED_SPOT,
+                payload: {
+                    errorMsg: SPOT_REMOVED,
+                    removingSpot: false,
+                    placeId: placeId
+                }
+            });
         })
-            .then(() => {
-                dispatch({
-                    type: REMOVE_SAVED_SPOT,
-                    payload: {
-                        errorMsg: SPOT_REMOVED,
-                        removingSpot: false,
-                        placeId: placeId
-                    }
-                });
-            })
-            .catch(error => {
-                dispatch({
-                    type: REMOVE_SAVED_SPOT,
-                    payload: {
-                        errorMsg: error.message,
-                        removingSpot: false
-                    }
-                });
-            })
+        .catch(error => {
+            dispatch({
+                type: REMOVE_SAVED_SPOT,
+                payload: {
+                    errorMsg: error.message,
+                    removingSpot: false
+                }
+            });
+        });
+}
+
+/* rating = {
+    overall: <string '1'-'5'>,
+    food: <string '1'-'5'>,
+    drink: <string '1'-'5'>,
+    music: <string '1'-'5'>,
+    lighting: <string '1'-'5'>    
+} */
+export const submitRating = (placeId, rating) => async (dispatch) => {
+    // parse all args to int
+    const formattedRating = {
+        overall: parseInt(rating.overall),
+        lighting: parseInt(rating.lighting),
+        music: parseInt(rating.music),
+        food: parseInt(rating.food),
+        drink: parseInt(rating.drink),
     }
+
+    // make sure rating data is legal before proceeding
+    for (const [key, value] of Object.entries(formattedRating)) {
+        if (isNaN(value) || value < 1 || value > 5) {
+            dispatch({
+                type: SUBMIT_RATING,
+                payload: {
+                    submittingRating: false,
+                    errorMsg: INVALID_ARGS
+                }
+            });
+            return;
+        }
+    }
+
+    dispatch({
+        type: SUBMIT_RATING,
+        payload: {
+            submittingRating: true
+        }
+    });
+
+    const userId = await getUserId();
+    const oldRatingsAgg = await getDocumentData("spots", placeId);
+    var newRatingsAgg = {};
+
+    // start by retieving existing rating from this user (if any)
+    getNestedDocumentData("spots", placeId, "ratings", userId)
+        .then(existingRating => {
+
+            // case where no users have ever rated this spot
+            if (oldRatingsAgg == null) {
+                newRatingsAgg = {
+                    numRatings: 1,
+                    avgOverallRating: formattedRating.overall,
+                    avgMusicRating: formattedRating.music,
+                    avgLightingRating: formattedRating.lighting,
+                    avgDrinkRating: formattedRating.drink,
+                    avgFoodRating: formattedRating.food,
+                };
+            }
+
+            // case where 1 or more users have rated this spot, but not the signed-in user
+            else if (existingRating == null) {
+                const { numRatings, avgOverallRating, avgMusicRating, avgLightingRating, avgDrinkRating, avgFoodRating } = oldRatingsAgg;
+
+                let newNumRatings = numRatings + 1;
+                newRatingsAgg = {
+                    numRatings: newNumRatings,
+                    avgOverallRating: ((avgOverallRating * numRatings) + formattedRating.overall) / newNumRatings,
+                    avgMusicRating: ((avgMusicRating * numRatings) + formattedRating.lighting) / newNumRatings,
+                    avgLightingRating: ((avgLightingRating * numRatings) + formattedRating.music) / newNumRatings,
+                    avgDrinkRating: ((avgDrinkRating * numRatings) + formattedRating.food) / newNumRatings,
+                    avgFoodRating: ((avgFoodRating * numRatings) + formattedRating.drink) / newNumRatings,
+                }
+            }
+
+            // case where this user has rated the spot in the past
+            else if (existingRating != null) {
+                const { numRatings, avgOverallRating, avgMusicRating, avgLightingRating, avgDrinkRating, avgFoodRating } = oldRatingsAgg;
+
+                newRatingsAgg = {
+                    numRatings: numRatings,
+                    avgOverallRating: ((avgOverallRating * numRatings) + formattedRating.overall - existingRating.overall) / numRatings,
+                    avgMusicRating: ((avgMusicRating * numRatings) + formattedRating.lighting - existingRating.lighting) / numRatings,
+                    avgLightingRating: ((avgLightingRating * numRatings) + formattedRating.music - existingRating.music) / numRatings,
+                    avgDrinkRating: ((avgDrinkRating * numRatings) + formattedRating.food - existingRating.food) / numRatings,
+                    avgFoodRating: ((avgFoodRating * numRatings) + formattedRating.drink - existingRating.drink) / numRatings,
+                };
+            }
+
+            // set the new aggregate ratings fields
+            return setDocumentData("spots", placeId, newRatingsAgg);
+        })
+        .then(() => {
+            // update the user's rating
+            return setNestedDocumentData("spots", placeId, "ratings", userId, formattedRating);
+        })
+        .catch(error => {
+            dispatch({
+                type: SUBMIT_RATING,
+                payload: {
+                    submittingRating: false,
+                    errorMsg: error.message
+                }
+            });
+        });
 }
