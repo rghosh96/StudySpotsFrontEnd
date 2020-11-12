@@ -39,19 +39,21 @@ import {
     FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE,
     FETCH_SPOT_DETAILS,
     SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS_DETAILS,
-    SUBMIT_RATING, UPDATE_RATING
+    SUBMIT_RATING
 } from '../actions/types';
 import {
-    SUCCESS, INTERNAL_SERVER, SPOT_CONSTANTS_ERROR, USER_DENIED_LOCATION, USER_NOT_SIGNED_IN,
+    SUCCESS, SPOT_CONSTANTS_ERROR, USER_DENIED_LOCATION,
     SPOT_SAVED, SPOT_REMOVED, MISSING_PLACE_IDS, STATUS_UNAVAILABLE, INVALID_ARGS
 } from '../errorMessages';
 import { getFirebase } from 'react-redux-firebase';
 import {
     mapify, mapGetArray, placesPeriodsReducer, placesPhotosReducer, placesReviewsReducer, placesTypesReducer
 } from '../../helpers/dataStructureHelpers';
+import { euclidDistance } from '../../helpers/distanceCalculator';
 import popularTimes from '../../services/popularTimes';
-
-import {getUserId, setDocumentData, getDocumentData, getNestedDocumentData, setNestedDocumentData, appendToDocArray, removeFromDocArray, updateRatings} from '../../services/firebaseService'; 
+import {
+    getUserId, setDocumentData, getDocumentData, getNestedDocumentData, setNestedDocumentData, appendToDocArray, removeFromDocArray
+} from '../../services/firebaseService';
 
 
 // these maps are used to turn enums returned by api calls into text that can
@@ -65,7 +67,7 @@ var businessStatusMap = undefined;
 var typesMap = undefined;
 var priceLevelMap = undefined;
 
-const NEARBY_SEARCH_RADIUS = 10000; // in meters (about 6 miles). max is 50000
+const NEARBY_SEARCH_RADIUS = 1500; // in meters (about 6 miles). max is 50000
 
 
 // fetches the constants from Firestore which are necessary to make API calls
@@ -171,27 +173,30 @@ export const fetchNearbySpots = (params) => (dispatch) => {
                                                 try {
                                                     if (status == window.google.maps.places.PlacesServiceStatus.OK) {
                                                         let popTimes = await popularTimes(await results.url);
+                                                        let distance = euclidDistance(latitude, longitude, r.geometry.location.lat(), r.geometry.location.lng());
+                                                        let types = typesMap && r.types ? mapGetArray(typesMap, r.types) : (r.types ? r.types : []);
 
                                                         let spot = {
                                                             placeId: r.place_id,
                                                             name: r.name,
                                                             businessStatus: businessStatusMap ? businessStatusMap.get(r.business_status) : STATUS_UNAVAILABLE,
-                                                            iconUrl: r.icon,
+                                                            iconUrl: r.icon || null,
+                                                            vicinity: r.vicinity || null, // almost always an address
+                                                            distance: distance,
+                                                            photos: placesPhotosReducer(r.photos),
+                                                            types: types,
+                                                            rating: r.rating || null,
+                                                            userRatingsTotal: r.user_ratings_total || null,
+                                                            url: results.url || null,
                                                             openNow: r.opening_hours ? r.opening_hours.isOpen() : null,
                                                             popularTimes: await popTimes,
-                                                            vicinity: r.vicinity, // almost always an address
-                                                            photos: r.photos, // [{ height, premade html element, width }]
-                                                            types: typesMap && r.types ? mapGetArray(typesMap, r.types) : [],
-                                                            rating: r.rating,
-                                                            userRatingsTotal: r.user_ratings_total,
-                                                            url: results.url
                                                         };
 
                                                         resolve(await spot);
                                                     } else {
                                                         throw new Error(placesRequestStatusMap ? placesRequestStatusMap.get(status) : SPOT_CONSTANTS_ERROR);
                                                     }
-                                                } catch(error) { 
+                                                } catch (error) {
                                                     dispatch({
                                                         type: FETCH_SPOTS_FAILURE,
                                                         payload: error.message
@@ -200,24 +205,24 @@ export const fetchNearbySpots = (params) => (dispatch) => {
                                             }
                                         );
                                     })
-                                    // add the aggregate ratings to the spot details
-                                    .then(async spot => {
-                                        const data = await getDocumentData("spots", spot.placeId);
-                                        
-                                        var newSpot = {
-                                            ...spot,
-                                            studySpotsRatings: {
-                                                numRatings: data == null ? null : data.numRatings,
-                                                overall: data == null ? null : data.avgOverallRating,
-                                                lighting: data == null ? null : data.avgLightingRating,
-                                                music: data == null ? null : data.avgMusicRating,
-                                                food: data == null ? null : data.avgFoodRating,
-                                                drink: data == null ? null : data.avgDrinkRating,
-                                            }
-                                        };
+                                        // add the aggregate ratings to the spot details
+                                        .then(async spot => {
+                                            const data = await getDocumentData("spots", spot.placeId);
 
-                                        return await newSpot;
-                                    })
+                                            var newSpot = {
+                                                ...spot,
+                                                studySpotsRatings: {
+                                                    numRatings: data == null ? null : data.numRatings,
+                                                    overall: data == null ? null : data.avgOverallRating,
+                                                    lighting: data == null ? null : data.avgLightingRating,
+                                                    music: data == null ? null : data.avgMusicRating,
+                                                    food: data == null ? null : data.avgFoodRating,
+                                                    drink: data == null ? null : data.avgDrinkRating,
+                                                }
+                                            };
+
+                                            return await newSpot;
+                                        });
                                 }))
                                     .then(async spots => {
                                         dispatch({
@@ -226,12 +231,18 @@ export const fetchNearbySpots = (params) => (dispatch) => {
                                         });
                                     })
                             } else {
-                                throw new Error(placesRequestStatusMap ? placesRequestStatusMap.get(status) : SPOT_CONSTANTS_ERROR);
+                                dispatch({
+                                    type: FETCH_SPOTS_FAILURE,
+                                    payload: placesRequestStatusMap ? placesRequestStatusMap.get(status) : SPOT_CONSTANTS_ERROR
+                                });
                             }
                         }
                     );
                 } else {
-                    throw new Error(USER_DENIED_LOCATION);
+                    dispatch({
+                        type: FETCH_SPOTS_FAILURE,
+                        payload: USER_DENIED_LOCATION
+                    });
                 }
             }
         );
@@ -250,74 +261,95 @@ export const fetchNearbySpots = (params) => (dispatch) => {
 // onSuccess(spot): a callback which takes the spot details and dispatches accordingly
 // onFailure(status): a callback which dispatches in case of failure, takes the status of the request
 const fetchAPISpotDetails = (placeId, onSuccess, onFailure) => {
-    // first try getting ratings data
-    getDocumentData("spots", placeId)
-        .then(data => {
-            var studySpotsRatings = {
-                numRatings: data && data.numRatings ? data.numRatings : null,
-                overall: data && data.avgOverallRating ? data.avgOverallRating : null,
-                lighting: data && data.avgLightingRating ? data.avgLightingRating : null,
-                music: data && data.avgMusicRating ? data.avgMusicRating : null,
-                food: data && data.avgFoodRating ? data.avgFoodRating : null,
-                drink: data && data.avgDrinkRating ? data.avgDrinkRating : null,
-            }
+    try {
+        // this will force a browser popup that asks permission to use the user's location
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                var latitude = position.coords.latitude;
+                var longitude = position.coords.longitude;
 
-            var service = new window.google.maps.places.PlacesService(document.createElement('div'));
+                if (latitude && longitude) {
+                    // try getting ratings data
+                    getDocumentData("spots", placeId)
+                        .then(data => {
+                            var studySpotsRatings = {
+                                numRatings: data && data.numRatings ? data.numRatings : null,
+                                overall: data && data.avgOverallRating ? data.avgOverallRating : null,
+                                lighting: data && data.avgLightingRating ? data.avgLightingRating : null,
+                                music: data && data.avgMusicRating ? data.avgMusicRating : null,
+                                food: data && data.avgFoodRating ? data.avgFoodRating : null,
+                                drink: data && data.avgDrinkRating ? data.avgDrinkRating : null,
+                            }
 
-            service.getDetails(
-                {
-                    placeId: placeId,
-                    // return only the fields specified
-                    fields: [
-                        "place_id",
-                        "name",
-                        "business_status",
-                        "formatted_address",
-                        "formatted_phone_number",
-                        "icon",
-                        "types",
-                        "opening_hours",
-                        "photos",
-                        "price_level",
-                        "rating",
-                        "review",
-                        "url"
-                    ]
-                },
+                            // now get the rest of spot details from Places API
+                            var service = new window.google.maps.places.PlacesService(document.createElement('div'));
 
-                async (results, status) => {
-                    if (status == window.google.maps.places.PlacesServiceStatus.OK) {
-                        let popTimes = await popularTimes(results.url);
+                            service.getDetails(
+                                {
+                                    placeId: placeId,
+                                    // return only the fields specified
+                                    fields: [
+                                        "place_id",
+                                        "name",
+                                        "business_status",
+                                        "geometry",
+                                        "formatted_address",
+                                        "formatted_phone_number",
+                                        "icon",
+                                        "types",
+                                        "opening_hours",
+                                        "photos",
+                                        "price_level",
+                                        "rating",
+                                        "review",
+                                        "url"
+                                    ]
+                                },
 
-                        // createMarker(place); // for usage with map
-                        let spotDetails = {
-                            placeId: results.place_id,
-                            name: results.name,
-                            businessStatus: businessStatusMap.get(results.business_status),
-                            formattedAddress: results.formatted_address,
-                            formattedPhoneNumber: results.formatted_phone_number,
-                            iconUrl: results.icon,
-                            types: placesTypesReducer(results.types),
-                            openNow: results.opening_hours.isOpen(),
-                            openHours: placesPeriodsReducer(results.opening_hours.periods),
-                            popularTimes: await popTimes,
-                            photos: placesPhotosReducer(results.photos),
-                            priceLevel: priceLevelMap.get(results.price_level),
-                            rating: results.rating,
-                            reviews: placesReviewsReducer(results.reviews),
-                            studySpotsRatings: studySpotsRatings,
-                        }
+                                async (results, status) => {
+                                    if (status == window.google.maps.places.PlacesServiceStatus.OK) {
+                                        let popTimes = await popularTimes(results.url);
+                                        let distance = euclidDistance(latitude, longitude, results.geometry.location.lat(), results.geometry.location.lng());
+                                        let types = typesMap && results.types ? mapGetArray(typesMap, results.types) : (results.types ? results.types : []);
 
-                        onSuccess(spotDetails);
-                    } else {
-                        onFailure(status);
-                    }
+                                        // createMarker(place); // for usage with map
+                                        let spotDetails = {
+                                            placeId: results.place_id,
+                                            name: results.name,
+                                            businessStatus: businessStatusMap.get(results.business_status),
+                                            distance: distance || null,
+                                            formattedAddress: results.formatted_address,
+                                            formattedPhoneNumber: results.formatted_phone_number,
+                                            iconUrl: results.icon || null,
+                                            types: types,
+                                            openNow: results.opening_hours.isOpen(),
+                                            openHours: placesPeriodsReducer(results.opening_hours.periods),
+                                            popularTimes: await popTimes,
+                                            photos: placesPhotosReducer(results.photos),
+                                            priceLevel: priceLevelMap.get(results.price_level),
+                                            rating: results.rating || null,
+                                            reviews: placesReviewsReducer(results.reviews),
+                                            studySpotsRatings: studySpotsRatings,
+                                        }
+
+                                        onSuccess(spotDetails);
+                                    } else {
+                                        onFailure(status);
+                                    }
+                                }
+                            );
+                        })
+                        .catch(error => {
+                            onFailure(error.message);
+                        });
+                } else {
+                    onFailure(USER_DENIED_LOCATION);
                 }
-            );
-        })
-        .catch(error => {
-            onFailure(error.message);
-        });
+            }
+        );
+    } catch (error) {
+        onFailure(error.message);
+    }
 }
 
 
@@ -599,5 +631,5 @@ export const submitRating = (placeId, rating) => async (dispatch) => {
                     errorMsg: error.message
                 }
             });
-        });      
+        });
 }
