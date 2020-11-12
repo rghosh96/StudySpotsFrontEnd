@@ -139,6 +139,14 @@ Button {
   }
 }
 
+.pop-times-chart-wrapper {
+  canvas {
+    width:400px !important;
+    height:200px !important;
+    font-size: 36px !important;
+  }
+}
+
 @include tiny {
   .container, .signUpContainer {
     padding: 1rem;

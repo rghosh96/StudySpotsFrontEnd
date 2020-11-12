@@ -5,12 +5,14 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { 
     fetchNearbySpots, fetchSpotDetails, fetchSpotsConstants,
-    saveSpot, removeSavedSpot, fetchSavedSpotsDetails
+    saveSpot, removeSavedSpot, fetchSavedSpotsDetails,
+    submitRating
 } from '../../redux/actions/spotsActions';
+import PopTimesChart from '../../components/pages/PopTimesChart';
 
 class TestSpotsActions extends React.Component {
     constructor() {
-        super()
+        super();
         this.state = {
             l: '',
             pl: '',
@@ -19,6 +21,11 @@ class TestSpotsActions extends React.Component {
             k: '',
             // some examples: ChIJa00m55kayYcRnz5WcvjDiMI, ChIJnQKsxvQPyYcRxqw3vavZ3jY
             placeId: '',
+            overall: '',
+            lighting: '',
+            music: '',
+            food: '',
+            drink: '',
         }
     }
 
@@ -49,17 +56,36 @@ class TestSpotsActions extends React.Component {
             this.props.fetchSavedSpotsDetails(this.props.userData.savedSpots);
         };
 
-        console.log(this.state)
+
+        var popularTimes = this.props.activeSpot.popularTimes;
+        var popTimesCharts = null;
+        if (popularTimes && popularTimes.status === "ok") {
+            popTimesCharts = popularTimes.week.map(item => {
+                return <div><PopTimesChart day={item.day} hours={item.hours}/></div>
+            })
+        }
 
         return (
           <div>
             <Header />
             <div style={{position: "absolute", top: "200px"}}>
-                <button onClick={fetchSpotsConstants}>fetch spots constants</button><br />
+                <input type="text" placeholder="placeId" onChange={e => this.setState({placeId: e.target.value})} /> <br/>
+                <input type="text" placeholder="overall rating" onChange={e => this.setState({overall: e.target.value})} /> <br/>
+                <input type="text" placeholder="lighting rating" onChange={e => this.setState({lighting: e.target.value})} /> <br/>
+                <input type="text" placeholder="music rating" onChange={e => this.setState({music: e.target.value})} /> <br/>
+                <input type="text" placeholder="food rating" onChange={e => this.setState({food: e.target.value})} /> <br/>
+                <input type="text" placeholder="drink rating" onChange={e => this.setState({drink: e.target.value})} /> <br/>
+                <br/>
+                <div>submittingRating...{this.props.submittingRating.toString()}</div>
                 <div>savingSpot...{this.props.savingSpot.toString()}</div>
                 <div>removingSpot...{this.props.removingSpot.toString()}</div>
-                <input type="text" placeholder="placeId" onChange={e => this.setState({placeId: e.target.value})} />
-                <br/>
+                <button onClick={() => this.props.submitRating(this.state.placeId, {
+                    overall: this.state.overall,
+                    lighting: this.state.lighting,
+                    music: this.state.music,
+                    food: this.state.food,
+                    drink: this.state.drink,
+                })}>submit rating</button><br/>
                 <button onClick={() => this.props.saveSpot(this.state.placeId)}>save spot</button><br/>
                 <button onClick={() => this.props.removeSavedSpot(this.state.placeId)}>remove spot</button><br/>
                 <button onClick={fetchSavedSpotsDetails}>fetched saved spots</button><br/>
@@ -83,7 +109,7 @@ class TestSpotsActions extends React.Component {
                 <select onChange={(e) => {this.setState({l: e.target.value})}}>
                     <option value="" selected disabled hidden>Choose...</option>
                     {this.props.languageConstants.map(l => {
-                        return <option value={l.api}>{l.display}</option>
+                        return <option key={l.api} value={l.api}>{l.display}</option>
                     })}
                 </select>
                 <br/>
@@ -92,7 +118,7 @@ class TestSpotsActions extends React.Component {
                 <select onChange={(e) => {this.setState({pl: e.target.value})}}>
                     <option value="" selected disabled hidden>Choose...</option>
                     {this.props.priceLevelConstants.map(pl => {
-                        return <option value={pl.api}>{pl.display}</option>
+                        return <option key={pl.api} value={pl.api}>{pl.display}</option>
                     })}
                 </select>
                 <br/>
@@ -101,7 +127,7 @@ class TestSpotsActions extends React.Component {
                 <select onChange={(e) => {this.setState({rb: e.target.value})}}>
                     <option value="" selected disabled hidden>Choose...</option>
                     {this.props.rankByConstants.map(rb => {
-                        return <option value={rb.api}>{rb.display}</option>
+                        return <option key={rb.api} value={rb.api}>{rb.display}</option>
                     })}
                 </select>
                 <br/>
@@ -110,13 +136,14 @@ class TestSpotsActions extends React.Component {
                 <select onChange={(e) => {this.setState({t: [e.target.value]})}}>
                     <option value="" selected disabled hidden>Choose...</option>
                     {this.props.typeConstants.map(t => {
-                        return <option value={t.api}>{t.display}</option>
+                        return <option key={t.api} value={t.api}>{t.display}</option>
                     })}
                 </select>
                 <br/>
 
                 <input type="text" placeholder="placeId" onChange={e => {this.setState({placeId: e.target.value})}}/>
                 <button onClick={fetchSpotDetails}>fetch active spot</button>
+                {popTimesCharts}
                 <div>activeSpot...<div style={{maxHeight: "1000px", maxWidth: "1200px", overflow: "auto"}}><pre>{JSON.stringify(this.props.activeSpot, null, 2)}</pre></div></div>
                 <br/>
                 
@@ -142,6 +169,7 @@ const mapStateToProps = state => ({
     rankByConstants: state.spots.rankByConstants,
     typeConstants: state.spots.typeConstants,
     
+    submittingRating: state.spots.submittingRating,
     savingSpot: state.spots.savingSpot,
     removingSpot: state.spots.removingSpot,
     savedSpots: state.spots.savedSpots,
@@ -157,10 +185,12 @@ const mapDispatchToProps = {
     saveSpot,
     removeSavedSpot,
     fetchSavedSpotsDetails: fetchSavedSpotsDetails,
+    submitRating,
 }
 
 // tell this component what it will be getting from redux. these members can be accessed using this.props
 TestSpotsActions.propTypes = {
+    submittingRating: PropTypes.bool.isRequired,
     savingSpot: PropTypes.bool.isRequired,
     removingSpot: PropTypes.bool.isRequired,
     fetchingSpots: PropTypes.bool.isRequired,
@@ -179,8 +209,9 @@ TestSpotsActions.propTypes = {
     fetchSpotDetails: PropTypes.func.isRequired,
     
     saveSpot: PropTypes.func.isRequired,
-    removeSpot: PropTypes.func.isRequired,
+    removeSavedSpot: PropTypes.func.isRequired,
     fetchSavedSpotsDetails: PropTypes.func.isRequired,
+    submitRating: PropTypes.func.isRequired,
     
     userData: PropTypes.object.isRequired
 };
