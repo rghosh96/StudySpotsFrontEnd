@@ -65,10 +65,8 @@ class Spotlight extends React.Component {
             return <LoadSpinner />
         }
         else {
-            console.log(this.props.errorMsg)
             return (
                 <div>
-                    {console.log(this.props.spots)}
                     <Header />
                     <h1>Spotlight</h1>
 
@@ -104,7 +102,7 @@ class Spotlight extends React.Component {
                                 <Dropdown>
                                     <Dropdown.Toggle variant="success" id="dropdown-basic">
                                         Select Type
-                        </Dropdown.Toggle>
+                                    </Dropdown.Toggle>
 
                                     <Dropdown.Menu>
                                         {this.props.typeConstants.map(t => <Dropdown.Item key={t.api} onSelect={(e) => { this.setState({ t: t.api }) }}>{t.display}</Dropdown.Item>)}
@@ -122,7 +120,7 @@ class Spotlight extends React.Component {
                                 <Dropdown>
                                     <Dropdown.Toggle variant="success" id="dropdown-basic">
                                         Select Importance
-                        </Dropdown.Toggle>
+                                    </Dropdown.Toggle>
 
                                     <Dropdown.Menu>
                                         {this.props.rankByConstants.map(rb => <Dropdown.Item key={rb.api} onSelect={(e) => { this.setState({ rb: rb.api }) }}>{rb.display}</Dropdown.Item>)}
