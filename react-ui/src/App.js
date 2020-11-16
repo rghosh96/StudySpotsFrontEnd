@@ -10,6 +10,8 @@ import Settings from './components/pages/Settings.js'
 import Spotlight from './components/pages/Spotlight.js'
 import SignIn from './components/pages/SignIn.js'
 import SignUp from './components/pages/SignUp.js'
+import SpotPage from './components/pages/SpotPage.js';
+
 
 import { fetchSpotsConstants } from './redux/actions/spotsActions';
 
@@ -18,6 +20,7 @@ import { fetchSpotsConstants } from './redux/actions/spotsActions';
 import TestAccountActions from './components/redux-testing/TestAccountActions';
 import TestSpotsActions from './components/redux-testing/TestSpotsActions';
 import TestSignOut from './components/redux-testing/TestSignOut';
+import { fetchSpotsConstants } from './redux/actions/spotsActions';
 
 function App() {
   const dispatch = useDispatch();
@@ -37,6 +40,7 @@ function App() {
         <Route exact path='/settings' component={Settings} />
         <Route exact path='/reviews' component={Reviews} />
         <Route exact path='/myspots' component={MySpots} />
+        <Route exact path='/spotpage' component={SpotPage} />
     
         <Route exact path='/redux/testaccountactions' component={TestAccountActions} />
         <Route exact path='/redux/testspotsactions' component={TestSpotsActions} />

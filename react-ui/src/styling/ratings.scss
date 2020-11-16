@@ -1,0 +1,37 @@
+@import "~bootstrap/scss/bootstrap";
+@import 'colors';
+@import 'fonts';
+@import 'config';
+
+
+// to define common properties, and then simply call function
+@mixin easeOut {
+  transition: all .5s ease-out !important;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+input[type="radio"] {
+    display: none;
+}
+
+.star {
+    padding: 2px;
+    cursor: pointer;
+    transition: color 200ms;
+    @include easeOut();
+    &:hover {
+      transform: scale(1.1);
+    }
+}
+
+.ratings {
+  display: flex;
+  flex-direction: row;
+}
+
+
+
+

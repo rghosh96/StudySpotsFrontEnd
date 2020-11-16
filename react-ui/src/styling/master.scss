@@ -72,11 +72,44 @@ body, html, #root, .App {
 
 .container {
   display: flex;
+  flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
+  padding: 50px !important;
+  min-width: 100%;
+}
+
+.info {
+  display: flex;
   width: 100%;
+  padding: 50px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.infoSection {
+  display: flex;
   flex-direction: column;
-  margin: 50px!important;
+  align-items: center;
+}
+
+img {
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+}
+
+.more-photos {
+  border-radius: 30%;
+  margin: 30px !important;
+}
+
+.load {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
 
 .signUpContainer {
@@ -100,12 +133,48 @@ h1 {
   @include header();
 }
 
+h2 {
+  color: $secondary;
+  font-size: 2rem;
+  @include header();
+}
+
+#uncontrolled-tab-example-tab-reviews, #uncontrolled-tab-example-tab-features,
+#uncontrolled-tab-example-tab-photos {
+  color: $grey !important;
+  @include header();
+  &:hover {
+    color:$white !important;
+    background-color: $primary !important;
+  }
+  &.active {
+    color: $primary !important;
+    letter-spacing: 2px !important;
+  }
+}
+
+.nav.nav-tabs {
+  padding-left: 50px !important;
+  padding-right: 50px !important;
+}
+
+.tab-content {
+  margin: 50px 100px 50px 100px;
+}
+
 p {
   color: $grey;
 }
 
 .secondary {
   color: $secondary !important;
+}
+
+.center {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
 }
 
 label {

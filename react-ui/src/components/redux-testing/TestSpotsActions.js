@@ -56,6 +56,7 @@ class TestSpotsActions extends React.Component {
             this.props.fetchSavedSpotsDetails(this.props.userData.savedSpots);
         };
 
+
         var popularTimes = this.props.activeSpot.popularTimes;
         var popTimesCharts = null;
         if (popularTimes && popularTimes.status === "ok") {
