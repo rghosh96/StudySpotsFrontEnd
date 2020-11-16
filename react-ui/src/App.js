@@ -13,6 +13,9 @@ import SignUp from './components/pages/SignUp.js'
 import SpotPage from './components/pages/SpotPage.js';
 
 
+import { fetchSpotsConstants } from './redux/actions/spotsActions';
+
+
 // redux testing components
 import TestAccountActions from './components/redux-testing/TestAccountActions';
 import TestSpotsActions from './components/redux-testing/TestSpotsActions';
@@ -24,8 +27,7 @@ function App() {
 
   useEffect(() => {
     dispatch(checkAuth());
-
-    dispatch(fetchSpotsConstants())
+    dispatch(fetchSpotsConstants());
   });
 
   return (
