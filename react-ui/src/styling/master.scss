@@ -18,12 +18,65 @@ body, html, #root, .App {
   width: 100%;
 }
 
+.title {
+  color: $primary;
+  font-size: 1.7rem!important;
+  font-weight: bold!important;
+  text-align: left;
+  padding-right: 15px;
+
+}
+
+.times {
+  padding-left: 50px;
+}
+.popular {
+  color: $primary;
+  font-size: 1.7rem!important;
+  font-weight: bold!important;
+  padding-left: 15px;
+  width: 70px!important;
+  height: 50px;
+}
+
+.busy {
+  padding-left: 15px;
+  padding-top: 30px;
+  color: gray;
+}
+
+.open {
+  background-color: #687E63;
+  color: white;
+  text-align: center;
+  border-radius: 10px;
+  padding: 8px;
+}
+
+.image {
+  width: 100px!important;
+  height: 100px!important;
+  padding-top: 15px;
+}
+
+.spotlight {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  margin: 50px!important;
+  border: 1.5px solid #687E63;
+  border-radius: 25px;
+  padding: 10px;
+}
+
 .container {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 90vh;
+  justify-content: flex-start;
+  align-items: flex-start;
   width: 100%;
+  flex-direction: column;
+  margin: 50px!important;
 }
 
 .signUpContainer {

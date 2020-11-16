@@ -118,7 +118,6 @@ export const fetchSpotsConstants = () => (dispatch) => {
 */
 export const fetchNearbySpots = (params) => (dispatch) => {
     dispatch({ type: FETCH_SPOTS_REQUEST });
-
     try {
         // this will force a browser popup that asks permission to use the user's location
         navigator.geolocation.getCurrentPosition(

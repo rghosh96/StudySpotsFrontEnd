@@ -11,6 +11,9 @@ import Spotlight from './components/pages/Spotlight.js'
 import SignIn from './components/pages/SignIn.js'
 import SignUp from './components/pages/SignUp.js'
 
+import { fetchSpotsConstants } from './redux/actions/spotsActions';
+
+
 // redux testing components
 import TestAccountActions from './components/redux-testing/TestAccountActions';
 import TestSpotsActions from './components/redux-testing/TestSpotsActions';
@@ -21,6 +24,7 @@ function App() {
 
   useEffect(() => {
     dispatch(checkAuth());
+    dispatch(fetchSpotsConstants());
   });
 
   return (
