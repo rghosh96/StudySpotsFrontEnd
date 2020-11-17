@@ -8,7 +8,6 @@ import { saveSpot, fetchNearbySpots, fetchSpotDetails, fetchSpotsConstants } fro
 import Header from '../nav/Header'
 import { Redirect } from 'react-router-dom';
 import { Button } from 'react-bootstrap'
-import PopTimesChart from './PopTimesChart';
 
 class Spotlight extends React.Component {
     state = {
@@ -45,7 +44,7 @@ class Spotlight extends React.Component {
     }
 
     onSubmit = () => {
-        return <Redirect to="/myspots" />
+        return <Redirect to="/spotpage" />
     }
     render() {
 
@@ -118,6 +117,7 @@ class Spotlight extends React.Component {
                     </div>
 
                     {this.props.spots ? this.props.spots.map(spot => {
+                        console.log(spot)
                         // let chart;
                         // if (spot.popularTimes.week) {
                         //     let date = new Date();
@@ -136,8 +136,8 @@ class Spotlight extends React.Component {
                         return (
                             <div className="spotlight" onClick={this.onSubmit}>
 
-                                <span className="image">
-                                    <img src={spot.iconUrl ? spot.iconUrl : "NA"} />
+                                <span >
+                                    <img className="image" src={spot.photos[0].url ? spot.photos[0].url : "NA"} />
                                 </span>
 
                                 <span>
@@ -150,24 +150,24 @@ class Spotlight extends React.Component {
                                             {spot.openNow ? "Open" : "Closed"}
                                         </span>
                                     </div>
-                                    <div>
-                                        {spot.distance}
+                                    <div className="gray">
+                                        {spot.distance} miles away
                                     </div>
 
-                                    <div>
-                                        Type goes here, undefined
+                                    <div className="gray">
+                                        {spot.types[0]}
                                     </div>
                                 </span>
 
-                                <span>
-                                    <div className="popular">
+                                {/* <span> */}
+                                    {/* <div className="popular">
                                         popular times
-                                    </div>
+                                    </div> */}
 
                                     {/* <div className="busy">
                                        
                                     </div> */}
-                                </span>
+                                {/* </span> */}
 
                                 {/* <span className="times">
                                     {/* code for chart */}

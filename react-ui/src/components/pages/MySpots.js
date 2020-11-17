@@ -1,11 +1,12 @@
 import React from 'react';
 import '../../styling/master.scss'
 import LoadSpinner from './LoadSpinner'
+import { Button } from 'react-bootstrap'
 
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Dropdown, Form } from 'react-bootstrap';
-import { fetchNearbySpots, fetchSpotDetails, fetchSpotsConstants } from '../../redux/actions/spotsActions';
+import { fetchSavedSpotsDetails, fetchSpotDetails, fetchSpotsConstants, removeSavedSpot } from '../../redux/actions/spotsActions';
 import Header from '../nav/Header'
 
 class MySpots extends React.Component {
@@ -42,17 +43,11 @@ class MySpots extends React.Component {
         },1000)
     }
     render() {
-        const fetchNearbySpots = () => {
-            this.props.fetchNearbySpots({
-                language: this.state.l,
-                priceLevel: this.state.pl,
-                rankBy: this.state.rb,
-                type: this.state.t,
-                keyword: this.state.k
+        const fetchSavedSpotsDetails = () => {
+            this.props.fetchSavedSpotsDetails({
+                //placeId = this.state.placeId,
             });
         };
-
-        
 
         if (this.state.loading) {
             return <LoadSpinner/>
@@ -60,9 +55,42 @@ class MySpots extends React.Component {
             return (
                 <div>
                     <Header />
+                    <h1>my spots</h1>
+                    {this.props.spots ? this.props.spots.map(spot => {
 
-                    <h1>myspots</h1>
-                   
+                        return (
+                            <div className="spotlight">
+
+                                <span >
+                                    <img className="image" src={spot.photos[0].url ? spot.photos[0].url : "NA"} />
+                                </span>
+
+                                <span>
+                                    <div>
+                                        <span className="title" >
+                                            {spot.name}
+                                        </span>
+
+                                        <span className="open">
+                                            {spot.openNow ? "Open" : "Closed"}
+                                        </span>
+                                    </div>
+                                    <div className="gray">
+                                        {spot.distance} miles away
+                                    </div>
+
+                                    <div className="gray">
+                                        {spot.types[0]}
+                                    </div>
+                                </span>
+
+                                <span>
+                                    <Button onClick={removeSavedSpot}>Remove</Button>
+                                </span>
+                            </div>
+                        )
+                    }) : null}
+
                 </div>
             )    
         } 
@@ -91,7 +119,7 @@ const mapStateToProps = state => ({
 
 
 const mapDispatchToProps = {
-    fetchNearbySpots,
+    fetchSavedSpotsDetails,
     fetchSpotsConstants,
     fetchSpotDetails
 }
