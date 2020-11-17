@@ -10,7 +10,6 @@ import Header from '../nav/Header'
 
 class MySpots extends React.Component {
     state = {
-        selection: 'filter0',
         loading: true
     }
 
@@ -62,71 +61,8 @@ class MySpots extends React.Component {
                 <div>
                     <Header />
 
-                    <div className="filterArea">
-                    {/* <Form.Control onChange={this.handleChange} id="selection" as="select" >
-                    <option value="filter0">select an option...</option>
-                    <option value="filter1">Price</option>
-                    <option value="filter2">Location Type</option>
-                    <option value="filter3">Importance</option>
-                    </Form.Control> */}
-            
-                
-                    {/* {this.state.selection == 'filter1' ? 
-                    <div>
-                    <Dropdown>
-                        <Dropdown.Toggle variant="success" id="dropdown-basic">
-                        Select Price
-                        </Dropdown.Toggle>
-
-                        <Dropdown.Menu>
-                        {this.props.priceLevelConstants.map(pl => <Dropdown.Item key={pl.api}  onSelect={(e) => {this.setState({pl: pl.api})}}>{pl.display}</Dropdown.Item>) }
-                        <Dropdown.Divider />
-                        <Dropdown.Item  onSelect={(e) => {this.setState({t: '', pl: '', rb: ''})}}>Reset Filters</Dropdown.Item>       
-                        </Dropdown.Menu>
-                    </Dropdown>
-                    </div>
-                                    : null
-                    }
-
-
-                    {this.state.selection == 'filter2' ? 
-                    <div>
-                    <Dropdown>
-                        <Dropdown.Toggle variant="success" id="dropdown-basic">
-                        Select Type
-                        </Dropdown.Toggle>
-
-                        <Dropdown.Menu>
-                        {this.props.typeConstants.map(t => <Dropdown.Item key={t.api}  onSelect={(e) => {this.setState({t: t.api})}}>{t.display}</Dropdown.Item>) }    
-                        <Dropdown.Divider />
-                        <Dropdown.Item  onSelect={(e) => {this.setState({t: '', pl: '', rb: ''})}}>Reset Filters</Dropdown.Item>
-                        </Dropdown.Menu>
-                    </Dropdown>
-                    </div>
-                                    : null
-                    }
-
-
-                    {this.state.selection == 'filter3' ? 
-                    <div>
-                    <Dropdown>
-                        <Dropdown.Toggle variant="success" id="dropdown-basic">
-                        Select Importance
-                        </Dropdown.Toggle>
-
-                        <Dropdown.Menu>
-                        {this.props.rankByConstants.map(rb => <Dropdown.Item key={rb.api}  onSelect={(e) => {this.setState({rb: rb.api})}}>{rb.display}</Dropdown.Item>) }
-                        <Dropdown.Divider />
-                        <Dropdown.Item  onSelect={(e) => {this.setState({t: '', pl: '', rb: ''})}}>Reset Filters</Dropdown.Item>       
-                        </Dropdown.Menu>
-                    </Dropdown>
-                    </div>
-                                    : null
-                    } */}
-
-
                     <h1>myspots</h1>
-                    </div>
+                   
                 </div>
             )    
         } 
