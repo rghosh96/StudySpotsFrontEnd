@@ -92,15 +92,23 @@ body, html, #root, .App {
   align-items: center;
 }
 
-img {
+.main-image {
   width: 300px;
   height: 300px;
   border-radius: 50%;
 }
 
 .more-photos {
-  border-radius: 30%;
+  height: 200px;
+  border-radius: 10%;
   margin: 30px !important;
+}
+
+.photo-wrap {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .load {
@@ -137,7 +145,13 @@ h2 {
   @include header();
 }
 
-#uncontrolled-tab-example-tab-reviews, #uncontrolled-tab-example-tab-features,
+h3 {
+  color: $secondary;
+  font-size: 15px !important;
+  @include header();
+}
+
+#uncontrolled-tab-example-tab-reviews, #uncontrolled-tab-example-tab-comments,
 #uncontrolled-tab-example-tab-photos {
   color: $grey !important;
   @include header();
