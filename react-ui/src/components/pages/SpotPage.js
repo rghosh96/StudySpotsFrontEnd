@@ -9,6 +9,7 @@ import { fetchSpotDetails } from "../../redux/actions/spotsActions";
 import { Tab, Tabs } from 'react-bootstrap'
 import { faStore, faHamburger, faSmileBeam, faMusic, faAdjust } from '@fortawesome/free-solid-svg-icons'
 import Ratings from './Ratings.js'
+import PopTimesChart from "./PopTimesChart"
 
 
 export default function SpotPage() {
@@ -24,6 +25,16 @@ export default function SpotPage() {
     const fetchSpots = () => {
         dispatch(fetchSpotDetails('ChIJa00m55kayYcRnz5WcvjDiMI'));
     }
+    var popTimesToday = null;
+    if (spot.popularTimes) {
+      console.log("IN IF")
+      console.log(spot.popularTimes)
+      let date = new Date();
+      let day = date.getDay();
+      let busy;
+      let currentHour = date.getHours();
+      popTimesToday= spot.popularTimes.week[day]
+    }
     
   useEffect(() => {
     setTimeout(() => { 
@@ -33,7 +44,7 @@ export default function SpotPage() {
     
   }, []);
 
-  if (loading) {
+  if (!spot.popularTimes) {
     return <LoadSpinner />
   } else {
     return (
@@ -56,7 +67,9 @@ export default function SpotPage() {
                     </div>
                     <div class= "infoSection">
                       <h2>popular times</h2>
-                      <p>pop times will go here</p>
+                      <p>currently:</p>
+                     {spot.popularTimes ? <PopTimesChart day={popTimesToday.day} hours={popTimesToday.hours} />
+                     : null}
                     </div>
                 </div>
                 
