@@ -26,8 +26,6 @@ export default function SpotPage() {
     }
     var popTimesToday = null;
     if (spot.popularTimes) {
-      console.log("IN IF")
-      console.log(spot.popularTimes)
       let date = new Date();
       let day = date.getDay();
       popTimesToday= spot.popularTimes.week[day]
@@ -40,18 +38,20 @@ export default function SpotPage() {
     
   }, []);
 
+  // changed to render page when popular times loads, since it takes the longest
   if (!spot.popularTimes) {
     return <LoadSpinner />
   } else {
     return (
         <div>
             <Header />
+            {console.log("THIS IS SPOT INFO")}
             {console.log(spot)}
             <div class="container">
                 <h1>{spot.name}</h1>
                 <p>{spot.formattedAddress}</p>
                 <div class = "info">
-                    {spot.photos ? <img src={spot.photos[0].url} /> : null }
+                    {spot.photos ? <img class="main-image" src={spot.photos[0].url} /> : null }
                     <div class= "infoSection">
                       <h2>hours</h2>
                       { spot.openHours && spot.openHours.map(hour => {
@@ -108,20 +108,32 @@ export default function SpotPage() {
               </div>
 
             <Tabs defaultActiveKey="reviews" id="uncontrolled-tab-example">
-                  <Tab eventKey="reviews" title="Reviews">
-                    <p>reviews</p>
+                  <Tab eventKey="reviews" title="Google Reviews">
+                    { spot.reviews && spot.reviews.map(review => {
+                        console.log(review)
+                          return (
+                            <div>
+                              <h3>{review.author}</h3>
+                              <p>{review.text}</p>
+                              <p>rating: {review.rating}</p>
+                              <hr/>
+                            </div>
+                            
+                          )
+                      })}
                   </Tab>
-                  <Tab eventKey="features" title="Features">
-                  <p>features</p>
+                  <Tab eventKey="comments" title="Comments">
+                  <p>comments</p>
                   </Tab>
-                  <Tab eventKey="photos" title="Photos">
-                  <p>photos</p>
+                  <Tab eventKey="photos" title="More Photos">
+                  <div class="photo-wrap"> 
                   { spot.photos && spot.photos.map(photo => {
                         console.log(photo)
                           return (
                             <img class="more-photos" src={photo.url} />
                           )
                       })}
+                      </div>
                   </Tab>
                 </Tabs>
         </div>
