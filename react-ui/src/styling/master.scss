@@ -59,14 +59,41 @@ body, html, #root, .App {
 
 .spotlight {
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  width: 100%;
-  margin: 50px!important;
-  border: 1.5px solid #687E63;
-  border-radius: 25px;
-  padding: 10px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+    .keywordarea {
+      width: 30%;
+    }
+
+    .filterarea {
+      display: flex;
+      margin: 15px;
+    }
+
+    .searcharea {
+      margin-bottom: 50px;
+    }
+
+    .filterbtn {
+      margin: 10px;
+    }
+
+    .spotcard {
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      width: 50%;
+      margin: 50px!important;
+      border: 1.5px solid #687E63;
+      border-radius: 25px;
+      padding: 10px;
+      margin: 15px !important;
+    }
+
 }
+
 
 .container {
   display: flex;
