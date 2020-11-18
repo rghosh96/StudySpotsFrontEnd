@@ -13,7 +13,6 @@ import PopTimesChart from "./PopTimesChart"
 
 
 export default function SpotPage() {
-  const [loading, setLoading] = useState(true);
   const [mRating, setMRating] = useState(3)
   const [sRating, setSRating] = useState(4)
   const [lRating, setLRating] = useState(2)
@@ -31,14 +30,11 @@ export default function SpotPage() {
       console.log(spot.popularTimes)
       let date = new Date();
       let day = date.getDay();
-      let busy;
-      let currentHour = date.getHours();
       popTimesToday= spot.popularTimes.week[day]
     }
     
   useEffect(() => {
     setTimeout(() => { 
-        setLoading(false)
         fetchSpots();
     },1000)
     
