@@ -39,7 +39,8 @@ import {
     FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE,
     FETCH_SPOT_DETAILS,
     FETCH_SAVED_SPOTS_DETAILS,
-    SUBMIT_RATING, CLEAR_ACTIVE_SPOT
+    SUBMIT_RATING, CLEAR_ACTIVE_SPOT,
+    CREATE_COMMENT, DELETE_COMMENT, UPDATE_COMMENT, FETCH_COMMENTS_SUCCESS, FETCH_COMMENTS_FAILURE, FETCH_COMMENTS_REQUEST
 } from '../actions/types';
 import {
     SUCCESS, SPOT_CONSTANTS_ERROR, USER_DENIED_LOCATION,
@@ -52,7 +53,7 @@ import {
 import { euclidDistance } from '../../helpers/distanceCalculator';
 import popularTimes from '../../services/popularTimes';
 import {
-    getUserId, setDocumentData, getDocumentData, getNestedDocumentData, setNestedDocumentData, appendToDocArray, removeFromDocArray
+    getUserId, setDocumentData, getDocumentData, getNestedDocumentData, setNestedDocumentData, appendToDocArray, removeFromDocArray, removeDocFromNestedDocArray, addAmbiguousDoc, getNestedCollectionData
 } from '../../services/firebaseService';
 
 
@@ -118,6 +119,7 @@ export const fetchSpotsConstants = () => (dispatch) => {
 */
 export const fetchNearbySpots = (params) => (dispatch) => {
     dispatch({ type: FETCH_SPOTS_REQUEST });
+
     try {
         // this will force a browser popup that asks permission to use the user's location
         navigator.geolocation.getCurrentPosition(
@@ -517,3 +519,187 @@ export const submitRating = (placeId, rating) => async (dispatch) => {
             });
         });
 }
+
+export const createComment = (placeId, text) => async (dispatch) => {
+
+
+    dispatch({
+        type: CREATE_COMMENT,
+        payload: {
+            creatingComment: true
+        }
+    })
+
+    const userId = await getUserId();
+
+    getDocumentData("users", userId)
+        .then(userData => {
+
+            const fname = userData['fName'];
+            const lname = userData['lName'];
+
+            const newComment = {
+                fname: fname,
+                lname: lname,
+                userId: userId,
+                comment: text,
+                timestamp: new Date(),
+                
+            }
+
+            if (isNaN(newComment.comment.length) || newComment.comment.length < 1 || newComment.comment.length > 280) {
+                dispatch({
+                    type: CREATE_COMMENT,
+                    payload: {
+                        creatingComment: false,
+                        errorMsg: INVALID_ARGS
+                    }
+                });
+                return;
+            }
+
+            addAmbiguousDoc("spots", placeId, "comments")
+            .then(commentDoc => {
+                setNestedDocumentData("spots", placeId, "comments", commentDoc.id, newComment)
+            })
+            .catch(error => {
+                dispatch({
+                    type: CREATE_COMMENT,
+                    payload: {
+                        creatingComment: false,
+                        errorMsg: error.message
+                    }
+                })
+            })
+
+        })
+
+
+}
+
+export const deleteComment = (placeId, commentId) => (dispatch) => {
+    
+    dispatch({
+        type: DELETE_COMMENT,
+        payload: {
+            deletingComment: true
+        }
+    })
+
+    removeDocFromNestedDocArray("spots", placeId, "comments", commentId)
+        .catch(error =>  {
+            dispatch({
+                type: DELETE_COMMENT,
+                payload: {
+                    deletingComment: false,
+                    errorMsg: error.message
+                }
+            })
+        })
+            
+    
+}
+
+export const updateComment = (placeId, commentId, newtext) => async (dispatch) => {
+
+    dispatch({
+        type: UPDATE_COMMENT,
+        payload: {
+            updatingComment: true
+        }
+    })
+
+    const userId = await getUserId();
+
+    getDocumentData("users", userId)
+    .then(userData => {
+
+        const fname = userData['fName'];
+        const lname = userData['lName'];
+
+        const newComment = {
+            fname: fname,
+            lname: lname,
+            userId: userId,
+            comment: newtext,
+            timestamp: new Date(),
+            
+        }
+
+        if (isNaN(newComment.comment.length) || newComment.comment.length < 1 || newComment.comment.length > 280) {
+            dispatch({
+                type: CREATE_COMMENT,
+                payload: {
+                    creatingComment: false,
+                    errorMsg: INVALID_ARGS
+                }
+            });
+            return;
+        }
+
+        setNestedDocumentData("spots", placeId, "comments", commentId, newComment)
+        .catch(error => {
+            dispatch({
+                type: UPDATE_COMMENT,
+                payload: {
+                    updatingComment: false,
+                    payload: error.message
+                }
+            })
+        })
+
+    })
+
+    // const newComment = {
+    //     comment: newtext,
+    //     timestamp: new Date(),
+    //     userId: userId
+    // }
+
+    // if (isNaN(newComment.comment.length) || newComment.comment.length < 1 || newComment.comment.length > 280) {
+    //     dispatch({
+    //         type: UPDATE_COMMENT,
+    //         payload: {
+    //             updatingComment: false,
+    //             errorMsg: INVALID_ARGS
+    //         }
+    //     });
+    //     return;
+    // }
+
+}
+
+export const fetchComments = (placeId) => (dispatch) => {
+    dispatch({
+        //request
+        type: FETCH_COMMENTS_REQUEST,
+        payload: {
+            fetchingComments: true
+        }
+    })
+
+    getNestedCollectionData("spots", placeId, "comments")
+        .then(commentDetails => {
+   
+            dispatch({
+                //success
+                type: FETCH_COMMENTS_SUCCESS,
+                commentDetails: commentDetails,
+                fetchingComments: false,
+                commentsFetched: true,
+            }) 
+
+        })
+        .catch(error => {
+            dispatch({
+                
+                type: FETCH_COMMENTS_FAILURE,
+                fetchingComments: false,
+                payload: error.message,
+            })
+        })
+
+}
+
+
+

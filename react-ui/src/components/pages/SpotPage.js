@@ -120,7 +120,6 @@ export default function SpotPage() {
                     <p>rating: {review.rating}</p>
                     <hr />
                   </div>
-
                 )
               })}
             </Tab>

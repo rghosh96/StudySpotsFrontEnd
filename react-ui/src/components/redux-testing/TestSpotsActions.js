@@ -22,6 +22,8 @@ class TestSpotsActions extends React.Component {
             k: '',
             // some examples: ChIJa00m55kayYcRnz5WcvjDiMI, ChIJnQKsxvQPyYcRxqw3vavZ3jY
             placeId: '',
+            comment: '',
+            commentId: '',
             overall: '',
             lighting: '',
             music: '',
@@ -70,6 +72,18 @@ class TestSpotsActions extends React.Component {
           <div>
             <Header />
             <div style={{position: "absolute", top: "200px"}}>
+                <input type="text" placeholder="comment" onChange={e => this.setState({comment: e.target.value})} /> <br/>
+                <input type="text" placeholder="commentId" onChange={e => this.setState({commentId: e.target.value})} /> <br/>
+                
+                placeId: ChIJ84Inr4tryYcRlJKIRCmfw0Y <br/>
+                <button onClick={() => this.props.createComment(this.state.placeId, this.state.comment)}>create comment</button><br />
+                <button onClick={() => this.props.deleteComment(this.state.placeId, this.state.commentId)}>delete comment</button><br />
+                <button onClick={() => this.props.updateComment(this.state.placeId, this.state.commentId, this.state.comment)}>update comments</button><br />
+                <button onClick={() => this.props.fetchComments(this.state.placeId)}>fetch comments</button><br />
+                <div>creating comment...{this.props.creatingComment.toString()}</div>
+
+
+
                 <input type="text" placeholder="placeId" onChange={e => this.setState({placeId: e.target.value})} /> <br/>
                 <input type="text" placeholder="overall rating" onChange={e => this.setState({overall: e.target.value})} /> <br/>
                 <input type="text" placeholder="lighting rating" onChange={e => this.setState({lighting: e.target.value})} /> <br/>
@@ -174,6 +188,13 @@ const mapStateToProps = state => ({
     savingSpot: state.spots.savingSpot,
     removingSpot: state.spots.removingSpot,
     savedSpots: state.spots.savedSpots,
+
+    creatingComment: state.spots.creatingComment,
+    deletingComment: state.spots.deletingComment,
+    updatingComment: state.spots.updatingComment,
+    fetchingComments: state.spots.fetchingComments,
+
+    
     
     userData: state.account.userData
 });
@@ -187,6 +208,11 @@ const mapDispatchToProps = {
     removeSavedSpot,
     fetchSavedSpotsDetails: fetchSavedSpotsDetails,
     submitRating,
+    createComment,
+    deleteComment,
+    updateComment,
+    fetchComments,
+
 }
 
 // tell this component what it will be getting from redux. these members can be accessed using this.props
@@ -213,6 +239,19 @@ TestSpotsActions.propTypes = {
     removeSavedSpot: PropTypes.func.isRequired,
     fetchSavedSpotsDetails: PropTypes.func.isRequired,
     submitRating: PropTypes.func.isRequired,
+
+    createComment: PropTypes.func.isRequired,
+    deleteComment: PropTypes.func.isRequired,
+    updateComment: PropTypes.func.isRequired,
+    fetchComments: PropTypes.func.isRequired,
+
+    creatingComment: PropTypes.bool.isRequired,
+    deletingComment: PropTypes.bool.isRequired,
+    updatingComment: PropTypes.bool.isRequired,
+    fetchingComments: PropTypes.bool.isRequired,
+
+
+
     
     userData: PropTypes.object.isRequired
 };
