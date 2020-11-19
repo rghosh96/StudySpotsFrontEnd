@@ -110,3 +110,39 @@ export const removeFromDocArray = (collection, document, field, value) => {
 
     return safeCall(callback);
 }
+
+export const addAmbiguousDoc = (outerCollec, outerDoc, innerCollec) => {
+    const callback = () => {
+        
+        const firestore = getFirebase().firestore();
+
+        return firestore.collection(outerCollec).doc(outerDoc).collection(innerCollec).add({});
+
+    };
+
+    return safeCall(callback);
+}
+
+export const removeDocFromNestedDocArray = (outerCollec, outerDoc, innerCollec, innerDoc) => {
+    const callback = () => {
+    
+        const firestore = getFirebase().firestore();
+
+        return firestore.collection(outerCollec).doc(outerDoc).collection(innerCollec).doc(innerDoc).delete();
+
+    };
+
+    return safeCall(callback);
+}
+
+export const getNestedCollectionData = (outerCollec, outerDoc, innerCollec) => {
+    const callback = () => {
+        
+        const firestore = getFirebase().firestore();
+
+        return firestore.collection(outerCollec).doc(outerDoc).collection(innerCollec).get();
+
+    };
+
+    return safeCall(callback);
+}
