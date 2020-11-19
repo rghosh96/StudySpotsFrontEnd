@@ -13,6 +13,7 @@ const initialState = {
     updatingComment: false,
     fetchingComments: false,
     commentsFetched: false,
+    commentDetails: null,
 
     savingSpot: false,
     removingSpot: false,
