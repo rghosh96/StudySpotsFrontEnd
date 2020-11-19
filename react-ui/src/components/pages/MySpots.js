@@ -6,7 +6,9 @@ import { Button } from 'react-bootstrap'
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Dropdown, Form } from 'react-bootstrap';
-import { fetchSavedSpotsDetails, fetchSpotDetails, fetchSpotsConstants, removeSavedSpot } from '../../redux/actions/spotsActions';
+import { fetchSavedSpotsDetails, fetchSpotDetails, fetchSpotsConstants } from '../../redux/actions/spotsActions';
+import { removeSavedSpot } from '../../redux/actions/accountActions';
+
 import Header from '../nav/Header'
 
 class MySpots extends React.Component {

@@ -5,9 +5,10 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { 
     fetchNearbySpots, fetchSpotDetails, fetchSpotsConstants,
-    saveSpot, removeSavedSpot, fetchSavedSpotsDetails,
+    fetchSavedSpotsDetails,
     submitRating
 } from '../../redux/actions/spotsActions';
+import {saveSpot, removeSavedSpot} from '../../redux/actions/accountActions';
 import PopTimesChart from '../../components/pages/PopTimesChart';
 
 class TestSpotsActions extends React.Component {

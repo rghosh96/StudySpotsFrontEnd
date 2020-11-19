@@ -25,7 +25,7 @@ export default function Header() {
                         <Nav.Link as={Link} to="/reviews">Reviews</Nav.Link>
                         <Nav.Link as={Link} to="/myspots">My Spots</Nav.Link>
                         <Nav.Link as={Link} to="/settings">Settings</Nav.Link>
-                        <Nav.Link as={Link} to="/spotpage">Spot Page</Nav.Link>
+                        <Nav.Link as={Link} to="/spotpage/ChIJa00m55kayYcRnz5WcvjDiMI">Spot Page</Nav.Link>
                         <NavDropdown title="Redux" id="basic-nav-dropdown">
                             <NavDropdown.Item as={Link} to="/redux/testaccountactions">Account</NavDropdown.Item>
                             <NavDropdown.Item as={Link} to="/redux/testspotsactions">Spots</NavDropdown.Item>

@@ -38,12 +38,12 @@ import {
     FETCH_SPOTS_REQUEST, FETCH_SPOTS_SUCCESS, FETCH_SPOTS_FAILURE,
     FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE,
     FETCH_SPOT_DETAILS,
-    SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS_DETAILS,
-    SUBMIT_RATING
+    FETCH_SAVED_SPOTS_DETAILS,
+    SUBMIT_RATING, CLEAR_ACTIVE_SPOT
 } from '../actions/types';
 import {
     SUCCESS, SPOT_CONSTANTS_ERROR, USER_DENIED_LOCATION,
-    SPOT_SAVED, SPOT_REMOVED, MISSING_PLACE_IDS, STATUS_UNAVAILABLE, INVALID_ARGS
+    MISSING_PLACE_IDS, STATUS_UNAVAILABLE, INVALID_ARGS
 } from '../errorMessages';
 import { getFirebase } from 'react-redux-firebase';
 import {
@@ -145,8 +145,6 @@ export const fetchNearbySpots = (params) => (dispatch) => {
                         ...(params.maxPriceLevel) && {maxPriceLevel: params.maxPriceLevel},
                         ...(params.pageToken) && {pageToken: params.pageToken},
                     };
-
-                    console.log(searchParams)
 
                     // use map from above instead of createElement to integrate Google maps 
                     var service = new window.google.maps.places.PlacesService(document.createElement('div')); // a dummy element
@@ -276,8 +274,8 @@ const fetchAPISpotDetails = (placeId, onSuccess, onFailure) => {
                                             formattedPhoneNumber: results.formatted_phone_number,
                                             iconUrl: results.icon || null,
                                             types: results.types ? placesTypesReducer(results.types) : null,
-                                            openNow: results.opening_hours.isOpen(),
-                                            openHours: placesPeriodsReducer(results.opening_hours.periods),
+                                            openNow: results.opening_hours ? results.opening_hours.open_now : null,
+                                            openHours: results.opening_hours ? placesPeriodsReducer(results.opening_hours.periods) : null,
                                             popularTimes: await popTimes,
                                             photos: results.photos ? placesPhotosReducer(results.photos) : null,
                                             priceLevel: priceLevelMap.get(results.price_level),
@@ -309,11 +307,11 @@ const fetchAPISpotDetails = (placeId, onSuccess, onFailure) => {
 
 // calls fetchAPISpotDetails with the appropriate dispatches
 export const fetchSpotDetails = (placeId) => dispatch => {
-    console.log(placeId)
     dispatch({
         type: FETCH_SPOT_DETAILS,
         payload: {
-            fetchingSpots: true
+            fetchingSpots: true,
+            spotsFetched: false,
         }
     });
 
@@ -339,12 +337,19 @@ export const fetchSpotDetails = (placeId) => dispatch => {
             type: FETCH_SPOT_DETAILS,
             payload: {
                 fetchingSpots: false,
+                spotsFetched: false,
                 errorMsg: errorMsg
             }
         });
     }
 
     fetchAPISpotDetails(placeId, onSuccess, onFailure);
+}
+
+export const clearActiveSpot = () => dispatch => {
+    dispatch({
+        type: CLEAR_ACTIVE_SPOT
+    })
 }
 
 // given an array of placeIds, fetches the data for each placeId that was 
@@ -406,82 +411,6 @@ export const fetchSavedSpotsDetails = (placeIds) => dispatch => {
     placeIds.forEach(id => {
         fetchAPISpotDetails(id, onSuccess, onFailure);
     });
-}
-
-
-// adds placeId to the current user's savedSpots in Firestore, then calls 
-// spotsActions.fetchSpotDetails(), and the details are passed into the reducer
-// to create a new entry in the redux savedSpots Map
-export const saveSpot = (placeId) => (dispatch) => {
-    dispatch({
-        type: SAVE_SPOT,
-        payload: {
-            savingSpot: true
-        }
-    });
-
-    getUserId()
-        .then(userId => {
-            return appendToDocArray("users", userId, "savedSpots", placeId)
-        })
-        .then(docRef => {
-            dispatch({
-                type: SAVE_SPOT,
-                payload: {
-                    errorMsg: SPOT_SAVED,
-                    savingSpot: false
-                }
-            });
-        })
-        .then(() => {
-            // once the placeId has been added to Firestore, get the data for that spot
-            fetchSavedSpotsDetails([placeId])(dispatch);
-        })
-        .catch(error => {
-            dispatch({
-                type: SAVE_SPOT,
-                payload: {
-                    errorMsg: error.message,
-                    savingSpot: false
-                }
-            });
-        });
-}
-
-
-// removes the placeId from the user's Firestore array of saved spots, then 
-// dispatches to remove the place data from redux store
-export const removeSavedSpot = (placeId) => (dispatch) => {
-    dispatch({
-        type: REMOVE_SAVED_SPOT,
-        payload: {
-            removingSpot: true
-        }
-    });
-
-    getUserId()
-        .then(userId => {
-            return removeFromDocArray("users", userId, "savedSpots", placeId);
-        })
-        .then(() => {
-            dispatch({
-                type: REMOVE_SAVED_SPOT,
-                payload: {
-                    errorMsg: SPOT_REMOVED,
-                    removingSpot: false,
-                    placeId: placeId
-                }
-            });
-        })
-        .catch(error => {
-            dispatch({
-                type: REMOVE_SAVED_SPOT,
-                payload: {
-                    errorMsg: error.message,
-                    removingSpot: false
-                }
-            });
-        });
 }
 
 /* rating = {

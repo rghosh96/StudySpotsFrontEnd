@@ -6,7 +6,7 @@ import React from 'react';
 import { Bar, Chart } from 'react-chartjs-2';
 import '../../styling/master.scss';
 
-Chart.defaults.global.defaultFontSize = 36;
+Chart.defaults.global.defaultFontSize = 15;
 
 
 export default function PopTimesChart(props) {
@@ -81,12 +81,16 @@ export default function PopTimesChart(props) {
             // hide gride lines
             xAxes: [{
                 gridLines: {
+                    display: false,
+                    drawBorder: false,
                     color: "rgba(0, 0, 0, 0)",
                 }
             }],
             yAxes: [{
                 display: false, // hide y axis numbers
                 gridLines: {
+                    display: false,
+                    drawBorder: false,
                     color: "rgba(0, 0, 0, 0)",
                 }
             }]
@@ -102,36 +106,3 @@ export default function PopTimesChart(props) {
         </div>
     );
 }
-
-// export default function PopTimesChart(props) {
-//     const options = {
-//         title: {
-//             text: "Basic Column Chart"
-//         },
-//         data: [
-//             {
-//                 // Change type to "doughnut", "line", "splineArea", etc.
-//                 type: "column",
-//                 dataPoints:
-
-//                     [
-//                         { label: "Apple", y: 10 },
-//                         { label: "Orange", y: 15 },
-//                         { label: "Banana", y: 25 },
-//                         { label: "Mango", y: 30 },
-//                         { label: "Grape", y: 28 }
-//                     ]
-//             }
-//         ]
-//     }
-
-//     return (
-//         <div>
-//             <CanvasJSChart options={options}
-//             /* onRef={ref => this.chart = ref} */
-//             />
-//             {/*You can get reference to the chart instance as shown above using onRef. This allows you to access all chart properties and methods*/}
-//         </div>
-//     );
-
-// }

@@ -39,7 +39,7 @@ const process_html = async html => {
     }
 
     const data = { status: 'ok' };
-    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
     data.week = Array.from(Array(7).keys()).map(index => {
         let hours = [];

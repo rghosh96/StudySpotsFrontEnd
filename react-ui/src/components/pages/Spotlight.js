@@ -1,13 +1,16 @@
 import React from 'react';
 import '../../styling/master.scss'
+import history from '../../history';
 import LoadSpinner from './LoadSpinner'
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Dropdown, InputGroup, FormControl } from 'react-bootstrap';
-import { saveSpot, fetchNearbySpots, fetchSpotDetails, fetchSpotsConstants } from '../../redux/actions/spotsActions';
+import { Dropdown, InputGroup, FormControl, Button } from 'react-bootstrap';
+import { fetchNearbySpots, fetchSpotDetails, fetchSpotsConstants } from '../../redux/actions/spotsActions';
+import { saveSpot, removeSavedSpot } from '../../redux/actions/accountActions';
 import Header from '../nav/Header'
 import { Redirect } from 'react-router-dom';
-import { Button } from 'react-bootstrap'
+import ReactTooltip from 'react-tooltip';
+
 
 class Spotlight extends React.Component {
     state = {
@@ -48,8 +51,8 @@ class Spotlight extends React.Component {
 
     // "loading"
     componentDidMount() {
-        this.props.fetchSpotsConstants();
         this.props.fetchNearbySpots({ type: 'cafe' });
+        window.scrollTo(0, 0);
     }
 
     resetFilters = () => {
@@ -67,21 +70,35 @@ class Spotlight extends React.Component {
         });
     }
 
-    handleClickSpot = (placeId) => {
-        this.setState({ redirect: true, placeId: placeId })
+    handleClickSpot = (e, placeId) => {
+        e.preventDefault();
+        history.push("/spotpage/" + placeId)
+        window.location.reload();
+        // this.setState({ redirect: true, placeId: placeId })
+    }
+
+    handleClickSave = (e, placeId) => {
+        e.preventDefault();
+
+        if (this.props.isSignedIn) {
+            if (this.props.userData.savedSpots.includes(placeId)) {
+                this.props.removeSavedSpot(placeId);
+            } else {
+                this.props.saveSpot(placeId)
+            }
+        }
     }
 
     render() {
         if (this.state.redirect) {
-            return <Redirect to={"/spotpage?placeid=" + this.state.placeId} />
+            return <Redirect to={"/spotpage/" + this.state.placeId} />
         } else {
             return (
                 <div>
                     <Header />
 
-                    <h1>Spotlight</h1>
-
                     <div className="spotlight">
+                        <h1>spotlight</h1>
                         <div className="keywordarea">
                             <InputGroup>
                                 <InputGroup.Prepend>
@@ -92,6 +109,7 @@ class Spotlight extends React.Component {
                                     aria-describedby="inputGroup-sizing-default"
                                     onChange={(e) => { this.setState({ k: e.target.value }) }}
                                     onKeyDown={this.handleKeywordEnter}
+                                    value={this.state.k}
                                 />
                             </InputGroup>
                         </div>
@@ -100,7 +118,7 @@ class Spotlight extends React.Component {
                             <span className="filterbtn">
                                 <Dropdown>
                                     <Dropdown.Toggle variant="success" id="dropdown-basic">
-                                        {this.state.minplDisp === '' ? "Select Min Price" : this.state.minplDisp}
+                                        {this.state.minplDisp === '' ? "Min Price" : this.state.minplDisp}
                                     </Dropdown.Toggle>
 
                                     <Dropdown.Menu>
@@ -113,7 +131,7 @@ class Spotlight extends React.Component {
                             <span className="filterbtn">
                                 <Dropdown>
                                     <Dropdown.Toggle variant="success" id="dropdown-basic">
-                                        {this.state.maxplDisp === '' ? "Select Max Price" : this.state.maxplDisp}
+                                        {this.state.maxplDisp === '' ? "Max Price" : this.state.maxplDisp}
                                     </Dropdown.Toggle>
 
                                     <Dropdown.Menu>
@@ -126,7 +144,7 @@ class Spotlight extends React.Component {
                             <span className="filterbtn">
                                 <Dropdown>
                                     <Dropdown.Toggle variant="success" id="dropdown-basic">
-                                        {this.state.tDisp === '' ? "Select Type" : this.state.tDisp}
+                                        {this.state.tDisp === '' ? "Type" : this.state.tDisp}
                                     </Dropdown.Toggle>
 
                                     <Dropdown.Menu>
@@ -163,20 +181,6 @@ class Spotlight extends React.Component {
                             <LoadSpinner />
                             :
                             this.props.spots ? this.props.spots.map(spot => {
-                                // let chart;
-                                // if (spot.popularTimes.week) {
-                                //     let date = new Date();
-                                //     let day = date.getDay();
-                                //     let busy;
-                                //     let currentHour = date.getHours();
-                                //     let popTimesToday = spot.popularTimes.week[day]
-
-                                //     chart = (<PopTimesChart day={popTimesToday.day} hours={popTimesToday.hours} />)
-
-                                // }
-                                // else {
-                                //     chart = "Unavailable :("
-                                // }
 
                                 let types = '';
                                 for (let i = 0; i < (spot.types.length < 3 ? spot.types.length : 3); i++) {
@@ -184,13 +188,13 @@ class Spotlight extends React.Component {
                                 }
 
                                 return (
-                                    <div className="spotcard" onClick={() => {this.handleClickSpot(spot.placeId)}}>
+                                    <div className="spotcard">
 
-                                        <span >
+                                        <span onClick={(e) => { this.handleClickSpot(e, spot.placeId) }}>
                                             <img className="image" src={spot.photos && spot.photos[0].url ? spot.photos[0].url : spot.iconUrl} />
                                         </span>
 
-                                        <span>
+                                        <span className="spotinfo" onClick={(e) => { this.handleClickSpot(e, spot.placeId) }}>
                                             <div>
                                                 <span className="title" >
                                                     {spot.name}
@@ -202,36 +206,32 @@ class Spotlight extends React.Component {
                                             </div>
                                             <div className="gray">
                                                 {spot.distance} miles away
-                                    </div>
+                                            </div>
 
                                             <div className="gray">
                                                 {types}
                                             </div>
                                         </span>
 
-                                        {/* <span> */}
-                                        {/* <div className="popular">
-                                        popular times
-                                    </div> */}
-
-                                        {/* <div className="busy">
-                                       
-                                    </div> */}
-                                        {/* </span> */}
-
-                                        {/* <span className="times">
-                                    {/* code for chart */}
-                                        {/* {chart} */}
-                                        {/* </span> */}
-
                                         <span>
-                                            <Button onClick={() => {this.props.saveSpot(spot.placeId)}}>Save</Button>
+                                            {this.props.isSignedIn ? 
+                                                <Button onClick={(e) => {this.handleClickSave(e, spot.placeId)}}>{this.props.userData.savedSpots.includes(spot.placeId) ? "Unsave" : "Save"}</Button>
+                                                :
+                                                <>
+                                                    <a data-tip data-for='saveBtn'> 
+                                                        <Button onClick={(e) => {this.handleClickSave(e, spot.placeId)}}>Save</Button> 
+                                                    </a>
+                                                    <ReactTooltip id='saveBtn' type='dark' effect='float'>
+                                                        <span>Create an account to save this spot (it's free!)</span>
+                                                    </ReactTooltip>
+                                                </>
+                                            }
+                                        
                                         </span>
                                     </div>
                                 )
                             }) : "We couldn't find any spots at the moment, our apologies"}
                     </div>
-
                 </div>
             )
         }
@@ -239,6 +239,8 @@ class Spotlight extends React.Component {
 }
 
 const mapStateToProps = state => ({
+    isSignedIn: state.account.isSignedIn,
+    userData: state.account.userData,
     fetchingSpots: state.spots.fetchingSpots,
     spotsFetched: state.spots.spotsFetched,
     spots: state.spots.spots,
@@ -257,9 +259,12 @@ const mapDispatchToProps = {
     fetchSpotsConstants,
     fetchSpotDetails,
     saveSpot,
+    removeSavedSpot,
 }
 
 Spotlight.propTypes = {
+    isSignedIn: PropTypes.bool.isRequired,
+    userData: PropTypes.object.isRequired,
     fetchingSpots: PropTypes.bool.isRequired,
     spotsFetched: PropTypes.bool.isRequired,
     spots: PropTypes.array.isRequired,
@@ -272,6 +277,7 @@ Spotlight.propTypes = {
     fetchNearbySpots: PropTypes.func.isRequired,
     fetchSpotDetails: PropTypes.func.isRequired,
     saveSpot: PropTypes.func.isRequired,
+    removeSavedSpot: PropTypes.func.isRequired,
 };
 
 
