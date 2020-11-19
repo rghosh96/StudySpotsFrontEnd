@@ -68,7 +68,7 @@ var businessStatusMap = undefined;
 var typesMap = undefined;
 var priceLevelMap = undefined;
 
-const NEARBY_SEARCH_RADIUS = 10000; // in meters (about 6 miles). max is 50000
+const NEARBY_SEARCH_RADIUS = 50000; // in meters (about 6 miles). max is 50000
 
 
 // fetches the constants from Firestore which are necessary to make API calls
