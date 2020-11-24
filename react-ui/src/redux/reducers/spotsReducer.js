@@ -2,7 +2,7 @@ import {
     FETCH_SPOTS_REQUEST, FETCH_SPOTS_SUCCESS, FETCH_SPOTS_FAILURE,
     FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE,
     FETCH_SPOT_DETAILS,
-    SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS_DETAILS,
+FETCH_SAVED_SPOTS_DETAILS,
     SUBMIT_RATING, UPDATE_RATING, CREATE_COMMENT, DELETE_COMMENT, UPDATE_COMMENT, FETCH_COMMENTS_SUCCESS, FETCH_COMMENTS_FAILURE, FETCH_COMMENTS_REQUEST
 } from '../actions/types';
 import { SUCCESS } from '../errorMessages'
@@ -17,6 +17,7 @@ const initialState = {
 
     savingSpot: false,
     removingSpot: false,
+
     submittingRating: false,
     fetchingSpots: false,
     spotsFetched: false,
@@ -35,7 +36,7 @@ const initialState = {
 
     spots: [],
     savedSpots: [],
-    activeSpot: {},
+    activeSpot: null,
     errorMsg: ''
 };
 
@@ -90,8 +91,15 @@ export default function (state = initialState, action) {
                 ...state,
                 fetchingSpots: action.payload.fetchingSpots,
                 spotsFetched: action.payload.spotsFetched || state.spotsFetched,
-                activeSpot: action.payload.spotDetails || state.activeSpot,
+                activeSpot: action.payload.spotDetails ? action.payload.spotDetails : null,
                 errorMsg: action.payload.errorMsg || ''
+            }
+
+        case CLEAR_ACTIVE_SPOT:
+            console.log("clear")
+            return {
+                ...state,
+                activeSpot: null
             }
 
         case FETCH_SAVED_SPOTS_DETAILS:
@@ -105,30 +113,6 @@ export default function (state = initialState, action) {
                 fetchingSpots: action.payload.fetchingSpots,
                 spotsFetched: action.payload.spotsFetched || state.spotsFetched,
                 errorMsg: action.payload.errorMsg || '',
-                savedSpots: updatedSavedSpots || state.savedSpots
-            }
-
-        case SAVE_SPOT:
-            return {
-                ...state,
-                savingSpot: action.payload.savingSpot,
-                errorMsg: action.payload.errorMsg || '',
-
-            }
-
-        case REMOVE_SAVED_SPOT:
-            updatedSavedSpots = null;
-            if (action.payload.placeId) {
-                updatedSavedSpots = state.savedSpots.filter(
-                    spot => spot.placeId !== action.payload.placeId
-                );
-            }
-
-            return {
-                ...state,
-                removingSpot: action.payload.removingSpot,
-                errorMsg: action.payload.errorMsg || '',
-                // on error, no spot is removed
                 savedSpots: updatedSavedSpots || state.savedSpots
             }
 

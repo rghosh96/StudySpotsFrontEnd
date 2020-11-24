@@ -1,6 +1,9 @@
 
 // given some array of JSON
 //     arr = [{ someKey: <any>, someValue: <any>, ... }, ...]
+
+import { appendToDocArray } from "../services/firebaseService";
+
 // returns a Map object with "someKey" keys and "someValue" values
 export const mapify = (arr, keyAttr, valueAttr) => {
     let map = new Map();
@@ -14,6 +17,8 @@ export const mapify = (arr, keyAttr, valueAttr) => {
 // only include values that have entries in the map
 export const mapGetArray = (map, arr) => {
     let newArr = [];
+
+    console.log(arr)
 
     arr.forEach(a => {
         if (map.get(a)) newArr.push(map.get(a));

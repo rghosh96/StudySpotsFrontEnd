@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import './styling/master.scss';
-import { BrowserRouter, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import history from './history';
 import { useDispatch } from "react-redux";
 import { checkAuth } from "./redux/actions/accountActions";
 
@@ -26,24 +27,26 @@ function App() {
   useEffect(() => {
     dispatch(checkAuth());
     dispatch(fetchSpotsConstants());
+    window.scrollTo(0, 0);
   });
 
   return (
     <div className="App">
-      <BrowserRouter>
+      <Router history={history}>
+        <Switch>
+          <Route exact path='/' component={Spotlight} />
+          <Route exact path='/signin' component={SignIn} />
+          <Route exact path='/signup' component={SignUp} />
+          <Route exact path='/settings' component={Settings} />
+          <Route exact path='/reviews' component={Reviews} />
+          <Route exact path='/myspots' component={MySpots} />
+          <Route exact path='/spotpage/:placeId' component={SpotPage} />
 
-        <Route exact path='/' component={Spotlight} />
-        <Route exact path='/signin' component={SignIn} />
-        <Route exact path='/signup' component={SignUp} />
-        <Route exact path='/settings' component={Settings} />
-        <Route exact path='/reviews' component={Reviews} />
-        <Route exact path='/myspots' component={MySpots} />
-        <Route exact path='/spotpage' component={SpotPage} />
-    
-        <Route exact path='/redux/testaccountactions' component={TestAccountActions} />
-        <Route exact path='/redux/testspotsactions' component={TestSpotsActions} />
-        <Route exact path='/redux/testsignout' component={TestSignOut} />
-      </BrowserRouter>
+          <Route exact path='/redux/testaccountactions' component={TestAccountActions} />
+          <Route exact path='/redux/testspotsactions' component={TestSpotsActions} />
+          <Route exact path='/redux/testsignout' component={TestSignOut} />
+        </Switch>
+      </Router>
     </div>
 
   );

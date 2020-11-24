@@ -38,12 +38,13 @@ import {
     FETCH_SPOTS_REQUEST, FETCH_SPOTS_SUCCESS, FETCH_SPOTS_FAILURE,
     FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE,
     FETCH_SPOT_DETAILS,
-    SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS_DETAILS,
-    SUBMIT_RATING, CREATE_COMMENT, DELETE_COMMENT, FETCH_COMMENTS_REQUEST, FETCH_COMMENTS_SUCCESS, FETCH_COMMENTS_FAILURE, UPDATE_COMMENT
+    FETCH_SAVED_SPOTS_DETAILS,
+    SUBMIT_RATING, CLEAR_ACTIVE_SPOT,
+    CREATE_COMMENT, DELETE_COMMENT, UPDATE_COMMENT, FETCH_COMMENTS_SUCCESS, FETCH_COMMENTS_FAILURE, FETCH_COMMENTS_REQUEST
 } from '../actions/types';
 import {
     SUCCESS, SPOT_CONSTANTS_ERROR, USER_DENIED_LOCATION,
-    SPOT_SAVED, SPOT_REMOVED, MISSING_PLACE_IDS, STATUS_UNAVAILABLE, INVALID_ARGS
+    MISSING_PLACE_IDS, STATUS_UNAVAILABLE, INVALID_ARGS
 } from '../errorMessages';
 import { getFirebase } from 'react-redux-firebase';
 import {
@@ -67,8 +68,7 @@ var businessStatusMap = undefined;
 var typesMap = undefined;
 var priceLevelMap = undefined;
 
-
-const NEARBY_SEARCH_RADIUS = 700; // in meters (about 6 miles). max is 50000
+const NEARBY_SEARCH_RADIUS = 50000; // in meters (about 6 miles). max is 50000
 
 
 // fetches the constants from Firestore which are necessary to make API calls
@@ -134,22 +134,25 @@ export const fetchNearbySpots = (params) => (dispatch) => {
                     //     zoom: 15
                     // })
 
+                    var searchParams = {
+                        location: here,
+                        // this weird syntax means include the object attribute only if ...(condition) is true
+                        ...(params.rankBy) && {rankBy: params.rankBy},
+                        ...(!params.rankBy || params.rankBy !== "1") && {radius: NEARBY_SEARCH_RADIUS},
+                        ...(params.type) && {type: params.type},
+                        ...(params.language) && {language: params.language},
+                        ...(params.keyword) && {keyword: params.keyword},
+                        ...(params.openNow) && {openNow: params.openNow},
+                        ...(params.minPriceLevel) && {minPriceLevel: params.minPriceLevel},
+                        ...(params.maxPriceLevel) && {maxPriceLevel: params.maxPriceLevel},
+                        ...(params.pageToken) && {pageToken: params.pageToken},
+                    };
+
                     // use map from above instead of createElement to integrate Google maps 
                     var service = new window.google.maps.places.PlacesService(document.createElement('div')); // a dummy element
                     service.nearbySearch(
                         // request params
-                        {
-                            location: here,
-                            radius: NEARBY_SEARCH_RADIUS,
-                            type: params.type || null,
-                            language: params.language || null,
-                            keyword: params.keyword || null,
-                            openNow: params.openNow || null,
-                            rankBy: params.rankBy || null,
-                            minPriceLevel: params.minPriceLevel || null,
-                            maxPriceLevel: params.maxPriceLevel || null,
-                            pageToken: params.pageToken || null,
-                        },
+                        searchParams,
 
                         // callback to handle response/errors
                         async (results, status) => {
@@ -159,78 +162,29 @@ export const fetchNearbySpots = (params) => (dispatch) => {
                                 //     createMarker(results[i]);
                                 // }
 
-                                Promise.all(await results.map(async r => {
-                                    var urlService = new window.google.maps.places.PlacesService(document.createElement('div'));
+                                var spots = results.map(r => {
+                                    let distance = euclidDistance(latitude, longitude, r.geometry.location.lat(), r.geometry.location.lng());
 
-                                    return new Promise(async (resolve, reject) => {
-                                        // get the url of the place since it is not returned by nearbySearch
-                                        await urlService.getDetails(
-                                            {
-                                                placeId: r.place_id,
-                                                fields: ["url"]
-                                            },
+                                    return {
+                                        placeId: r.place_id,
+                                        name: r.name,
+                                        businessStatus: businessStatusMap ? businessStatusMap.get(r.business_status) : STATUS_UNAVAILABLE,
+                                        iconUrl: r.icon || null,
+                                        vicinity: r.vicinity || null, // almost always an address
+                                        distance: distance,
+                                        photos: r.photos ? placesPhotosReducer(r.photos) : null,
+                                        types: r.types ? placesTypesReducer(r.types) : null,
+                                        rating: r.rating || null,
+                                        userRatingsTotal: r.user_ratings_total || null,
+                                        openNow: r.opening_hours ? r.opening_hours.open_now : null
+                                    };
+                                });
+                                
+                                dispatch({
+                                    type: FETCH_SPOTS_SUCCESS,
+                                    payload: await spots
+                                });
 
-                                            async (results, status) => {
-                                                try {
-                                                    if (status == window.google.maps.places.PlacesServiceStatus.OK) {
-                                                        let popTimes = await popularTimes(await results.url);
-                                                        let distance = euclidDistance(latitude, longitude, r.geometry.location.lat(), r.geometry.location.lng());
-                                                        let types = typesMap && r.types ? mapGetArray(typesMap, r.types) : (r.types ? r.types : []);
-
-                                                        let spot = {
-                                                            placeId: r.place_id,
-                                                            name: r.name,
-                                                            businessStatus: businessStatusMap ? businessStatusMap.get(r.business_status) : STATUS_UNAVAILABLE,
-                                                            iconUrl: r.icon || null,
-                                                            vicinity: r.vicinity || null, // almost always an address
-                                                            distance: distance,
-                                                            photos: placesPhotosReducer(r.photos),
-                                                            types: types,
-                                                            rating: r.rating || null,
-                                                            userRatingsTotal: r.user_ratings_total || null,
-                                                            url: results.url || null,
-                                                            openNow: r.opening_hours ? r.opening_hours.isOpen() : null,
-                                                            popularTimes: await popTimes,
-                                                        };
-
-                                                        resolve(await spot);
-                                                    } else {
-                                                        throw new Error(placesRequestStatusMap ? placesRequestStatusMap.get(status) : SPOT_CONSTANTS_ERROR);
-                                                    }
-                                                } catch (error) {
-                                                    dispatch({
-                                                        type: FETCH_SPOTS_FAILURE,
-                                                        payload: error.message
-                                                    });
-                                                }
-                                            }
-                                        );
-                                    })
-                                        // add the aggregate ratings to the spot details
-                                        .then(async spot => {
-                                            const data = await getDocumentData("spots", spot.placeId);
-
-                                            var newSpot = {
-                                                ...spot,
-                                                studySpotsRatings: {
-                                                    numRatings: data == null ? null : data.numRatings,
-                                                    overall: data == null ? null : data.avgOverallRating,
-                                                    lighting: data == null ? null : data.avgLightingRating,
-                                                    music: data == null ? null : data.avgMusicRating,
-                                                    food: data == null ? null : data.avgFoodRating,
-                                                    drink: data == null ? null : data.avgDrinkRating,
-                                                }
-                                            };
-
-                                            return await newSpot;
-                                        });
-                                }))
-                                    .then(async spots => {
-                                        dispatch({
-                                            type: FETCH_SPOTS_SUCCESS,
-                                            payload: await spots
-                                        });
-                                    })
                             } else {
                                 dispatch({
                                     type: FETCH_SPOTS_FAILURE,
@@ -311,7 +265,6 @@ const fetchAPISpotDetails = (placeId, onSuccess, onFailure) => {
                                     if (status == window.google.maps.places.PlacesServiceStatus.OK) {
                                         let popTimes = await popularTimes(results.url);
                                         let distance = euclidDistance(latitude, longitude, results.geometry.location.lat(), results.geometry.location.lng());
-                                        let types = typesMap && results.types ? mapGetArray(typesMap, results.types) : (results.types ? results.types : []);
 
                                         // createMarker(place); // for usage with map
                                         let spotDetails = {
@@ -322,14 +275,14 @@ const fetchAPISpotDetails = (placeId, onSuccess, onFailure) => {
                                             formattedAddress: results.formatted_address,
                                             formattedPhoneNumber: results.formatted_phone_number,
                                             iconUrl: results.icon || null,
-                                            types: types,
-                                            openNow: results.opening_hours.isOpen(),
-                                            openHours: placesPeriodsReducer(results.opening_hours.periods),
+                                            types: results.types ? placesTypesReducer(results.types) : null,
+                                            openNow: results.opening_hours ? results.opening_hours.open_now : null,
+                                            openHours: results.opening_hours ? placesPeriodsReducer(results.opening_hours.periods) : null,
                                             popularTimes: await popTimes,
-                                            photos: placesPhotosReducer(results.photos),
+                                            photos: results.photos ? placesPhotosReducer(results.photos) : null,
                                             priceLevel: priceLevelMap.get(results.price_level),
                                             rating: results.rating || null,
-                                            reviews: placesReviewsReducer(results.reviews),
+                                            reviews: results.reviews ? placesReviewsReducer(results.reviews) : null,
                                             studySpotsRatings: studySpotsRatings,
                                         }
 
@@ -359,7 +312,8 @@ export const fetchSpotDetails = (placeId) => dispatch => {
     dispatch({
         type: FETCH_SPOT_DETAILS,
         payload: {
-            fetchingSpots: true
+            fetchingSpots: true,
+            spotsFetched: false,
         }
     });
 
@@ -385,12 +339,19 @@ export const fetchSpotDetails = (placeId) => dispatch => {
             type: FETCH_SPOT_DETAILS,
             payload: {
                 fetchingSpots: false,
+                spotsFetched: false,
                 errorMsg: errorMsg
             }
         });
     }
 
     fetchAPISpotDetails(placeId, onSuccess, onFailure);
+}
+
+export const clearActiveSpot = () => dispatch => {
+    dispatch({
+        type: CLEAR_ACTIVE_SPOT
+    })
 }
 
 // given an array of placeIds, fetches the data for each placeId that was 
@@ -452,82 +413,6 @@ export const fetchSavedSpotsDetails = (placeIds) => dispatch => {
     placeIds.forEach(id => {
         fetchAPISpotDetails(id, onSuccess, onFailure);
     });
-}
-
-
-// adds placeId to the current user's savedSpots in Firestore, then calls 
-// spotsActions.fetchSpotDetails(), and the details are passed into the reducer
-// to create a new entry in the redux savedSpots Map
-export const saveSpot = (placeId) => (dispatch) => {
-    dispatch({
-        type: SAVE_SPOT,
-        payload: {
-            savingSpot: true
-        }
-    });
-
-    getUserId()
-        .then(userId => {
-            return appendToDocArray("users", userId, "savedSpots", placeId)
-        })
-        .then(docRef => {
-            dispatch({
-                type: SAVE_SPOT,
-                payload: {
-                    errorMsg: SPOT_SAVED,
-                    savingSpot: false
-                }
-            });
-        })
-        .then(() => {
-            // once the placeId has been added to Firestore, get the data for that spot
-            fetchSavedSpotsDetails([placeId])(dispatch);
-        })
-        .catch(error => {
-            dispatch({
-                type: SAVE_SPOT,
-                payload: {
-                    errorMsg: error.message,
-                    savingSpot: false
-                }
-            });
-        });
-}
-
-
-// removes the placeId from the user's Firestore array of saved spots, then 
-// dispatches to remove the place data from redux store
-export const removeSavedSpot = (placeId) => (dispatch) => {
-    dispatch({
-        type: REMOVE_SAVED_SPOT,
-        payload: {
-            removingSpot: true
-        }
-    });
-
-    getUserId()
-        .then(userId => {
-            return removeFromDocArray("users", userId, "savedSpots", placeId);
-        })
-        .then(() => {
-            dispatch({
-                type: REMOVE_SAVED_SPOT,
-                payload: {
-                    errorMsg: SPOT_REMOVED,
-                    removingSpot: false,
-                    placeId: placeId
-                }
-            });
-        })
-        .catch(error => {
-            dispatch({
-                type: REMOVE_SAVED_SPOT,
-                payload: {
-                    errorMsg: error.message,
-                    removingSpot: false
-                }
-            });
-        });
 }
 
 /* rating = {
