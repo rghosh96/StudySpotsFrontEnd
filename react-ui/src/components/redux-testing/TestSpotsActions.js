@@ -25,11 +25,11 @@ class TestSpotsActions extends React.Component {
             placeId: '',
             comment: '',
             commentId: '',
-            overall: '',
             lighting: '',
+            overall: '',
             music: '',
+            space: '',
             food: '',
-            drink: '',
         }
     }
 
@@ -61,13 +61,13 @@ class TestSpotsActions extends React.Component {
         };
 
 
-        var popularTimes = this.props.activeSpot.popularTimes;
-        var popTimesCharts = null;
-        if (popularTimes && popularTimes.status === "ok") {
-            popTimesCharts = popularTimes.week.map(item => {
-                return <div><PopTimesChart day={item.day} hours={item.hours}/></div>
-            })
-        }
+        // var popularTimes = this.props.activeSpot.popularTimes;
+        // var popTimesCharts = null;
+        // if (popularTimes && popularTimes.status === "ok") {
+        //     popTimesCharts = popularTimes.week.map(item => {
+        //         return <div><PopTimesChart day={item.day} hours={item.hours}/></div>
+        //     })
+        // }
 
         return (
           <div>
@@ -87,20 +87,20 @@ class TestSpotsActions extends React.Component {
 
                 <input type="text" placeholder="placeId" onChange={e => this.setState({placeId: e.target.value})} /> <br/>
                 <input type="text" placeholder="overall rating" onChange={e => this.setState({overall: e.target.value})} /> <br/>
-                <input type="text" placeholder="lighting rating" onChange={e => this.setState({lighting: e.target.value})} /> <br/>
                 <input type="text" placeholder="music rating" onChange={e => this.setState({music: e.target.value})} /> <br/>
+                <input type="text" placeholder="lighting rating" onChange={e => this.setState({lighting: e.target.value})} /> <br/>
+                <input type="text" placeholder="space rating" onChange={e => this.setState({space: e.target.value})} /> <br/>
                 <input type="text" placeholder="food rating" onChange={e => this.setState({food: e.target.value})} /> <br/>
-                <input type="text" placeholder="drink rating" onChange={e => this.setState({drink: e.target.value})} /> <br/>
                 <br/>
                 <div>submittingRating...{this.props.submittingRating.toString()}</div>
                 <div>savingSpot...{this.props.savingSpot.toString()}</div>
                 <div>removingSpot...{this.props.removingSpot.toString()}</div>
                 <button onClick={() => this.props.submitRating(this.state.placeId, {
                     overall: this.state.overall,
-                    lighting: this.state.lighting,
                     music: this.state.music,
+                    lighting: this.state.lighting,
+                    space: this.state.space,
                     food: this.state.food,
-                    drink: this.state.drink,
                 })}>submit rating</button><br/>
                 <button onClick={() => this.props.saveSpot(this.state.placeId)}>save spot</button><br/>
                 <button onClick={() => this.props.removeSavedSpot(this.state.placeId)}>remove spot</button><br/>
@@ -159,7 +159,7 @@ class TestSpotsActions extends React.Component {
 
                 <input type="text" placeholder="placeId" onChange={e => {this.setState({placeId: e.target.value})}}/>
                 <button onClick={fetchSpotDetails}>fetch active spot</button>
-                {popTimesCharts}
+                {/* {popTimesCharts} */}
                 <div>activeSpot...<div style={{maxHeight: "1000px", maxWidth: "1200px", overflow: "auto"}}><pre>{JSON.stringify(this.props.activeSpot, null, 2)}</pre></div></div>
                 <br/>
                 

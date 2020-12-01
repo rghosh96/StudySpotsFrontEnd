@@ -44,7 +44,7 @@ import {
 } from '../actions/types';
 import {
     SUCCESS, SPOT_CONSTANTS_ERROR, USER_DENIED_LOCATION,
-    MISSING_PLACE_IDS, STATUS_UNAVAILABLE, INVALID_ARGS
+    MISSING_PLACE_IDS, STATUS_UNAVAILABLE, INVALID_ARGS, USER_NOT_SIGNED_IN
 } from '../errorMessages';
 import { getFirebase } from 'react-redux-firebase';
 import {
@@ -137,15 +137,15 @@ export const fetchNearbySpots = (params) => (dispatch) => {
                     var searchParams = {
                         location: here,
                         // this weird syntax means include the object attribute only if ...(condition) is true
-                        ...(params.rankBy) && {rankBy: params.rankBy},
-                        ...(!params.rankBy || params.rankBy !== "1") && {radius: NEARBY_SEARCH_RADIUS},
-                        ...(params.type) && {type: params.type},
-                        ...(params.language) && {language: params.language},
-                        ...(params.keyword) && {keyword: params.keyword},
-                        ...(params.openNow) && {openNow: params.openNow},
-                        ...(params.minPriceLevel) && {minPriceLevel: params.minPriceLevel},
-                        ...(params.maxPriceLevel) && {maxPriceLevel: params.maxPriceLevel},
-                        ...(params.pageToken) && {pageToken: params.pageToken},
+                        ...(params.rankBy) && { rankBy: params.rankBy },
+                        ...(!params.rankBy || params.rankBy !== "1") && { radius: NEARBY_SEARCH_RADIUS },
+                        ...(params.type) && { type: params.type },
+                        ...(params.language) && { language: params.language },
+                        ...(params.keyword) && { keyword: params.keyword },
+                        ...(params.openNow) && { openNow: params.openNow },
+                        ...(params.minPriceLevel) && { minPriceLevel: params.minPriceLevel },
+                        ...(params.maxPriceLevel) && { maxPriceLevel: params.maxPriceLevel },
+                        ...(params.pageToken) && { pageToken: params.pageToken },
                     };
 
                     // use map from above instead of createElement to integrate Google maps 
@@ -179,7 +179,7 @@ export const fetchNearbySpots = (params) => (dispatch) => {
                                         openNow: r.opening_hours ? r.opening_hours.open_now : null
                                     };
                                 });
-                                
+
                                 dispatch({
                                     type: FETCH_SPOTS_SUCCESS,
                                     payload: await spots
@@ -233,7 +233,7 @@ const fetchAPISpotDetails = (placeId, onSuccess, onFailure) => {
                                 lighting: data && data.avgLightingRating ? data.avgLightingRating : null,
                                 music: data && data.avgMusicRating ? data.avgMusicRating : null,
                                 food: data && data.avgFoodRating ? data.avgFoodRating : null,
-                                drink: data && data.avgDrinkRating ? data.avgDrinkRating : null,
+                                space: data && data.avgSpaceRating ? data.avgSpaceRating : null,
                             }
 
                             // now get the rest of spot details from Places API
@@ -418,23 +418,23 @@ export const fetchSavedSpotsDetails = (placeIds) => dispatch => {
 /* rating = {
     overall: <string '1'-'5'>,
     food: <string '1'-'5'>,
-    drink: <string '1'-'5'>,
+    space: <string '1'-'5'>,
     music: <string '1'-'5'>,
     lighting: <string '1'-'5'>    
 } */
 export const submitRating = (placeId, rating) => async (dispatch) => {
     // parse all args to int
-    const formattedRating = {
-        overall: parseInt(rating.overall),
-        lighting: parseInt(rating.lighting),
-        music: parseInt(rating.music),
-        food: parseInt(rating.food),
-        drink: parseInt(rating.drink),
+    var formattedRating = {
+        overall: rating.overall ? parseInt(rating.overall) : null,
+        music: rating.music ? parseInt(rating.music) : null,
+        lighting: rating.lighting ? parseInt(rating.lighting) : null,
+        space: rating.space ? parseInt(rating.space) : null,
+        food: rating.food ? parseInt(rating.food) : null,
     }
 
     // make sure rating data is legal before proceeding
     for (const [key, value] of Object.entries(formattedRating)) {
-        if (isNaN(value) || value < 1 || value > 5) {
+        if (value && (isNaN(value) || value < 1 || value > 5)) {
             dispatch({
                 type: SUBMIT_RATING,
                 payload: {
@@ -453,71 +453,129 @@ export const submitRating = (placeId, rating) => async (dispatch) => {
         }
     });
 
+    try {
+
     const userId = await getUserId();
     const oldRatingsAgg = await getDocumentData("spots", placeId);
     var newRatingsAgg = {};
 
-    // start by retieving existing rating from this user (if any)
-    getNestedDocumentData("spots", placeId, "ratings", userId)
-        .then(existingRating => {
+        // start by retieving existing rating from this user (if any)
+        getNestedDocumentData("spots", placeId, "ratings", userId)
+            .then(existingRating => {
+                // case where no users have ever rated this spot
+                if (oldRatingsAgg == null) {
+                    console.log("no one has rated")
 
-            // case where no users have ever rated this spot
-            if (oldRatingsAgg == null) {
-                newRatingsAgg = {
-                    numRatings: 1,
-                    avgOverallRating: formattedRating.overall,
-                    avgMusicRating: formattedRating.music,
-                    avgLightingRating: formattedRating.lighting,
-                    avgDrinkRating: formattedRating.drink,
-                    avgFoodRating: formattedRating.food,
-                };
-            }
-
-            // case where 1 or more users have rated this spot, but not the signed-in user
-            else if (existingRating == null) {
-                const { numRatings, avgOverallRating, avgMusicRating, avgLightingRating, avgDrinkRating, avgFoodRating } = oldRatingsAgg;
-
-                let newNumRatings = numRatings + 1;
-                newRatingsAgg = {
-                    numRatings: newNumRatings,
-                    avgOverallRating: ((avgOverallRating * numRatings) + formattedRating.overall) / newNumRatings,
-                    avgMusicRating: ((avgMusicRating * numRatings) + formattedRating.lighting) / newNumRatings,
-                    avgLightingRating: ((avgLightingRating * numRatings) + formattedRating.music) / newNumRatings,
-                    avgDrinkRating: ((avgDrinkRating * numRatings) + formattedRating.food) / newNumRatings,
-                    avgFoodRating: ((avgFoodRating * numRatings) + formattedRating.drink) / newNumRatings,
+                    newRatingsAgg = {
+                        numOverallRatings: formattedRating.overall ? 1 : 0,
+                        numMusicRatings: formattedRating.music ? 1 : 0,
+                        numLightingRatings: formattedRating.lighting ? 1 : 0,
+                        numSpaceRatings: formattedRating.space ? 1 : 0,
+                        numFoodRatings: formattedRating.food ? 1 : 0,
+                        avgOverallRating: formattedRating.overall ? formattedRating.overall : null,
+                        avgMusicRating: formattedRating.music ? formattedRating.music : null,
+                        avgLightingRating: formattedRating.lighting ? formattedRating.lighting : null,
+                        avgSpaceRating: formattedRating.space ? formattedRating.space : null,
+                        avgFoodRating: formattedRating.food ? formattedRating.food : null,
+                    };
                 }
-            }
 
-            // case where this user has rated the spot in the past
-            else if (existingRating != null) {
-                const { numRatings, avgOverallRating, avgMusicRating, avgLightingRating, avgDrinkRating, avgFoodRating } = oldRatingsAgg;
+                // case where 1 or more users have rated this spot, but not the signed-in user
+                else if (existingRating == null) {
+                    const { numOverallRatings, numMusicRatings, numLightingRatings, numSpaceRatings, numFoodRatings, avgOverallRating, avgMusicRating, avgLightingRating, avgSpaceRating, avgFoodRating } = oldRatingsAgg;
 
-                newRatingsAgg = {
-                    numRatings: numRatings,
-                    avgOverallRating: ((avgOverallRating * numRatings) + formattedRating.overall - existingRating.overall) / numRatings,
-                    avgMusicRating: ((avgMusicRating * numRatings) + formattedRating.lighting - existingRating.lighting) / numRatings,
-                    avgLightingRating: ((avgLightingRating * numRatings) + formattedRating.music - existingRating.music) / numRatings,
-                    avgDrinkRating: ((avgDrinkRating * numRatings) + formattedRating.food - existingRating.food) / numRatings,
-                    avgFoodRating: ((avgFoodRating * numRatings) + formattedRating.drink - existingRating.drink) / numRatings,
-                };
-            }
+                    // only add 1 if user submitted a rating for that category
+                    let newNumOverallRatings = formattedRating.overall ? numOverallRatings + 1 : numOverallRatings;
+                    let newNumMusicRatings = formattedRating.music ? numMusicRatings + 1 : numMusicRatings;
+                    let newNumLightingRatings = formattedRating.lighting ? numLightingRatings + 1 : numLightingRatings;
+                    let newNumSpaceRatings = formattedRating.space ? numSpaceRatings + 1 : numSpaceRatings;
+                    let newNumFoodRatings = formattedRating.food ? numFoodRatings + 1 : numFoodRatings;
 
-            // set the new aggregate ratings fields
-            return setDocumentData("spots", placeId, newRatingsAgg);
-        })
-        .then(() => {
-            // update the user's rating
-            return setNestedDocumentData("spots", placeId, "ratings", userId, formattedRating);
-        })
-        .catch(error => {
-            dispatch({
-                type: SUBMIT_RATING,
-                payload: {
-                    submittingRating: false,
-                    errorMsg: error.message
+                    let newAvgOverallRatings = avgOverallRating ? ((avgOverallRating * numOverallRatings) + formattedRating.overall) / newNumOverallRatings : null;
+                    let newAvgMusicRatings = avgMusicRating ? ((avgMusicRating * numMusicRatings) + formattedRating.music) / newNumMusicRatings : null;
+                    let newAvgLightingRatings = avgLightingRating ? ((avgLightingRating * numLightingRatings) + formattedRating.lighting) / newNumLightingRatings : null;
+                    let newAvgSpaceRatings = avgSpaceRating ? ((avgSpaceRating * numSpaceRatings) + formattedRating.space) / newNumSpaceRatings : null;
+                    let newAvgFoodRatings = avgFoodRating ? ((avgFoodRating * numFoodRatings) + formattedRating.food) / newNumFoodRatings : null;
+
+                    newRatingsAgg = {
+                        numOverallRatings: newNumOverallRatings,
+                        numMusicRatings: newNumMusicRatings,
+                        numLightingRatings: newNumLightingRatings,
+                        numSpaceRatings: newNumSpaceRatings,
+                        numFoodRatings: newNumFoodRatings,
+                        avgOverallRating: newAvgOverallRatings || (formattedRating.overall ? formattedRating.overall : null),
+                        avgMusicRating: newAvgMusicRatings || (formattedRating.music ? formattedRating.music : null),
+                        avgLightingRating: newAvgLightingRatings || (formattedRating.lighting ? formattedRating.lighting : null),
+                        avgSpaceRating: newAvgSpaceRatings || (formattedRating.space ? formattedRating.space : null),
+                        avgFoodRating: newAvgFoodRatings || (formattedRating.food ? formattedRating.food : null),
+                    }
+
                 }
+
+                // case where this user has rated the spot in the past
+                else {
+                    const { numOverallRatings, numMusicRatings, numLightingRatings, numSpaceRatings, numFoodRatings, avgOverallRating, avgMusicRating, avgLightingRating, avgSpaceRating, avgFoodRating } = oldRatingsAgg;
+                    const { overall, music, lighting, space, food } = existingRating;
+                    formattedRating = {
+                        overall: formattedRating.overall || overall,
+                        music: formattedRating.music || music,
+                        lighting: formattedRating.lighting || lighting,
+                        space: formattedRating.space || space,
+                        food: formattedRating.food || food,
+                    }
+
+                    // only add 1 if no rating exist for that category for this user
+                    let newNumOverallRatings = formattedRating.overall && !overall ? numOverallRatings + 1 : numOverallRatings;
+                    let newNumMusicRatings = formattedRating.music && !music ? numMusicRatings + 1 : numMusicRatings;
+                    let newNumLightingRatings = formattedRating.lighting && !lighting ? numLightingRatings + 1 : numLightingRatings;
+                    let newNumSpaceRatings = formattedRating.space && !space ? numSpaceRatings + 1 : numSpaceRatings;
+                    let newNumFoodRatings = formattedRating.food && !food ? numFoodRatings + 1 : numFoodRatings;
+
+                    let newAvgOverallRatings = avgOverallRating ? ((avgOverallRating * numOverallRatings) + formattedRating.overall - overall) / newNumOverallRatings : null;
+                    let newAvgMusicRatings = avgMusicRating ? ((avgMusicRating * numMusicRatings) + formattedRating.music - music) / newNumMusicRatings : null;
+                    let newAvgLightingRatings = avgLightingRating ? ((avgLightingRating * numLightingRatings) + formattedRating.lighting - lighting) / newNumLightingRatings : null;
+                    let newAvgSpaceRatings = avgSpaceRating ? ((avgSpaceRating * numSpaceRatings) + formattedRating.space - space) / newNumSpaceRatings : null;
+                    let newAvgFoodRatings = avgFoodRating ? ((avgFoodRating * numFoodRatings) + formattedRating.food - food) / newNumFoodRatings : null;
+
+                    newRatingsAgg = {
+                        numOverallRatings: newNumOverallRatings,
+                        numMusicRatings: newNumMusicRatings,
+                        numLightingRatings: newNumLightingRatings,
+                        numSpaceRatings: newNumSpaceRatings,
+                        numFoodRatings: newNumFoodRatings,
+                        avgOverallRating: newAvgOverallRatings || (formattedRating.overall ? formattedRating.overall : null),
+                        avgMusicRating: newAvgMusicRatings || (formattedRating.music ? formattedRating.music : null),
+                        avgLightingRating: newAvgLightingRatings || (formattedRating.lighting ? formattedRating.lighting : null),
+                        avgSpaceRating: newAvgSpaceRatings || (formattedRating.space ? formattedRating.space : null),
+                        avgFoodRating: newAvgFoodRatings || (formattedRating.food ? formattedRating.food : null),
+                    };
+                }
+
+                // set the new aggregate ratings fields
+                return setDocumentData("spots", placeId, newRatingsAgg);
+            })
+            .then(() => {
+                // update the user's rating
+                return setNestedDocumentData("spots", placeId, "ratings", userId, formattedRating);
+            })
+            .catch(error => {
+                dispatch({
+                    type: SUBMIT_RATING,
+                    payload: {
+                        submittingRating: false,
+                        errorMsg: error.message
+                    }
+                });
             });
+    } catch (error) {
+        dispatch({
+            type: SUBMIT_RATING,
+            payload: {
+                submittingRating: false,
+                errorMsg: error.message
+            }
         });
+    }
 }
 
 export const createComment = (placeId, text) => async (dispatch) => {
@@ -544,7 +602,7 @@ export const createComment = (placeId, text) => async (dispatch) => {
                 userId: userId,
                 comment: text,
                 timestamp: new Date(),
-                
+
             }
 
             if (isNaN(newComment.comment.length) || newComment.comment.length < 1 || newComment.comment.length > 280) {
@@ -559,18 +617,18 @@ export const createComment = (placeId, text) => async (dispatch) => {
             }
 
             addAmbiguousDoc("spots", placeId, "comments")
-            .then(commentDoc => {
-                setNestedDocumentData("spots", placeId, "comments", commentDoc.id, newComment)
-            })
-            .catch(error => {
-                dispatch({
-                    type: CREATE_COMMENT,
-                    payload: {
-                        creatingComment: false,
-                        errorMsg: error.message
-                    }
+                .then(commentDoc => {
+                    setNestedDocumentData("spots", placeId, "comments", commentDoc.id, newComment)
                 })
-            })
+                .catch(error => {
+                    dispatch({
+                        type: CREATE_COMMENT,
+                        payload: {
+                            creatingComment: false,
+                            errorMsg: error.message
+                        }
+                    })
+                })
 
         })
 
@@ -578,7 +636,7 @@ export const createComment = (placeId, text) => async (dispatch) => {
 }
 
 export const deleteComment = (placeId, commentId) => (dispatch) => {
-    
+
     dispatch({
         type: DELETE_COMMENT,
         payload: {
@@ -587,7 +645,7 @@ export const deleteComment = (placeId, commentId) => (dispatch) => {
     })
 
     removeDocFromNestedDocArray("spots", placeId, "comments", commentId)
-        .catch(error =>  {
+        .catch(error => {
             dispatch({
                 type: DELETE_COMMENT,
                 payload: {
@@ -596,8 +654,8 @@ export const deleteComment = (placeId, commentId) => (dispatch) => {
                 }
             })
         })
-            
-    
+
+
 }
 
 export const updateComment = (placeId, commentId, newtext) => async (dispatch) => {
@@ -612,43 +670,43 @@ export const updateComment = (placeId, commentId, newtext) => async (dispatch) =
     const userId = await getUserId();
 
     getDocumentData("users", userId)
-    .then(userData => {
+        .then(userData => {
 
-        const fname = userData['fName'];
-        const lname = userData['lName'];
+            const fname = userData['fName'];
+            const lname = userData['lName'];
 
-        const newComment = {
-            fname: fname,
-            lname: lname,
-            userId: userId,
-            comment: newtext,
-            timestamp: new Date(),
-            
-        }
+            const newComment = {
+                fname: fname,
+                lname: lname,
+                userId: userId,
+                comment: newtext,
+                timestamp: new Date(),
 
-        if (isNaN(newComment.comment.length) || newComment.comment.length < 1 || newComment.comment.length > 280) {
-            dispatch({
-                type: CREATE_COMMENT,
-                payload: {
-                    creatingComment: false,
-                    errorMsg: INVALID_ARGS
-                }
-            });
-            return;
-        }
+            }
 
-        setNestedDocumentData("spots", placeId, "comments", commentId, newComment)
-        .catch(error => {
-            dispatch({
-                type: UPDATE_COMMENT,
-                payload: {
-                    updatingComment: false,
-                    payload: error.message
-                }
-            })
+            if (isNaN(newComment.comment.length) || newComment.comment.length < 1 || newComment.comment.length > 280) {
+                dispatch({
+                    type: CREATE_COMMENT,
+                    payload: {
+                        creatingComment: false,
+                        errorMsg: INVALID_ARGS
+                    }
+                });
+                return;
+            }
+
+            setNestedDocumentData("spots", placeId, "comments", commentId, newComment)
+                .catch(error => {
+                    dispatch({
+                        type: UPDATE_COMMENT,
+                        payload: {
+                            updatingComment: false,
+                            payload: error.message
+                        }
+                    })
+                })
+
         })
-
-    })
 
     // const newComment = {
     //     comment: newtext,
@@ -680,19 +738,19 @@ export const fetchComments = (placeId) => (dispatch) => {
 
     getNestedCollectionData("spots", placeId, "comments")
         .then(commentDetails => {
-   
+
             dispatch({
                 //success
                 type: FETCH_COMMENTS_SUCCESS,
                 commentDetails: commentDetails,
                 fetchingComments: false,
                 commentsFetched: true,
-            }) 
+            })
 
         })
         .catch(error => {
             dispatch({
-                
+
                 type: FETCH_COMMENTS_FAILURE,
                 fetchingComments: false,
                 payload: error.message,
