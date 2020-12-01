@@ -2,13 +2,23 @@ import {
     FETCH_SPOTS_REQUEST, FETCH_SPOTS_SUCCESS, FETCH_SPOTS_FAILURE,
     FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE,
     FETCH_SPOT_DETAILS,
-    SAVE_SPOT, REMOVE_SAVED_SPOT, FETCH_SAVED_SPOTS_DETAILS
+FETCH_SAVED_SPOTS_DETAILS,
+    SUBMIT_RATING, UPDATE_RATING, CREATE_COMMENT, DELETE_COMMENT, UPDATE_COMMENT, FETCH_COMMENTS_SUCCESS, FETCH_COMMENTS_FAILURE, FETCH_COMMENTS_REQUEST
 } from '../actions/types';
-import { SUCCESS, BAD_SPOTS_FETCH } from '../errorMessages'
+import { SUCCESS } from '../errorMessages'
 
 const initialState = {
+    creatingComment: false,
+    deletingComment: false,
+    updatingComment: false,
+    fetchingComments: false,
+    commentsFetched: false,
+    commentDetails: null,
+
     savingSpot: false,
     removingSpot: false,
+
+    submittingRating: false,
     fetchingSpots: false,
     spotsFetched: false,
     constantsFetched: false, 
@@ -26,11 +36,13 @@ const initialState = {
 
     spots: [],
     savedSpots: [],
-    activeSpot: {},
+    activeSpot: null,
     errorMsg: ''
 };
 
 export default function (state = initialState, action) {
+    var updatedSavedSpots = null;
+
     switch (action.type) {
 
         case FETCH_SPOTS_REQUEST:
@@ -79,13 +91,21 @@ export default function (state = initialState, action) {
                 ...state,
                 fetchingSpots: action.payload.fetchingSpots,
                 spotsFetched: action.payload.spotsFetched || state.spotsFetched,
-                activeSpot: action.payload.spotDetails || state.activeSpot,
+                activeSpot: action.payload.spotDetails ? action.payload.spotDetails : null,
                 errorMsg: action.payload.errorMsg || ''
             }
 
+        case CLEAR_ACTIVE_SPOT:
+            console.log("clear")
+            return {
+                ...state,
+                activeSpot: null
+            }
+
         case FETCH_SAVED_SPOTS_DETAILS:
+            updatedSavedSpots = null;
             if (action.payload.spotsDetails) {
-                var updatedSavedSpots = [action.payload.spotsDetails, ...state.savedSpots];
+                updatedSavedSpots = [action.payload.spotsDetails, ...state.savedSpots];
             }
 
             return {
@@ -96,27 +116,62 @@ export default function (state = initialState, action) {
                 savedSpots: updatedSavedSpots || state.savedSpots
             }
 
-        case SAVE_SPOT:
+        case SUBMIT_RATING:
             return {
                 ...state,
-                savingSpot: action.payload.savingSpot,
+                submittingRating: action.payload.submittingRating,
                 errorMsg: action.payload.errorMsg || '',
+            }
+
+        case UPDATE_RATING:
+            return {
+                ...state,
+                submittingRating: action.payload.submittingRating,
+                errorMsg: action.payload.errorMsg || '',
+            }
+
+        case CREATE_COMMENT:
+            return {
+                ...state,
+                creatingComment: action.payload.creatingComment,
+                errorMsg: action.payload.errorMsg || '',
+            }
+
+        case DELETE_COMMENT:
+            return {
+                ...state,
+                deletingComment: action.payload.deletingComment,
+                errorMsg: action.payload.errorMsg || '',
+            }
+        
+        case FETCH_COMMENTS_REQUEST:
+            return {
+                ...state,
+                fetchingComments: true,
+            }
+
+        case FETCH_COMMENTS_SUCCESS:
+            return {
+                ...state,
+                fetchingComments: false,
+                commentsFetched: true,
+                commentDetails: action.payload,
+                errorMsg: SUCCESS,
 
             }
 
-        case REMOVE_SAVED_SPOT:
-            if (action.payload.placeId) {
-                var updatedSavedSpots = state.savedSpots.filter(
-                    spot => spot.placeId != action.payload.placeId
-                );
-            }
-
+        case FETCH_COMMENTS_FAILURE:
             return {
                 ...state,
-                removingSpot: action.payload.removingSpot,
+                fetchingComments: false,
+                errorMsg: action.payload,
+            }
+
+        case UPDATE_COMMENT:
+            return {
+                ...state,
+                updatingComment: action.payload.updatingComment,
                 errorMsg: action.payload.errorMsg || '',
-                // on error, no spot is removed
-                savedSpots: updatedSavedSpots || state.savedSpots
             }
 
         default:

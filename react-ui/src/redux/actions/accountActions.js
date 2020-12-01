@@ -1,17 +1,15 @@
 import {
-	SIGN_UP_REQUEST, SIGN_UP_FAILURE, SIGN_UP_SUCCESS, SIGN_OUT_REQUEST, SIGN_OUT_SUCCESS, SIGN_OUT_FAILURE,
+	SIGN_UP_REQUEST, SIGN_UP_FAILURE, SIGN_UP_SUCCESS, SIGN_OUT_REQUEST, SIGN_OUT_SUCCESS,
 	UPDATE_ACCOUNT_REQUEST, UPDATE_ACCOUNT_SUCCESS, UPDATE_ACCOUNT_FAILURE,
 	SIGN_IN_REQUEST, SIGN_IN_SUCCESS, SIGN_IN_FAILURE,
 	FETCH_USERDATA_REQUEST, FETCH_USERDATA_SUCCESS, FETCH_USERDATA_FAILURE,
+	SAVE_SPOT, REMOVE_SAVED_SPOT
 } from '../actions/types';
-import {
-	EXISTING_ACCOUNT, BAD_CREDENTIALS, USER_NOT_SIGNED_IN,
-	SPOT_SAVED
-} from '../errorMessages';
-import {
-    placesPeriodsReducer, placesPhotosReducer, placesReviewsReducer, placesTypesReducer
-} from '../../helpers/dataStructureHelpers';
+import { EXISTING_ACCOUNT, BAD_CREDENTIALS, USER_NOT_SIGNED_IN, SPOT_SAVED, SPOT_REMOVED } from '../errorMessages';
 import { getFirebase } from 'react-redux-firebase';
+import {
+    getUserId, appendToDocArray, removeFromDocArray
+} from '../../services/firebaseService';
 
 
 export const checkAuth = () => dispatch => {
@@ -249,6 +247,81 @@ function mockSignUp(signUpData, dispatch) {
 				});
 			}
 		});
+}
+
+// adds placeId to the current user's savedSpots in Firestore, then calls 
+// spotsActions.fetchSpotDetails(), and the details are passed into the reducer
+// to create a new entry in the redux savedSpots Map
+export const saveSpot = (placeId) => (dispatch) => {
+    dispatch({
+        type: SAVE_SPOT,
+        payload: {
+            savingSpot: true
+        }
+    });
+
+    getUserId()
+        .then(userId => {
+            return appendToDocArray("users", userId, "savedSpots", placeId)
+        })
+        .then(docRef => {
+            dispatch({
+                type: SAVE_SPOT,
+                payload: {
+					errorMsg: SPOT_SAVED,
+					placeId: placeId,
+                    savingSpot: false
+                }
+            });
+        })
+        .then(() => {
+            // once the placeId has been added to Firestore, get the data for that spot
+            // fetchSavedSpotsDetails([placeId])(dispatch);
+        })
+        .catch(error => {
+            dispatch({
+                type: SAVE_SPOT,
+                payload: {
+                    errorMsg: error.message,
+                    savingSpot: false
+                }
+            });
+        });
+}
+
+// removes the placeId from the user's Firestore array of saved spots, then 
+// dispatches to remove the place data from redux store
+export const removeSavedSpot = (placeId) => (dispatch) => {
+    dispatch({
+        type: REMOVE_SAVED_SPOT,
+        payload: {
+            removingSpot: true
+        }
+    });
+
+    getUserId()
+        .then(userId => {
+            return removeFromDocArray("users", userId, "savedSpots", placeId);
+        })
+        .then(() => {
+            dispatch({
+                type: REMOVE_SAVED_SPOT,
+                payload: {
+                    errorMsg: SPOT_REMOVED,
+                    removingSpot: false,
+                    placeId: placeId
+                }
+            });
+        })
+        .catch(error => {
+            dispatch({
+                type: REMOVE_SAVED_SPOT,
+                payload: {
+                    errorMsg: error.message,
+                    removingSpot: false
+                }
+            });
+        });
 }
 
 function mockUpdateAccount(userData, dispatch) {

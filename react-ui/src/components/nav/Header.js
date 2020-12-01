@@ -8,7 +8,6 @@ import '../../styling/header.scss'
 
 export default function Header() {
     const signedIn = useSelector(state => state.account.isSignedIn)
-    console.log(signedIn)
 
     const dispatch = useDispatch()
     const signOut = () => {
@@ -17,7 +16,7 @@ export default function Header() {
 
     return (
         <div className="header">
-            <Navbar bg="light" expand="lg">
+            <Navbar expand="lg">
                 <Navbar.Brand as={Link} to="/">STUDY SPOTS</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
@@ -26,6 +25,7 @@ export default function Header() {
                         <Nav.Link as={Link} to="/reviews">Reviews</Nav.Link>
                         <Nav.Link as={Link} to="/myspots">My Spots</Nav.Link>
                         <Nav.Link as={Link} to="/settings">Settings</Nav.Link>
+                        <Nav.Link as={Link} to="/spotpage/ChIJa00m55kayYcRnz5WcvjDiMI">Spot Page</Nav.Link>
                         <NavDropdown title="Redux" id="basic-nav-dropdown">
                             <NavDropdown.Item as={Link} to="/redux/testaccountactions">Account</NavDropdown.Item>
                             <NavDropdown.Item as={Link} to="/redux/testspotsactions">Spots</NavDropdown.Item>

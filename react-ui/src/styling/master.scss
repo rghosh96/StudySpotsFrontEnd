@@ -18,12 +18,150 @@ body, html, #root, .App {
   width: 100%;
 }
 
+.title {
+  color: $primary;
+  font-size: 1.7rem!important;
+  font-weight: bold!important;
+  text-align: left;
+  padding-right: 15px;
+
+}
+
+.times {
+  padding-left: 50px;
+}
+.popular {
+  color: $primary;
+  font-size: 1.7rem!important;
+  font-weight: bold!important;
+  padding-left: 15px;
+  width: 70px!important;
+  height: 50px;
+}
+
+.gray {
+  padding-left: 15px;
+  color: gray;
+}
+
+.open {
+  background-color: #687E63;
+  color: white;
+  text-align: center;
+  border-radius: 10px;
+  padding: 8px;
+}
+
+.image {
+  width: 100px!important;
+  height: 100px!important;
+  border-radius: 50%;
+}
+
+.spotlight {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 50px !important;
+  min-width: 100%;
+  
+  h1 {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+  }
+  
+  .keywordarea {
+    width: 30%;
+  }
+  
+  .filterarea {
+    display: flex;
+    margin: 15px;
+  }
+  
+  .searcharea {
+    margin-bottom: 50px;
+  }
+  
+  .filterbtn {
+    margin: 10px;
+  }
+  
+  .spotcard {
+    @include easeOut();
+    &:hover {
+      background-color: $hvrgrey !important;
+    }
+
+    .spotinfo {
+      width: 100%;
+      margin: 0px 0px 0px 50px;
+    }
+
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 50%;
+    margin: 50px!important;
+    border: 1.5px solid #687E63;
+    border-radius: 25px;
+    padding: 10px;
+    margin: 15px !important;
+  }
+}
+
+
 .container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 50px !important;
+  min-width: 100%;
+}
+
+.info {
+  display: flex;
+  width: 100%;
+  padding: 50px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.infoSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.main-image {
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+}
+
+.more-photos {
+  height: 200px;
+  border-radius: 10%;
+  margin: 30px !important;
+}
+
+.photo-wrap {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.load {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 90vh;
-  width: 100%;
+  min-height: 100vh;
 }
 
 .signUpContainer {
@@ -47,12 +185,54 @@ h1 {
   @include header();
 }
 
+h2 {
+  color: $secondary;
+  font-size: 2rem;
+  @include header();
+}
+
+h3 {
+  color: $secondary;
+  font-size: 15px !important;
+  @include header();
+}
+
+#uncontrolled-tab-example-tab-reviews, #uncontrolled-tab-example-tab-comments,
+#uncontrolled-tab-example-tab-photos {
+  color: $grey !important;
+  @include header();
+  &:hover {
+    color:$white !important;
+    background-color: $primary !important;
+  }
+  &.active {
+    color: $primary !important;
+    letter-spacing: 2px !important;
+  }
+}
+
+.nav.nav-tabs {
+  padding-left: 50px !important;
+  padding-right: 50px !important;
+}
+
+.tab-content {
+  margin: 50px 100px 50px 100px;
+}
+
 p {
   color: $grey;
 }
 
 .secondary {
   color: $secondary !important;
+}
+
+.center {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
 }
 
 label {
@@ -71,9 +251,9 @@ Button {
 
 .pop-times-chart-wrapper {
   canvas {
-    width:400px !important;
-    height:200px !important;
-    font-size: 36px !important;
+    width:500px !important;
+    height:250px !important;
+    font-size: 12px !important;
   }
 }
 

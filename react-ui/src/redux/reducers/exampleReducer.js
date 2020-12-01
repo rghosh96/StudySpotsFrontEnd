@@ -25,13 +25,13 @@ export default function(state = initialState, action) {
             return {
                 ...state,
                 submittedText: action.payload,
-                isSameValue: action.payload == state.buttonValue ? true : false
+                isSameValue: action.payload === state.buttonValue ? true : false
             }           
         case INCREMENT_VALUE:
             return {
                 ...state,
                 buttonValue: action.payload,
-                isSameValue: action.payload == state.submittedText ? true : false
+                isSameValue: action.payload === state.submittedText ? true : false
             }
         default:
             return state
