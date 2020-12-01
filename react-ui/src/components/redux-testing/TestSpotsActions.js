@@ -6,7 +6,8 @@ import { connect } from 'react-redux';
 import { 
     fetchNearbySpots, fetchSpotDetails, fetchSpotsConstants,
     fetchSavedSpotsDetails,
-    submitRating
+    submitRating, 
+    createComment, deleteComment, updateComment, fetchComments
 } from '../../redux/actions/spotsActions';
 import {saveSpot, removeSavedSpot} from '../../redux/actions/accountActions';
 import PopTimesChart from '../../components/pages/PopTimesChart';
