@@ -84,8 +84,6 @@ class TestSpotsActions extends React.Component {
                 <button onClick={() => this.props.fetchComments(this.state.placeId)}>fetch comments</button><br />
                 <div>creating comment...{this.props.creatingComment.toString()}</div>
                 <div>comments...<div style={{maxHeight: "1000px", maxWidth: "1200px", overflow: "auto"}}><pre>{JSON.stringify(this.props.comments, null, 2)}</pre></div></div>
-                {console.log(this.state.comment)}
-                {console.log(this.props.comments)}
 
                 <input type="text" placeholder="placeId" onChange={e => this.setState({placeId: e.target.value})} /> <br/>
                 <input type="text" placeholder="overall rating" onChange={e => this.setState({overall: e.target.value})} /> <br/>
