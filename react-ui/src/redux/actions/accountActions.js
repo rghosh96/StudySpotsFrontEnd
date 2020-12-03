@@ -165,7 +165,8 @@ export const updateUserAccount = (userData) => dispatch => {
 			musicPref: userData.musicPref,
 			spacePref: userData.spacePref,
 			lightingPref: userData.lightingPref,
-			foodPref: userData.foodPref
+			foodPref: userData.foodPref,
+			savedSpots: userData.savedSpots || []
 		}).then(() => {
 			dispatch({ type: UPDATE_ACCOUNT_SUCCESS });
 			// should we call fetchUserData() here just in case?
@@ -238,7 +239,8 @@ function mockSignUp(signUpData, dispatch) {
 					musicPref: signUpData.musicPref,
 					spacePref: signUpData.spacePref,
 					lightingPref: signUpData.lightingPref,
-					foodPref: signUpData.foodPref
+					foodPref: signUpData.foodPref,
+					savedSpots: []
 				};
 
 				dispatch({
