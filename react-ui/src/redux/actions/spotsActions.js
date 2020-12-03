@@ -671,7 +671,7 @@ export const updateComment = (placeId, commentId, newtext) => async (dispatch) =
 
     getDocumentData("users", userId)
         .then(userData => {
-
+        
             const fname = userData['fName'];
             const lname = userData['lName'];
 
@@ -736,15 +736,26 @@ export const fetchComments = (placeId) => (dispatch) => {
         }
     })
 
-    getNestedCollectionData("spots", placeId, "comments")
+    getNestedCollectionData("spots", placeId, "comments") 
         .then(commentDetails => {
 
+            var comments = commentDetails.docs.map(r => {
+                return {
+                    comment: r.data().comment,
+                    fname: r.data().fname,
+                    lname: r.data().lname,
+                    timestamp: r.data().timestamp,
+                    userId: r.data().userId,
+                }
+            })
+            console.log(comments)
             dispatch({
                 //success
                 type: FETCH_COMMENTS_SUCCESS,
-                commentDetails: commentDetails,
                 fetchingComments: false,
                 commentsFetched: true,
+                payload: comments,
+                
             })
 
         })

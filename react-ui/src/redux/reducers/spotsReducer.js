@@ -14,7 +14,7 @@ const initialState = {
     updatingComment: false,
     fetchingComments: false,
     commentsFetched: false,
-    commentDetails: null,
+    
 
     savingSpot: false,
     removingSpot: false,
@@ -36,6 +36,7 @@ const initialState = {
     typeConstants: [],
 
     spots: [],
+    comments: [],
     savedSpots: [],
     activeSpot: null,
     errorMsg: ''
@@ -156,7 +157,7 @@ export default function (state = initialState, action) {
                 ...state,
                 fetchingComments: false,
                 commentsFetched: true,
-                commentDetails: action.payload,
+                comments: action.payload,
                 errorMsg: SUCCESS,
 
             }
