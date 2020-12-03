@@ -309,6 +309,7 @@ const fetchAPISpotDetails = (placeId, onSuccess, onFailure) => {
 
 // calls fetchAPISpotDetails with the appropriate dispatches
 export const fetchSpotDetails = (placeId) => dispatch => {
+    console.log("FETCHING SPOT DETAILS")
     dispatch({
         type: FETCH_SPOT_DETAILS,
         payload: {
@@ -424,6 +425,9 @@ export const fetchSavedSpotsDetails = (placeIds) => dispatch => {
 } */
 export const submitRating = (placeId, rating) => async (dispatch) => {
     // parse all args to int
+    console.log("IN SUBMIT RATING REDUX")
+    console.log(placeId)
+    console.log(rating)
     var formattedRating = {
         overall: rating.overall ? parseInt(rating.overall) : null,
         music: rating.music ? parseInt(rating.music) : null,

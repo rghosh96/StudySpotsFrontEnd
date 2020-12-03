@@ -82,7 +82,7 @@ class TestSpotsActions extends React.Component {
                 <button onClick={() => this.props.updateComment(this.state.placeId, this.state.commentId, this.state.comment)}>update comments</button><br />
                 <button onClick={() => this.props.fetchComments(this.state.placeId)}>fetch comments</button><br />
                 <div>creating comment...{this.props.creatingComment.toString()}</div>
-
+                <div>{this.props.commentDetails}</div>
 
 
                 <input type="text" placeholder="placeId" onChange={e => this.setState({placeId: e.target.value})} /> <br/>
@@ -195,7 +195,7 @@ const mapStateToProps = state => ({
     updatingComment: state.spots.updatingComment,
     fetchingComments: state.spots.fetchingComments,
 
-    
+    commentDetails: state.spots.commentDetails, 
     
     userData: state.account.userData
 });
@@ -245,6 +245,7 @@ TestSpotsActions.propTypes = {
     deleteComment: PropTypes.func.isRequired,
     updateComment: PropTypes.func.isRequired,
     fetchComments: PropTypes.func.isRequired,
+
 
     creatingComment: PropTypes.bool.isRequired,
     deletingComment: PropTypes.bool.isRequired,
