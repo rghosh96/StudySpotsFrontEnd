@@ -91,7 +91,7 @@ export default function(state = initialState, action) {
                 ...state,
                 signingOut: false,
                 isSignedIn: false,
-                userData: [],
+                userData: {},
                 errorMsg: SUCCESS
             }
 
@@ -151,9 +151,7 @@ export default function(state = initialState, action) {
             if (action.payload.placeId) {
                 updatedSavedSpots = state.userData.savedSpots;
                 updatedSavedSpots.push(action.payload.placeId)
-                console.log({...state.userData, savedSpots: updatedSavedSpots})
             }
-
 
             return {
                 ...state,
