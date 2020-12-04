@@ -217,14 +217,11 @@ export const fetchNearbySpots = (params) => (dispatch) => {
 // onFailure(status): a callback which dispatches in case of failure, takes the status of the request
 const fetchAPISpotDetails = (placeId, onSuccess, onFailure) => {
     try {
-        console.log("IN PAI")
-        console.log(navigator.geolocation)
         // this will force a browser popup that asks permission to use the user's location
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 var latitude = position.coords.latitude;
                 var longitude = position.coords.longitude;
-                console.log("INSIDE GEO LOCATION")
                 if (latitude && longitude) {
                     // try getting ratings data
                     getDocumentData("spots", placeId)
@@ -311,8 +308,6 @@ const fetchAPISpotDetails = (placeId, onSuccess, onFailure) => {
 
 // calls fetchAPISpotDetails with the appropriate dispatches
 export const fetchSpotDetails = (placeId) => dispatch => {
-    console.log("FETCHING SPOT DETAILS")
-    console.log(placeId)
     dispatch({
         type: FETCH_SPOT_DETAILS,
         payload: {
@@ -322,7 +317,6 @@ export const fetchSpotDetails = (placeId) => dispatch => {
     });
 
     const onSuccess = (spot) => {
-        console.log("success")
         dispatch({
             type: FETCH_SPOT_DETAILS,
             payload: {
@@ -429,9 +423,6 @@ export const fetchSavedSpotsDetails = (placeIds) => dispatch => {
 } */
 export const submitRating = (placeId, rating) => async (dispatch) => {
     // parse all args to int
-    console.log("IN SUBMIT RATING REDUX")
-    console.log(placeId)
-    console.log(rating)
     var formattedRating = {
         overall: rating.overall ? parseInt(rating.overall) : null,
         music: rating.music ? parseInt(rating.music) : null,

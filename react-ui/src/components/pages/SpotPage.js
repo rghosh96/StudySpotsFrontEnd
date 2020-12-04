@@ -14,11 +14,6 @@ import PopTimesChart from "./PopTimesChart"
 
 
 export default function SpotPage() {
-  const [mRating, setMRating] = useState(3)
-  const [sRating, setSRating] = useState(4)
-  const [lRating, setLRating] = useState(2)
-  const [fRating, setFRating] = useState(1)
-  const [oRating, setORating] = useState(4)
 
   const [ratings, setRatings] = useState({
     overall: null,
@@ -107,27 +102,22 @@ export default function SpotPage() {
                 <div class="infoSection">
                   <p>music:</p>
                   <Ratings icon={faMusic} updateRating={updateState} currentRating={ratings.music} itemType="music" signedIn={isSignedIn} />
-                  <p>your rating: unrated</p>
                 </div>
                 <div class="infoSection">
                   <p>space:</p>
                   <Ratings icon={faStore} updateRating={updateState} currentRating={ratings.space} itemType="space" signedIn={isSignedIn}  />
-                  <p>your rating: unrated</p>
                 </div>
                 <div class="infoSection">
                   <p>lighting:</p>
                   <Ratings icon={faAdjust} updateRating={updateState} currentRating={ratings.lighting} itemType="lighting" signedIn={isSignedIn}  />
-                  <p>your rating: unrated</p>
                 </div>
                 <div class="infoSection">
                   <p>food:</p>
                   <Ratings icon={faHamburger} updateRating={updateState} currentRating={ratings.food} itemType="food" signedIn={isSignedIn}  />
-                  <p>your rating: unrated</p>
                 </div>
                 <div class="infoSection">
                   <p>overall:</p>
                   <Ratings icon={faSmileBeam} updateRating={updateState} currentRating={ratings.overall} itemType="overall" signedIn={isSignedIn}  />
-                  <p>your rating: unrated</p>
                 </div>
                 {console.log("ratings")}
                 {console.log(ratings)}
