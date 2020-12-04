@@ -75,15 +75,16 @@ class TestSpotsActions extends React.Component {
             <div style={{position: "absolute", top: "200px"}}>
                 <input type="text" placeholder="comment" onChange={e => this.setState({comment: e.target.value})} /> <br/>
                 <input type="text" placeholder="commentId" onChange={e => this.setState({commentId: e.target.value})} /> <br/>
+                <input type="text" placeholder="placeId" onChange={e => this.setState({placeId: e.target.value})} /> <br/>
                 
-                placeId: ChIJ84Inr4tryYcRlJKIRCmfw0Y <br/>
+                placeId: ChIJnQKsxvQPyYcRxqw3vavZ3jY <br/>
                 <button onClick={() => this.props.createComment(this.state.placeId, this.state.comment)}>create comment</button><br />
                 <button onClick={() => this.props.deleteComment(this.state.placeId, this.state.commentId)}>delete comment</button><br />
                 <button onClick={() => this.props.updateComment(this.state.placeId, this.state.commentId, this.state.comment)}>update comments</button><br />
                 <button onClick={() => this.props.fetchComments(this.state.placeId)}>fetch comments</button><br />
                 <div>creating comment...{this.props.creatingComment.toString()}</div>
-                <div>{this.props.commentDetails}</div>
 
+                <div>{this.props.commentDetails}</div>
 
                 <input type="text" placeholder="placeId" onChange={e => this.setState({placeId: e.target.value})} /> <br/>
                 <input type="text" placeholder="overall rating" onChange={e => this.setState({overall: e.target.value})} /> <br/>
@@ -195,8 +196,9 @@ const mapStateToProps = state => ({
     updatingComment: state.spots.updatingComment,
     fetchingComments: state.spots.fetchingComments,
 
+
     commentDetails: state.spots.commentDetails, 
-    
+
     userData: state.account.userData
 });
 
