@@ -3,9 +3,10 @@ import { useParams } from 'react-router-dom';
 import Header from '../nav/Header';
 import '../../styling/master.scss';
 import '../../styling/ratings.scss';
+import Button from 'react-bootstrap/Button';
 import LoadSpinner from './LoadSpinner';
 import { useSelector, useDispatch } from "react-redux";
-import { fetchSpotDetails } from "../../redux/actions/spotsActions";
+import { fetchSpotDetails, submitRating, fetchComments } from "../../redux/actions/spotsActions";
 import { Tab, Tabs } from 'react-bootstrap'
 import { faStore, faHamburger, faSmileBeam, faMusic, faAdjust } from '@fortawesome/free-solid-svg-icons'
 import Ratings from './Ratings.js'
@@ -13,30 +14,49 @@ import PopTimesChart from "./PopTimesChart"
 
 
 export default function SpotPage() {
-  const [mRating, setMRating] = useState(3)
-  const [sRating, setSRating] = useState(4)
-  const [lRating, setLRating] = useState(2)
-  const [fRating, setFRating] = useState(1)
-  const [oRating, setORating] = useState(4)
 
-  const { activeSpot, fetchingSpots } = useSelector(state => state.spots)
+  const [ratings, setRatings] = useState({
+    overall: null,
+    music: null,
+    lighting: null,
+    space: null,
+    food: null
+  })
+
+  const updateState = (attribute, data) => {
+    setRatings({
+      ...ratings,
+      [attribute]: data
+    })
+  }
+
+  const { activeSpot, fetchingSpots, commentDetails, fetchingComments, commentsFetched } = useSelector(state => state.spots)
+  const { isSignedIn } = useSelector(state => state.account)
   const [popTimesToday, setPopTimesToday] = useState("unavailable")
   const dispatch = useDispatch();
   const params = useParams();
 
   useEffect(() => {
     window.scrollTo(0, 0);
-
     if (!fetchingSpots && (!activeSpot || activeSpot.placeId != params.placeId)) {
       dispatch(fetchSpotDetails(params.placeId));
+      dispatch(fetchComments(params.placeId));
     }
   });
 
   useEffect(() => {
     if (activeSpot && activeSpot.popularTimes.status === "ok") {
+      console.log("setting pop times")
       const date = new Date();
       const day = date.getDay();
       setPopTimesToday(<PopTimesChart day={activeSpot.popularTimes.week[day].day} hours={activeSpot.popularTimes.week[day].hours} />)
+      setRatings({
+        overall: activeSpot.studySpotsRatings.overall,
+        music: activeSpot.studySpotsRatings.music,
+        lighting: activeSpot.studySpotsRatings.lighting,
+        space: activeSpot.studySpotsRatings.space,
+        food: activeSpot.studySpotsRatings.food
+      })
     }
   }, [activeSpot]);
 
@@ -45,7 +65,11 @@ export default function SpotPage() {
   return (
     <div>
       <Header />
-
+      {console.log("active spot")}
+      {console.log(activeSpot)}
+      {console.log("fetching spots")}
+      {console.log(fetchingSpots)}
+      {console.log("signed in ?" + isSignedIn)}
       {fetchingSpots || !activeSpot ?
         <LoadSpinner />
         :
@@ -77,36 +101,29 @@ export default function SpotPage() {
               <div class="info">
                 <div class="infoSection">
                   <p>music:</p>
-                  <Ratings icon={faMusic} updateRating={setMRating} currentRating={mRating} />
-                  <p>your rating: unrated</p>
+                  <Ratings icon={faMusic} updateRating={updateState} currentRating={ratings.music} itemType="music" signedIn={isSignedIn} />
                 </div>
                 <div class="infoSection">
                   <p>space:</p>
-                  <Ratings icon={faStore} updateRating={setSRating} currentRating={sRating} />
-                  <p>your rating: unrated</p>
+                  <Ratings icon={faStore} updateRating={updateState} currentRating={ratings.space} itemType="space" signedIn={isSignedIn}  />
                 </div>
                 <div class="infoSection">
                   <p>lighting:</p>
-                  <Ratings icon={faAdjust} updateRating={setLRating} currentRating={lRating} />
-                  <p>your rating: unrated</p>
+                  <Ratings icon={faAdjust} updateRating={updateState} currentRating={ratings.lighting} itemType="lighting" signedIn={isSignedIn}  />
                 </div>
                 <div class="infoSection">
                   <p>food:</p>
-                  <Ratings icon={faHamburger} updateRating={setFRating} currentRating={fRating} />
-                  <p>your rating: unrated</p>
+                  <Ratings icon={faHamburger} updateRating={updateState} currentRating={ratings.food} itemType="food" signedIn={isSignedIn}  />
                 </div>
                 <div class="infoSection">
                   <p>overall:</p>
-                  <Ratings icon={faSmileBeam} updateRating={setORating} currentRating={oRating} />
-                  <p>your rating: unrated</p>
+                  <Ratings icon={faSmileBeam} updateRating={updateState} currentRating={ratings.overall} itemType="overall" signedIn={isSignedIn}  />
                 </div>
-
-                {console.log("spotpage music: " + mRating)}
-                {console.log("spotpage space: " + sRating)}
-                {console.log("spotpage lighting: " + lRating)}
-                {console.log("spotpage food: " + fRating)}
-                {console.log("spotpage overall: " + oRating)}
+                {console.log("ratings")}
+                {console.log(ratings)}
               </div>
+              {isSignedIn ? <Button onClick={() => dispatch(submitRating(activeSpot.placeId, ratings))}>submit</Button> : null}
+              
             </div>
           </div>
 

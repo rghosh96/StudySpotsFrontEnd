@@ -222,7 +222,6 @@ const fetchAPISpotDetails = (placeId, onSuccess, onFailure) => {
             (position) => {
                 var latitude = position.coords.latitude;
                 var longitude = position.coords.longitude;
-
                 if (latitude && longitude) {
                     // try getting ratings data
                     getDocumentData("spots", placeId)

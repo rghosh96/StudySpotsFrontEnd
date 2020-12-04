@@ -4,7 +4,7 @@ import '../../styling/ratings.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 // props are: desired icon, updating rating in spot page, and current rating from spot page
-const Ratings = ({icon, updateRating, currentRating}) => {
+const Ratings = ({icon, updateRating, currentRating, itemType, signedIn}) => {
     console.log("currentRating: " + currentRating)
     // for hover effects when user hovers over to rate
     const [hover, setHover] = useState(null)
@@ -16,15 +16,13 @@ const Ratings = ({icon, updateRating, currentRating}) => {
     ** when user clicks on rating, spot page state is updated via
     ** the updateRating prop passed into component
     */
-    return(
-        <div class="ratings">
-            {[ ...Array(5)].map((item, i) => {
+   const signedInView = [ ...Array(5)].map((item, i) => {
                 const ratingValue = i +1;
                 return <label>
                 <input type="radio" 
                     name="rate" 
                     value={ratingValue} 
-                    onClick={()=>updateRating(ratingValue)}
+                    onClick={()=>updateRating(itemType, ratingValue)}
                     />
                 <FontAwesomeIcon className="star" 
                     color={ratingValue <= (hover || currentRating) ? "#c29257" : "#7f7f7f"}
@@ -34,7 +32,40 @@ const Ratings = ({icon, updateRating, currentRating}) => {
                     onMouseLeave={()=>setHover(null)}
                     />
                 </label>
-            })}
+            })
+    const notSignedInView = [ ...Array(5)].map((item, i) => {
+        const ratingValue = i +1;
+        return <label>
+        <FontAwesomeIcon className="star-no-hover" 
+            color={ratingValue <= currentRating ? "#c29257" : "#7f7f7f"}
+            icon={icon} 
+            size='2x'
+            />
+        </label>
+    })
+    return(
+        
+        <div class="ratings">
+            {console.log("INSIDE RATINGS")}
+            {console.log(signedIn)}
+            {signedIn ? signedInView : notSignedInView}
+            {/* {[ ...Array(5)].map((item, i) => {
+                const ratingValue = i +1;
+                return <label>
+                <input type="radio" 
+                    name="rate" 
+                    value={ratingValue} 
+                    onClick={()=>updateRating(itemType, ratingValue)}
+                    />
+                <FontAwesomeIcon className="star" 
+                    color={ratingValue <= (hover || currentRating) ? "#c29257" : "#7f7f7f"}
+                    icon={icon} 
+                    size='2x'
+                    onMouseEnter={()=>setHover(ratingValue)}
+                    onMouseLeave={()=>setHover(null)}
+                    />
+                </label>
+            })} */}
             {console.log(currentRating)}
         </div>
     )
