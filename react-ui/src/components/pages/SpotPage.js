@@ -132,7 +132,8 @@ export default function SpotPage() {
                 {console.log("ratings")}
                 {console.log(ratings)}
               </div>
-              <Button onClick={() => dispatch(submitRating(activeSpot.placeId, ratings))}>submit</Button>
+              {isSignedIn ? <Button onClick={() => dispatch(submitRating(activeSpot.placeId, ratings))}>submit</Button> : null}
+              
             </div>
           </div>
 
