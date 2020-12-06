@@ -578,7 +578,7 @@ export const submitRating = (placeId, rating) => async (dispatch) => {
 }
 
 export const createComment = (placeId, text) => async (dispatch) => {
-
+    console.log("IN CREATE COMMENT!")
 
     dispatch({
         type: CREATE_COMMENT,
@@ -591,7 +591,6 @@ export const createComment = (placeId, text) => async (dispatch) => {
 
     getDocumentData("users", userId)
         .then(userData => {
-
             const fname = userData['fName'];
             const lname = userData['lName'];
 

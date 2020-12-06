@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from '../nav/Header';
 import '../../styling/master.scss';
 import '../../styling/ratings.scss';
 import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
 import LoadSpinner from './LoadSpinner';
 import { useSelector, useDispatch } from "react-redux";
-import { fetchSpotDetails, submitRating, fetchComments } from "../../redux/actions/spotsActions";
+import { fetchSpotDetails, submitRating, fetchComments, createComment } from "../../redux/actions/spotsActions";
 import { Tab, Tabs } from 'react-bootstrap'
 import { faStore, faHamburger, faSmileBeam, faMusic, faAdjust } from '@fortawesome/free-solid-svg-icons'
 import Ratings from './Ratings.js'
@@ -23,6 +24,8 @@ export default function SpotPage() {
     food: null
   })
 
+  const [comment, setComment] = useState('')
+
   const updateState = (attribute, data) => {
     setRatings({
       ...ratings,
@@ -30,23 +33,38 @@ export default function SpotPage() {
     })
   }
 
-  const { activeSpot, fetchingSpots, commentDetails, fetchingComments, commentsFetched } = useSelector(state => state.spots)
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("in handle submit")
+    console.log(activeSpot.placeId)
+    console.log(comment)
+    dispatch(createComment(activeSpot.placeId, comment))
+    dispatch(fetchComments(params.placeId))
+  }
+
+  const handleChange = (e) => {
+    setComment(e.target.value)
+    console.log(comment)
+  }
+
+  const { activeSpot, fetchingSpots, comments } = useSelector(state => state.spots)
   const { isSignedIn } = useSelector(state => state.account)
   const [popTimesToday, setPopTimesToday] = useState("unavailable")
   const dispatch = useDispatch();
   const params = useParams();
 
+
   useEffect(() => {
     window.scrollTo(0, 0);
     if (!fetchingSpots && (!activeSpot || activeSpot.placeId != params.placeId)) {
+      console.log("IN USE EFFECT")
       dispatch(fetchSpotDetails(params.placeId));
       dispatch(fetchComments(params.placeId));
     }
-  });
+  }, );
 
   useEffect(() => {
     if (activeSpot && activeSpot.popularTimes.status === "ok") {
-      console.log("setting pop times")
       const date = new Date();
       const day = date.getDay();
       setPopTimesToday(<PopTimesChart day={activeSpot.popularTimes.week[day].day} hours={activeSpot.popularTimes.week[day].hours} />)
@@ -65,11 +83,6 @@ export default function SpotPage() {
   return (
     <div>
       <Header />
-      {console.log("active spot")}
-      {console.log(activeSpot)}
-      {console.log("fetching spots")}
-      {console.log(fetchingSpots)}
-      {console.log("signed in ?" + isSignedIn)}
       {fetchingSpots || !activeSpot ?
         <LoadSpinner />
         :
@@ -77,6 +90,7 @@ export default function SpotPage() {
           <div class="container">
             <h1>{activeSpot.name}</h1>
             <p>{activeSpot.formattedAddress}</p>
+            {console.log(isSignedIn)}
             <div class="info">
               {activeSpot.photos ? <img class="main-image" src={activeSpot.photos[0].url} /> : null}
               <div class="infoSection">
@@ -119,8 +133,6 @@ export default function SpotPage() {
                   <p>overall:</p>
                   <Ratings icon={faSmileBeam} updateRating={updateState} currentRating={ratings.overall} itemType="overall" signedIn={isSignedIn}  />
                 </div>
-                {console.log("ratings")}
-                {console.log(ratings)}
               </div>
               {isSignedIn ? <Button onClick={() => dispatch(submitRating(activeSpot.placeId, ratings))}>submit</Button> : null}
               
@@ -140,8 +152,30 @@ export default function SpotPage() {
                 )
               })}
             </Tab>
-            <Tab eventKey="comments" title="Comments">
-              <p>comments</p>
+            <Tab eventKey="comments" title="User Comments">
+              {isSignedIn ? <div>
+                <h2>add your comment!</h2>
+                <Form onSubmit={(e) => handleSubmit(e)}>
+                    <Form.Group >
+                    <Form.Control required as="textarea" rows={3} onChange={(e) => handleChange(e)} />
+                    </Form.Group>
+                    <Button type="submit">Submit Comment!</Button>
+                </Form>
+              <hr />
+              </div> : null }
+              
+              <h2>all comments</h2>
+              <br />
+              {console.log(comments)}
+              {comments && comments.map(comment => {
+                return (
+                  <div>
+                    <h3>{comment.fname} {comment.lname}</h3>
+                    <p>{comment.comment}</p>
+                    <hr />
+                  </div>
+                )
+              })}
             </Tab>
             <Tab eventKey="photos" title="More Photos">
               <div class="photo-wrap">
