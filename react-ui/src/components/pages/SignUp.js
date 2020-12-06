@@ -18,8 +18,6 @@ class SignUp extends React.Component {
         password: '',
         fName: '',
         lName: '',
-        zipcode: '',
-        state: '',
         musicPref: [],
         spacePref: [],
         lightingPref: [],
@@ -52,9 +50,6 @@ class SignUp extends React.Component {
                 passwordConfirmed: false,
             })
         }
-        console.log("IN CONFIRM PASSWORD")
-        console.log(e.target.value)
-        console.log(this.state.passwordConfirmed)
     }
 
     // handles state info that can have multiple options
@@ -119,7 +114,6 @@ class SignUp extends React.Component {
     handleSubmit = (e) => {
         e.preventDefault();
         if (this.state.passwordConfirmed) {
-            console.log(this.state)
             this.props.userSignUp(this.state)
             this.setState({ loading: true })
             // wait one second to check if successfully signed in
@@ -146,13 +140,8 @@ class SignUp extends React.Component {
             modalToggle: false
         })
     }
-    
 
     render() {
-        console.log(this.state.musicPref)
-        console.log(this.state.spacePref)
-        console.log(this.state.lightingPref)
-        console.log(this.state.foodPref)
         // conditionally redirect to myspots if successful sign in
         if (this.state.loading) {
             return <LoadSpinner />
@@ -196,18 +185,6 @@ class SignUp extends React.Component {
                         <Form.Label>Confirm Password *</Form.Label>
                         <Form.Control required onChange={this.handleConfirmPassword} id="passwordConfirm" type="password"/>
                     </Form.Group>
-
-                    <Form.Row>
-                        <Form.Group as={Col}>
-                            <Form.Label>State*</Form.Label>
-                            <Form.Control required onChange={this.handleChange} id="state"/>
-                        </Form.Group>
-                        
-                        <Form.Group as={Col} >
-                            <Form.Label>Zip Code*</Form.Label>
-                            <Form.Control required onChange={this.handleChange} id="zipcode" />
-                        </Form.Group>
-                    </Form.Row>
 
                     <p>Select preferences from the areas below. If you do not have a preference for an area, do not check any boxes.</p>
 

@@ -18,6 +18,7 @@ export const checkAuth = () => dispatch => {
 	// what if guest user? what happens when they refresh and have no acct?
 	// maybe include a link to signin on the signup page
 	firebase.auth().onAuthStateChanged((user) => {
+		console.log(user)
 		if (user) {
 			dispatch({ type: SIGN_IN_SUCCESS });
 			fetchUserData()(dispatch);
@@ -95,8 +96,6 @@ export const fetchUserData = () => dispatch => {
 /* signUpData = {
 	fName: <string>,
 	lName: <string>,
-	state: <string>,  // length 2
-	zipcode: <int>,
 	email: <string>,
 	password: <string>,
 	confirmPwd: <string>,
@@ -134,8 +133,6 @@ export const userSignUp = (signUpData) => dispatch => {
 /* userData = {
 	fName: <string>,
 	lName: <string>,
-	state: <string>,  // length 2
-	zipcode: <int>,
 	email: <string>,
 	newPassword: <string>,
 	confirmNewPwd: <string>,
@@ -160,8 +157,6 @@ export const updateUserAccount = (userData) => dispatch => {
 		firestore.collection('users').doc(user.uid.toString()).set({
 			fName: userData.fName,
 			lName: userData.lName,
-			state: userData.state,
-			zipcode: userData.zipcode,
 			musicPref: userData.musicPref,
 			spacePref: userData.spacePref,
 			lightingPref: userData.lightingPref,
@@ -178,78 +173,6 @@ export const updateUserAccount = (userData) => dispatch => {
 		})
 	}
 };
-
-const wait = time => new Promise((resolve) => setTimeout(resolve, time));
-
-function mockSignIn(signInData, dispatch) {
-	// for now, here is a mock sign in with a 2 second delay to simulate processing.
-	// requires email "email" and password "password" for success
-	// populates store with mock userData on success
-	dispatch({
-		type: SIGN_IN_REQUEST
-	})
-
-	wait(2000)
-		.then(() => {
-			if (signInData.email === 'email' && signInData.password === 'password') {
-				let userData = {
-					fName: 'Faker',
-					lName: 'McFakerson',
-					state: 'ZZ',
-					zipcode: 12345,
-					email: 'email',
-					musicPref: 3,
-					spacePref: 2,
-					lightingPref: 5,
-					foodPref: 1
-				};
-
-				dispatch({
-					type: SIGN_IN_SUCCESS,
-					payload: userData
-				});
-			} else {
-				dispatch({
-					type: SIGN_IN_FAILURE,
-					payload: BAD_CREDENTIALS
-				});
-			}
-		});
-}
-
-function mockSignUp(signUpData, dispatch) {
-	dispatch({
-		type: SIGN_UP_REQUEST
-	})
-
-	wait(2000)
-		.then(() => {
-			if (signUpData.email === 'email') {
-				dispatch({
-					type: SIGN_UP_FAILURE,
-					payload: EXISTING_ACCOUNT
-				});
-			} else {
-				let userData = {
-					fName: signUpData.fName,
-					lName: signUpData.lName,
-					state: signUpData.state,
-					zipcode: signUpData.zipcode,
-					email: signUpData.email,
-					musicPref: signUpData.musicPref,
-					spacePref: signUpData.spacePref,
-					lightingPref: signUpData.lightingPref,
-					foodPref: signUpData.foodPref,
-					savedSpots: []
-				};
-
-				dispatch({
-					type: SIGN_UP_SUCCESS,
-					payload: userData
-				});
-			}
-		});
-}
 
 // adds placeId to the current user's savedSpots in Firestore, then calls 
 // spotsActions.fetchSpotDetails(), and the details are passed into the reducer
@@ -326,6 +249,87 @@ export const removeSavedSpot = (placeId) => (dispatch) => {
         });
 }
 
+export const userSignOut = () => dispatch => {
+	dispatch({ type: SIGN_OUT_REQUEST });
+	const firebase = getFirebase();
+
+	firebase.auth().signOut().then(() => {
+		dispatch({ type: SIGN_OUT_SUCCESS });
+	});
+
+	//Add else SIGN_OUT_FAILURE
+}
+
+
+
+const wait = time => new Promise((resolve) => setTimeout(resolve, time));
+
+function mockSignIn(signInData, dispatch) {
+	// for now, here is a mock sign in with a 2 second delay to simulate processing.
+	// requires email "email" and password "password" for success
+	// populates store with mock userData on success
+	dispatch({
+		type: SIGN_IN_REQUEST
+	})
+
+	wait(2000)
+		.then(() => {
+			if (signInData.email === 'email' && signInData.password === 'password') {
+				let userData = {
+					fName: 'Faker',
+					lName: 'McFakerson',
+					email: 'email',
+					musicPref: 3,
+					spacePref: 2,
+					lightingPref: 5,
+					foodPref: 1
+				};
+
+				dispatch({
+					type: SIGN_IN_SUCCESS,
+					payload: userData
+				});
+			} else {
+				dispatch({
+					type: SIGN_IN_FAILURE,
+					payload: BAD_CREDENTIALS
+				});
+			}
+		});
+}
+
+function mockSignUp(signUpData, dispatch) {
+	dispatch({
+		type: SIGN_UP_REQUEST
+	})
+
+	wait(2000)
+		.then(() => {
+			if (signUpData.email === 'email') {
+				dispatch({
+					type: SIGN_UP_FAILURE,
+					payload: EXISTING_ACCOUNT
+				});
+			} else {
+				let userData = {
+					fName: signUpData.fName,
+					lName: signUpData.lName,
+					email: signUpData.email,
+					musicPref: signUpData.musicPref,
+					spacePref: signUpData.spacePref,
+					lightingPref: signUpData.lightingPref,
+					foodPref: signUpData.foodPref,
+					savedSpots: []
+				};
+
+				dispatch({
+					type: SIGN_UP_SUCCESS,
+					payload: userData
+				});
+			}
+		});
+}
+
 function mockUpdateAccount(userData, dispatch) {
 	dispatch({
 		type: UPDATE_ACCOUNT_REQUEST
@@ -336,7 +340,6 @@ function mockUpdateAccount(userData, dispatch) {
 			let userNewData = {
 				fName: userData.fName,
 				lName: userData.lName,
-				zipcode: userData.zipcode,
 				email: userData.email,
 				musicPref: userData.musicPref,
 				spacePref: userData.spacePref,
@@ -349,15 +352,4 @@ function mockUpdateAccount(userData, dispatch) {
 				payload: userNewData
 			});
 		});
-}
-
-export const userSignOut = () => dispatch => {
-	dispatch({ type: SIGN_OUT_REQUEST });
-	const firebase = getFirebase();
-
-	firebase.auth().signOut().then(() => {
-		dispatch({ type: SIGN_OUT_SUCCESS });
-	});
-
-	//Add else SIGN_OUT_FAILURE
 }

@@ -19,7 +19,6 @@ class SignIn extends React.Component {
     handleChange = (e) => {
         this.setState( {
             [e.target.id]: e.target.value,
-
         })
     }
 
@@ -57,13 +56,13 @@ class SignIn extends React.Component {
         })
     }
 
-
     render() {
-       
+        console.log('signin rerender')
+
         // conditionally redirect to myspots if successful sign in
         if (this.props.isSignedIn) {
         return (
-            <Redirect to="/myspots" />
+            <Redirect to="/" />
         )} else {
         return (
             <div>
@@ -73,12 +72,12 @@ class SignIn extends React.Component {
                         <h1>sign in</h1>
                         <hr></hr>
                         
-                        <Form.Group  controlId="formGridEmail">
+                        <Form.Group>
                             <Form.Label>Email</Form.Label>
                             <Form.Control required onChange={this.handleChange} id="email" type="email"  />
                         </Form.Group>
 
-                        <Form.Group controlId="formGridPassword">
+                        <Form.Group>
                             <Form.Label>Password</Form.Label>
                             <Form.Control required onChange={this.handleChange} id="password" type="password"/>
                         </Form.Group>
@@ -88,12 +87,12 @@ class SignIn extends React.Component {
 
                     {/* error modal */}
                     <Modal 
-                    show={this.state.modalToggle} 
-                    onHide={this.handleClose}
-                    size="lg"
-                    aria-labelledby="contained-modal-title-vcenter"
-                    centered
-                >
+                        show={this.state.modalToggle} 
+                        onHide={this.handleClose}
+                        size="lg"
+                        aria-labelledby="contained-modal-title-vcenter"
+                        centered
+                    >
                     <Modal.Header>
                         <Modal.Title>Sorry, there was an error.</Modal.Title>
                     </Modal.Header>
