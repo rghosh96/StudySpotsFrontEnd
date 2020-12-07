@@ -143,28 +143,34 @@ export default function SpotPage() {
               </div>
             </div>
 
+            {console.log(activeSpot)}
             <div class="center">
               <h2>at a glance</h2>
               <div class="info">
                 <div class="infoSection">
                   <p>music:</p>
                   <Ratings icon={faMusic} updateRating={updateState} currentRating={ratings.music} itemType="music" signedIn={isSignedIn} />
+                  <p>avg rating: {activeSpot.studySpotsRatings.music}/5</p>
                 </div>
                 <div class="infoSection">
                   <p>space:</p>
                   <Ratings icon={faStore} updateRating={updateState} currentRating={ratings.space} itemType="space" signedIn={isSignedIn}  />
+                  <p>avg rating: {activeSpot.studySpotsRatings.space}/5</p>
                 </div>
                 <div class="infoSection">
                   <p>lighting:</p>
                   <Ratings icon={faAdjust} updateRating={updateState} currentRating={ratings.lighting} itemType="lighting" signedIn={isSignedIn}  />
+                  <p>avg rating: {activeSpot.studySpotsRatings.lighting}/5</p>
                 </div>
                 <div class="infoSection">
                   <p>food:</p>
                   <Ratings icon={faHamburger} updateRating={updateState} currentRating={ratings.food} itemType="food" signedIn={isSignedIn}  />
+                  <p>avg rating: {activeSpot.studySpotsRatings.food}/5</p>
                 </div>
                 <div class="infoSection">
                   <p>overall:</p>
                   <Ratings icon={faSmileBeam} updateRating={updateState} currentRating={ratings.overall} itemType="overall" signedIn={isSignedIn}  />
+                  <p>avg rating: {activeSpot.studySpotsRatings.overall}/5</p>
                 </div>
               </div>
               {isSignedIn ? <Button onClick={() => dispatch(submitRating(activeSpot.placeId, ratings))}>submit</Button> : null}
