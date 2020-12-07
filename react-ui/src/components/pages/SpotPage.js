@@ -32,6 +32,7 @@ export default function SpotPage() {
   const [firebaseUID, setFirebaseUID] = useState()
 
   const updateState = (attribute, data) => {
+    console.log("IN UPDATE STATE " + attribute + data)
     setRatings({
       ...ratings,
       [attribute]: data
@@ -80,7 +81,6 @@ export default function SpotPage() {
   const dispatch = useDispatch();
   const params = useParams();
 
-
   useEffect(() => {
     window.scrollTo(0, 0);
     if (!fetchingSpots && (!activeSpot || activeSpot.placeId != params.placeId)) {
@@ -102,17 +102,17 @@ export default function SpotPage() {
       const day = date.getDay();
       setPopTimesToday(<PopTimesChart day={activeSpot.popularTimes.week[day].day} hours={activeSpot.popularTimes.week[day].hours} />)
       setRatings({
-        overall: activeSpot.studySpotsRatings.overall,
-        music: activeSpot.studySpotsRatings.music,
-        lighting: activeSpot.studySpotsRatings.lighting,
-        space: activeSpot.studySpotsRatings.space,
-        food: activeSpot.studySpotsRatings.food
+        overall: activeSpot.userRating ? activeSpot.userRating.overall : null,
+        music: activeSpot.userRating ? activeSpot.userRating.music : null,
+        lighting: activeSpot.userRating ? activeSpot.userRating.lighting : null,
+        space: activeSpot.userRating ? activeSpot.userRating.space : null,
+        food: activeSpot.userRating ? activeSpot.userRating.food : null
       })
     }
   }, [activeSpot]);
 
   // changed to render page when popular times loads, since it takes the longest
-
+  
   return (
     <div>
       <Header />
@@ -148,29 +148,29 @@ export default function SpotPage() {
               <h2>at a glance</h2>
               <div class="info">
                 <div class="infoSection">
-                  <p>music:</p>
+                  <p>your music rating:</p>
                   <Ratings icon={faMusic} updateRating={updateState} currentRating={ratings.music} itemType="music" signedIn={isSignedIn} />
-                  <p>avg rating: {activeSpot.studySpotsRatings.music}/5</p>
+                  <p>avg rating: {activeSpot.studySpotsRatings.music ? activeSpot.studySpotsRatings.music+"/5" : "no ratings yet .."}</p>
                 </div>
                 <div class="infoSection">
-                  <p>space:</p>
+                  <p>your space rating:</p>
                   <Ratings icon={faStore} updateRating={updateState} currentRating={ratings.space} itemType="space" signedIn={isSignedIn}  />
-                  <p>avg rating: {activeSpot.studySpotsRatings.space}/5</p>
+                  <p>avg rating: {activeSpot.studySpotsRatings.space ? activeSpot.studySpotsRatings.space+"/5" : "no ratings yet .."}</p>
                 </div>
                 <div class="infoSection">
-                  <p>lighting:</p>
+                  <p>your lighting rating:</p>
                   <Ratings icon={faAdjust} updateRating={updateState} currentRating={ratings.lighting} itemType="lighting" signedIn={isSignedIn}  />
-                  <p>avg rating: {activeSpot.studySpotsRatings.lighting}/5</p>
+                  <p>avg rating: {activeSpot.studySpotsRatings.lighting ? activeSpot.studySpotsRatings.lighting+"/5" : "no ratings yet .."}</p>
                 </div>
                 <div class="infoSection">
-                  <p>food:</p>
+                  <p>your food rating:</p>
                   <Ratings icon={faHamburger} updateRating={updateState} currentRating={ratings.food} itemType="food" signedIn={isSignedIn}  />
-                  <p>avg rating: {activeSpot.studySpotsRatings.food}/5</p>
+                  <p>avg rating: {activeSpot.studySpotsRatings.food ? activeSpot.studySpotsRatings.food+"/5" : "no ratings yet .."}</p>
                 </div>
                 <div class="infoSection">
-                  <p>overall:</p>
+                  <p>your overall rating:</p>
                   <Ratings icon={faSmileBeam} updateRating={updateState} currentRating={ratings.overall} itemType="overall" signedIn={isSignedIn}  />
-                  <p>avg rating: {activeSpot.studySpotsRatings.overall}/5</p>
+                  <p>avg rating: {activeSpot.studySpotsRatings.overall ? activeSpot.studySpotsRatings.overall+"/5" : "no ratings yet .."}</p>
                 </div>
               </div>
               {isSignedIn ? <Button onClick={() => dispatch(submitRating(activeSpot.placeId, ratings))}>submit</Button> : null}
@@ -205,9 +205,8 @@ export default function SpotPage() {
               
               <h2>all comments</h2>
               <br />
-              {console.log("COMMENTS ARRAY")}
-              {console.log(comments)}
-              {console.log(firebaseUID)}
+              {/* {console.log("COMMENTS ARRAY")}
+              {console.log(comments)} */}
               {comments && comments.map(comment => {
                 return (
                   <div>
