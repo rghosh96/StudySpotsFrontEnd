@@ -6,6 +6,17 @@ import {  SIGN_UP_REQUEST, SIGN_UP_FAILURE, SIGN_UP_SUCCESS, SIGN_OUT_REQUEST, S
 } from '../actions/types';
 import { SUCCESS } from '../errorMessages'
 
+const blankUserData = {     // might have to init to nulls if frontend has problems
+    fName: '',
+    lName: '',
+    email: '',
+    musicPref: [],
+    spacePref: [],
+    lightingPref: [],
+    foodPref: [],
+    savedSpots: [],
+}
+
 const initialState = {
     signingUp: false,
     signingIn: false,
@@ -17,18 +28,7 @@ const initialState = {
     fetchingUserData: false,
     userDataFetched: false,
     savingSpot: false,
-    userData: {     // might have to init to nulls if frontend has problems
-        fName: '',
-	    lName: '',
-        zipcode: '',
-        state: '',
-        email: '',
-	    musicPref: [],
-	    spacePref: [],
-	    lightingPref: [],
-        foodPref: [],
-        savedSpots: [],
-    },
+    userData: blankUserData,
     errorMsg: ''
 };
 
@@ -60,12 +60,18 @@ export default function(state = initialState, action) {
             }    
 
         case SIGN_UP_REQUEST:
+            console.log('SIGN_UP_REQUEST')
+            console.log(action.payload)
+
             return {
                 ...state,
                 signingUp: true
             }
 
         case SIGN_UP_SUCCESS:
+            console.log('SIGN_UP_SUCCESS')
+            console.log(action.payload)
+
             return {
                 ...state,
                 signingUp: false,
@@ -74,6 +80,9 @@ export default function(state = initialState, action) {
             }
 
         case SIGN_UP_FAILURE:
+            console.log('SIGN_UP_FAILURE')
+            console.log(action.payload)
+            
             return {
                 ...state,
                 signingUp: false,
@@ -91,7 +100,18 @@ export default function(state = initialState, action) {
                 ...state,
                 signingOut: false,
                 isSignedIn: false,
-                userData: {},
+                userData: {     // might have to init to nulls if frontend has problems
+                    fName: '',
+                    lName: '',
+                    zipcode: '',
+                    state: '',
+                    email: '',
+                    musicPref: [],
+                    spacePref: [],
+                    lightingPref: [],
+                    foodPref: [],
+                    savedSpots: [],
+                },
                 errorMsg: SUCCESS
             }
 
@@ -100,7 +120,7 @@ export default function(state = initialState, action) {
                 ...state,
                 signingOut: false,
                 isSignedIn: true,
-                userData: [],
+                userData: blankUserData,
                 errorMsg: action.payload
             }
 

@@ -22,7 +22,6 @@ export default function Header() {
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">
                         <Nav.Link as={Link} to="/">Spotlight</Nav.Link>
-                        <Nav.Link as={Link} to="/reviews">Reviews</Nav.Link>
                         <Nav.Link as={Link} to="/myspots">My Spots</Nav.Link>
                         <Nav.Link as={Link} to="/settings">Settings</Nav.Link>
                         <Nav.Link as={Link} to="/spotpage/ChIJa00m55kayYcRnz5WcvjDiMI">Spot Page</Nav.Link>

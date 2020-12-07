@@ -59,19 +59,22 @@ html,
   border-radius: 50%;
 }
 
+.spotlist-header {
+  top: 30px;
+  position: relative;
+  transform: translateX(25%);
+  display: flex;
+  justify-content: flex-start;
+}
+
 .spotlight {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 50px !important;
+  width: 100%;
   min-width: 100%;
-
-  h1 {
-    width: 100%;
-    display: flex;
-    justify-content: flex-start;
-  }
 
   .keywordarea {
     width: 30%;
@@ -105,9 +108,9 @@ html,
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 50%;
-    margin: 50px !important;
-    border: 1.5px solid #687e63;
+    width: 700px;
+    margin: 50px!important;
+    border: 1.5px solid #687E63;
     border-radius: 25px;
     padding: 10px;
     margin: 15px !important;

@@ -38,7 +38,7 @@ import {
     FETCH_SPOTS_REQUEST, FETCH_SPOTS_SUCCESS, FETCH_SPOTS_FAILURE,
     FETCH_SPOTS_CONSTANTS_SUCCESS, FETCH_SPOTS_CONSTANTS_FAILURE,
     FETCH_SPOT_DETAILS,
-    FETCH_SAVED_SPOTS_DETAILS,
+    FETCH_SAVED_SPOTS_DETAILS, REMOVE_SAVED_SPOT_DETAILS,
     SUBMIT_RATING, CLEAR_ACTIVE_SPOT,
     CREATE_COMMENT, DELETE_COMMENT, UPDATE_COMMENT, FETCH_COMMENTS_SUCCESS, FETCH_COMMENTS_FAILURE, FETCH_COMMENTS_REQUEST
 } from '../actions/types';
@@ -423,6 +423,13 @@ export const fetchSavedSpotsDetails = (placeIds) => dispatch => {
     });
 }
 
+export const removeSavedSpotDetails = (placeId) => async (dispatch) => {
+    dispatch({
+        type: REMOVE_SAVED_SPOT_DETAILS,
+        payload: { placeId: placeId }
+    })
+}
+
 /* rating = {
     overall: <string '1'-'5'>,
     food: <string '1'-'5'>,
@@ -660,8 +667,6 @@ export const deleteComment = (placeId, commentId) => (dispatch) => {
                 }
             })
         })
-
-
 }
 
 export const updateComment = (placeId, commentId, newtext) => async (dispatch) => {

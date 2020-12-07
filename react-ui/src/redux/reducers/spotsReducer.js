@@ -4,7 +4,8 @@ import {
     FETCH_SPOT_DETAILS,
 FETCH_SAVED_SPOTS_DETAILS,
     SUBMIT_RATING, UPDATE_RATING, CREATE_COMMENT, DELETE_COMMENT, UPDATE_COMMENT, FETCH_COMMENTS_SUCCESS, FETCH_COMMENTS_FAILURE, FETCH_COMMENTS_REQUEST,
-    CLEAR_ACTIVE_SPOT
+    CLEAR_ACTIVE_SPOT,
+    REMOVE_SAVED_SPOT_DETAILS
 } from '../actions/types';
 import { SUCCESS } from '../errorMessages'
 
@@ -43,7 +44,8 @@ const initialState = {
 };
 
 export default function (state = initialState, action) {
-    var updatedSavedSpots = null;
+    var lastSavedSpotsIds = null;
+    var nextSavedSpots = null;
 
     switch (action.type) {
 
@@ -98,16 +100,16 @@ export default function (state = initialState, action) {
             }
 
         case CLEAR_ACTIVE_SPOT:
-            console.log("clear")
             return {
                 ...state,
                 activeSpot: null
             }
 
         case FETCH_SAVED_SPOTS_DETAILS:
-            updatedSavedSpots = null;
-            if (action.payload.spotsDetails) {
-                updatedSavedSpots = [action.payload.spotsDetails, ...state.savedSpots];
+            nextSavedSpots = state.savedSpots;
+            lastSavedSpotsIds = state.savedSpots.map(spot => {return spot.placeId});
+            if (action.payload.spotsDetails && !lastSavedSpotsIds.includes(action.payload.spotsDetails.placeId)) {
+                nextSavedSpots.push(action.payload.spotsDetails);
             }
 
             return {
@@ -115,7 +117,13 @@ export default function (state = initialState, action) {
                 fetchingSpots: action.payload.fetchingSpots,
                 spotsFetched: action.payload.spotsFetched || state.spotsFetched,
                 errorMsg: action.payload.errorMsg || '',
-                savedSpots: updatedSavedSpots || state.savedSpots
+                savedSpots: nextSavedSpots
+            }
+
+        case REMOVE_SAVED_SPOT_DETAILS:
+            return {
+                ...state,
+                savedSpots: state.savedSpots.filter(spot => spot.placeId != action.payload.placeId)
             }
 
         case SUBMIT_RATING:
@@ -159,7 +167,6 @@ export default function (state = initialState, action) {
                 commentsFetched: true,
                 comments: action.payload,
                 errorMsg: SUCCESS,
-
             }
 
         case FETCH_COMMENTS_FAILURE:
