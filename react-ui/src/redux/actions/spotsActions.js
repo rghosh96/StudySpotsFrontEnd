@@ -634,7 +634,7 @@ export const createComment = (placeId, text) => async (dispatch) => {
 }
 
 export const deleteComment = (placeId, commentId) => (dispatch) => {
-
+    console.log("IN REDUX DELETE")
     dispatch({
         type: DELETE_COMMENT,
         payload: {
@@ -744,6 +744,7 @@ export const fetchComments = (placeId) => (dispatch) => {
                     lname: r.data().lname,
                     timestamp: r.data().timestamp,
                     userId: r.data().userId,
+                    commentId: r.id
                 }
             })
             console.log(comments)

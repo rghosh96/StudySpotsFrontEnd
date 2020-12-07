@@ -7,11 +7,12 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import LoadSpinner from './LoadSpinner';
 import { useSelector, useDispatch } from "react-redux";
-import { fetchSpotDetails, submitRating, fetchComments, createComment } from "../../redux/actions/spotsActions";
+import { fetchSpotDetails, submitRating, fetchComments, createComment, deleteComment } from "../../redux/actions/spotsActions";
 import { Tab, Tabs } from 'react-bootstrap'
 import { faStore, faHamburger, faSmileBeam, faMusic, faAdjust } from '@fortawesome/free-solid-svg-icons'
 import Ratings from './Ratings.js'
 import PopTimesChart from "./PopTimesChart"
+import { getUserId } from '../../services/firebaseService'
 
 
 export default function SpotPage() {
@@ -25,6 +26,8 @@ export default function SpotPage() {
   })
 
   const [comment, setComment] = useState('')
+  const [commentsArray, setCommentsArray] = useState()
+  const [firebaseUID, setFirebaseUID] = useState()
 
   const updateState = (attribute, data) => {
     setRatings({
@@ -33,13 +36,20 @@ export default function SpotPage() {
     })
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     console.log("in handle submit")
     console.log(activeSpot.placeId)
     console.log(comment)
     dispatch(createComment(activeSpot.placeId, comment))
-    dispatch(fetchComments(params.placeId))
+    dispatch(fetchComments(activeSpot.placeId))
+  }
+
+  const removeComment = (index) => {
+    console.log("deleting comment ...")
+    console.log(activeSpot.placeId)
+    console.log(index)
+    dispatch(deleteComment(params.placeId, index))
+    dispatch(fetchComments(activeSpot.placeId))
   }
 
   const handleChange = (e) => {
@@ -47,7 +57,7 @@ export default function SpotPage() {
     console.log(comment)
   }
 
-  const { activeSpot, fetchingSpots, comments } = useSelector(state => state.spots)
+  const { activeSpot, fetchingSpots, comments, creatingComment, fetchingComments } = useSelector(state => state.spots)
   const { isSignedIn } = useSelector(state => state.account)
   const [popTimesToday, setPopTimesToday] = useState("unavailable")
   const dispatch = useDispatch();
@@ -57,11 +67,25 @@ export default function SpotPage() {
   useEffect(() => {
     window.scrollTo(0, 0);
     if (!fetchingSpots && (!activeSpot || activeSpot.placeId != params.placeId)) {
-      console.log("IN USE EFFECT")
       dispatch(fetchSpotDetails(params.placeId));
       dispatch(fetchComments(params.placeId));
     }
-  }, );
+    getUserId()
+        .then(userId => {
+            setFirebaseUID(userId)
+        })
+        .catch(error => {
+            console.log("error in fetching firebase user id :/")
+        });
+  }, [activeSpot]);
+
+  // useEffect(() => {
+  //   console.log("IN USE EFFECT"  + fetchingComments)
+  //   if (!fetchingComments) {
+  //     console.log("IN USE EFFECT FOR COMMENTS")
+  //     setCommentsArray(comments)
+  //   }
+  // }, [comments]);
 
   useEffect(() => {
     if (activeSpot && activeSpot.popularTimes.status === "ok") {
@@ -155,23 +179,28 @@ export default function SpotPage() {
             <Tab eventKey="comments" title="User Comments">
               {isSignedIn ? <div>
                 <h2>add your comment!</h2>
-                <Form onSubmit={(e) => handleSubmit(e)}>
+                <Form >
                     <Form.Group >
                     <Form.Control required as="textarea" rows={3} onChange={(e) => handleChange(e)} />
                     </Form.Group>
-                    <Button type="submit">Submit Comment!</Button>
+                    <Button onClick={() => handleSubmit()}>Submit Comment!</Button>
                 </Form>
               <hr />
               </div> : null }
               
               <h2>all comments</h2>
               <br />
+              {console.log("COMMENTS ARRAY")}
               {console.log(comments)}
+              {console.log(firebaseUID)}
               {comments && comments.map(comment => {
                 return (
                   <div>
                     <h3>{comment.fname} {comment.lname}</h3>
                     <p>{comment.comment}</p>
+                    {comment.userId === firebaseUID ? 
+                    <Button onClick={() => removeComment(comment.commentId)}>delete comment</Button>
+                    : null}
                     <hr />
                   </div>
                 )
@@ -189,6 +218,8 @@ export default function SpotPage() {
           </Tabs>
         </div>
       }
+
+      
     </div>
   );
 
