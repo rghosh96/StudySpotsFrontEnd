@@ -142,12 +142,13 @@ export default function (state = initialState, action) {
 
         case CREATE_COMMENT:
             console.log("IN STORE CREATE COMMENT")
-            console.log(action.payload.creatingComment)
+            console.log(action.payload.newComment)
             console.log(state)
             return {
                 ...state,
                 creatingComment: action.payload.creatingComment,
                 errorMsg: action.payload.errorMsg || '',
+                comments: state.comments.push(action.payload.newComment) || state.comments
             }
 
         case DELETE_COMMENT:

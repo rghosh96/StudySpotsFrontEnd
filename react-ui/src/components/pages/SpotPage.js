@@ -50,7 +50,6 @@ export default function SpotPage() {
     console.log(activeSpot.placeId)
     console.log(comment)
     dispatch(createComment(activeSpot.placeId, comment))
-    dispatch(fetchComments(activeSpot.placeId))
   }
 
   const removeComment = (index) => {
@@ -58,7 +57,6 @@ export default function SpotPage() {
     console.log(activeSpot.placeId)
     console.log(index)
     dispatch(deleteComment(params.placeId, index))
-    dispatch(fetchComments(activeSpot.placeId))
   }
 
   const update = () => {
@@ -66,7 +64,6 @@ export default function SpotPage() {
     console.log(commentId)
     console.log(comment)
     dispatch(updateComment(params.placeId, commentId, comment))
-    dispatch(fetchComments(activeSpot.placeId))
     setModalToggle(false)
   }
 
