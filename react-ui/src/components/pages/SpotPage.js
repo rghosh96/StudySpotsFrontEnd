@@ -128,20 +128,6 @@ export default function SpotPage() {
     }
   }, [activeSpot]);
 
-  // useEffect(() => {
-  //   if (activeSpot && activeSpot.studySpotsRatings) {
-  //     setRatings({
-  //       overall: activeSpot.userRating ? activeSpot.userRating.overall : null,
-  //       music: activeSpot.userRating ? activeSpot.userRating.music : null,
-  //       lighting: activeSpot.userRating ? activeSpot.userRating.lighting : null,
-  //       space: activeSpot.userRating ? activeSpot.userRating.space : null,
-  //       food: activeSpot.userRating ? activeSpot.userRating.food : null
-  //     })
-  //   }
-  // }, [activeSpot]);
-
-  // changed to render page when popular times loads, since it takes the longest
-  
   return (
     <div>
       <Header />
@@ -242,8 +228,9 @@ export default function SpotPage() {
                     <p>{comment.comment}</p>
                     {comment.userId === firebaseUID ? 
                     <div>
-                      <Button onClick={() => removeComment(comment.commentId)}>delete comment</Button>
-                      <Button onClick={() => prepareModal(comment.comment, comment.commentId)}>update comment</Button>
+                      <Button onClick={() => prepareModal(comment.comment, comment.commentId)}>update</Button>
+                      &nbsp;&nbsp;
+                      <Button onClick={() => removeComment(comment.commentId)}>delete</Button>
                     </div> 
                     : null}
                     <hr />
