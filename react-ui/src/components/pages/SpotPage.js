@@ -5,9 +5,10 @@ import '../../styling/master.scss';
 import '../../styling/ratings.scss';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
+import Modal from 'react-bootstrap/Modal';
 import LoadSpinner from './LoadSpinner';
 import { useSelector, useDispatch } from "react-redux";
-import { fetchSpotDetails, submitRating, fetchComments, createComment, deleteComment } from "../../redux/actions/spotsActions";
+import { fetchSpotDetails, submitRating, fetchComments, createComment, deleteComment, updateComment } from "../../redux/actions/spotsActions";
 import { Tab, Tabs } from 'react-bootstrap'
 import { faStore, faHamburger, faSmileBeam, faMusic, faAdjust } from '@fortawesome/free-solid-svg-icons'
 import Ratings from './Ratings.js'
@@ -26,7 +27,8 @@ export default function SpotPage() {
   })
 
   const [comment, setComment] = useState('')
-  const [commentsArray, setCommentsArray] = useState()
+  const [modalToggle, setModalToggle] = useState(false)
+  const [commentId, setCommentId] = useState()
   const [firebaseUID, setFirebaseUID] = useState()
 
   const updateState = (attribute, data) => {
@@ -52,9 +54,24 @@ export default function SpotPage() {
     dispatch(fetchComments(activeSpot.placeId))
   }
 
+  const update = () => {
+    console.log("updating comment ...")
+    console.log(commentId)
+    console.log(comment)
+    dispatch(updateComment(params.placeId, commentId, comment))
+    dispatch(fetchComments(activeSpot.placeId))
+    setModalToggle(false)
+  }
+
   const handleChange = (e) => {
     setComment(e.target.value)
     console.log(comment)
+  }
+
+  const prepareModal = (comment, id) => {
+    setComment(comment)
+    setCommentId(id)
+    setModalToggle(true)
   }
 
   const { activeSpot, fetchingSpots, comments, creatingComment, fetchingComments } = useSelector(state => state.spots)
@@ -78,14 +95,6 @@ export default function SpotPage() {
             console.log("error in fetching firebase user id :/")
         });
   }, [activeSpot]);
-
-  // useEffect(() => {
-  //   console.log("IN USE EFFECT"  + fetchingComments)
-  //   if (!fetchingComments) {
-  //     console.log("IN USE EFFECT FOR COMMENTS")
-  //     setCommentsArray(comments)
-  //   }
-  // }, [comments]);
 
   useEffect(() => {
     if (activeSpot && activeSpot.popularTimes.status === "ok") {
@@ -199,7 +208,10 @@ export default function SpotPage() {
                     <h3>{comment.fname} {comment.lname}</h3>
                     <p>{comment.comment}</p>
                     {comment.userId === firebaseUID ? 
-                    <Button onClick={() => removeComment(comment.commentId)}>delete comment</Button>
+                    <div>
+                      <Button onClick={() => removeComment(comment.commentId)}>delete comment</Button>
+                      <Button onClick={() => prepareModal(comment.comment, comment.commentId)}>update comment</Button>
+                    </div> 
                     : null}
                     <hr />
                   </div>
@@ -216,10 +228,37 @@ export default function SpotPage() {
               </div>
             </Tab>
           </Tabs>
-        </div>
-      }
 
-      
+
+          <Modal 
+            show={modalToggle} 
+            onHide={() => setModalToggle(false)}
+            size="xl"
+            aria-labelledby="contained-modal-title-vcenter"
+            centered
+        >
+            <Modal.Header>
+                <Modal.Title>update your comment: </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <div class="center">
+            <Form >
+                <Form.Group >
+                <Form.Control required as="textarea" defaultValue={comment} rows={3} onChange={(e) => handleChange(e)} />
+                </Form.Group>
+              </Form>
+              </div>
+              </Modal.Body>
+            <Modal.Footer>
+            <Button onClick={() => update()}>Submit Comment!</Button>
+            <Button variant="secondary" onClick={() => setModalToggle(false)}>
+                Cancel
+            </Button>
+            </Modal.Footer>
+            </Modal>
+
+        </div>
+      } 
     </div>
   );
 
