@@ -141,6 +141,9 @@ export default function (state = initialState, action) {
             }
 
         case CREATE_COMMENT:
+            console.log("IN STORE CREATE COMMENT")
+            console.log(action.payload.creatingComment)
+            console.log(state)
             return {
                 ...state,
                 creatingComment: action.payload.creatingComment,

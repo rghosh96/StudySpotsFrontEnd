@@ -631,7 +631,18 @@ export const createComment = (placeId, text) => async (dispatch) => {
 
             addAmbiguousDoc("spots", placeId, "comments")
                 .then(commentDoc => {
+                    console.log("REDUX NEW COMMENT")
+                    console.log(newComment)
                     setNestedDocumentData("spots", placeId, "comments", commentDoc.id, newComment)
+                    console.log("INSIDE REDUX AB TO DISPATCH")
+                    dispatch({
+                        type: CREATE_COMMENT,
+                        payload: {
+                            creatingComment: false,
+                            errorMsg: SUCCESS
+                        }
+                    })
+                    console.log("we just dispatched ...")
                 })
                 .catch(error => {
                     dispatch({

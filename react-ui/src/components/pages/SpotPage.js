@@ -27,19 +27,25 @@ export default function SpotPage() {
   })
 
   const [comment, setComment] = useState('')
+  const [commentsArray, setCommentsArray] = useState()
   const [modalToggle, setModalToggle] = useState(false)
   const [commentId, setCommentId] = useState()
   const [firebaseUID, setFirebaseUID] = useState()
 
   const updateState = (attribute, data) => {
-    console.log("IN UPDATE STATE " + attribute + data)
     setRatings({
       ...ratings,
       [attribute]: data
     })
   }
 
-  const handleSubmit = () => {
+  const submitUserRating = () => {
+    console.log("IN SUBMIT USER RATING")
+    dispatch(submitRating(activeSpot.placeId, ratings))
+    dispatch(fetchSpotDetails(params.placeId));
+  }
+
+  const addComment = () => {
     console.log("in handle submit")
     console.log(activeSpot.placeId)
     console.log(comment)
@@ -82,6 +88,15 @@ export default function SpotPage() {
   const params = useParams();
 
   useEffect(() => {
+    // console.log("IN COMMENTS USE EFFECT " + creatingComment)
+    if (!fetchingComments) {
+      if (!creatingComment) {
+        setCommentsArray(comments)
+      }
+    }
+  }, [comments, creatingComment]);
+
+  useEffect(() => {
     window.scrollTo(0, 0);
     if (!fetchingSpots && (!activeSpot || activeSpot.placeId != params.placeId)) {
       dispatch(fetchSpotDetails(params.placeId));
@@ -101,6 +116,8 @@ export default function SpotPage() {
       const date = new Date();
       const day = date.getDay();
       setPopTimesToday(<PopTimesChart day={activeSpot.popularTimes.week[day].day} hours={activeSpot.popularTimes.week[day].hours} />)
+    }
+    if (activeSpot && activeSpot.studySpotsRatings) {
       setRatings({
         overall: activeSpot.userRating ? activeSpot.userRating.overall : null,
         music: activeSpot.userRating ? activeSpot.userRating.music : null,
@@ -110,6 +127,18 @@ export default function SpotPage() {
       })
     }
   }, [activeSpot]);
+
+  // useEffect(() => {
+  //   if (activeSpot && activeSpot.studySpotsRatings) {
+  //     setRatings({
+  //       overall: activeSpot.userRating ? activeSpot.userRating.overall : null,
+  //       music: activeSpot.userRating ? activeSpot.userRating.music : null,
+  //       lighting: activeSpot.userRating ? activeSpot.userRating.lighting : null,
+  //       space: activeSpot.userRating ? activeSpot.userRating.space : null,
+  //       food: activeSpot.userRating ? activeSpot.userRating.food : null
+  //     })
+  //   }
+  // }, [activeSpot]);
 
   // changed to render page when popular times loads, since it takes the longest
   
@@ -123,7 +152,6 @@ export default function SpotPage() {
           <div class="container">
             <h1>{activeSpot.name}</h1>
             <p>{activeSpot.formattedAddress}</p>
-            {console.log(isSignedIn)}
             <div class="info">
               {activeSpot.photos ? <img class="main-image" src={activeSpot.photos[0].url} /> : null}
               <div class="infoSection">
@@ -173,7 +201,7 @@ export default function SpotPage() {
                   <p>avg rating: {activeSpot.studySpotsRatings.overall ? activeSpot.studySpotsRatings.overall+"/5" : "no ratings yet .."}</p>
                 </div>
               </div>
-              {isSignedIn ? <Button onClick={() => dispatch(submitRating(activeSpot.placeId, ratings))}>submit</Button> : null}
+              {isSignedIn ? <Button onClick={() => submitUserRating()}>submit</Button> : null}
               
             </div>
           </div>
@@ -198,7 +226,7 @@ export default function SpotPage() {
                     <Form.Group >
                     <Form.Control required as="textarea" rows={3} onChange={(e) => handleChange(e)} />
                     </Form.Group>
-                    <Button onClick={() => handleSubmit()}>Submit Comment!</Button>
+                    <Button onClick={() => addComment()}>Submit Comment!</Button>
                 </Form>
               <hr />
               </div> : null }
@@ -206,8 +234,8 @@ export default function SpotPage() {
               <h2>all comments</h2>
               <br />
               {/* {console.log("COMMENTS ARRAY")}
-              {console.log(comments)} */}
-              {comments && comments.map(comment => {
+              {console.log(commentsArray)} */}
+              {commentsArray && commentsArray.map(comment => {
                 return (
                   <div>
                     <h3>{comment.fname} {comment.lname}</h3>
