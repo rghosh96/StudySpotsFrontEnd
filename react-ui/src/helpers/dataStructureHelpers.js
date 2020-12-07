@@ -27,6 +27,20 @@ export const mapGetArray = (map, arr) => {
     return newArr;
 };
 
+// given an array of objects with properties, sort on property [propName] of the objects.
+// also takes param asc, sorts by ascending if true (true by default)
+export const innerPropSort = (arr, propName, asc=true) => {
+    return arr.sort(function (a, b) {
+        if (a[propName] < b[propName]) {
+            return asc ? -1 : 1;
+        } else if (a[propName] > b[propName]) {
+            return asc ? 1 : -1;
+        } else {
+            return 0;
+        }
+    });
+};
+
 // takes an array of periods info returned from Google Places API.
 // returns array of formatted open hours info (e.g. "Sunday 9:00am-5:00pm")
 export const placesPeriodsReducer = (periods) => {

@@ -40,36 +40,26 @@ export default function SpotPage() {
   }
 
   const submitUserRating = () => {
-    console.log("IN SUBMIT USER RATING")
     dispatch(submitRating(activeSpot.placeId, ratings))
     dispatch(fetchSpotDetails(params.placeId));
   }
 
   const addComment = () => {
-    console.log("in handle submit")
-    console.log(activeSpot.placeId)
-    console.log(comment)
     dispatch(createComment(activeSpot.placeId, comment))
   }
 
   const removeComment = (index) => {
-    console.log("deleting comment ...")
-    console.log(activeSpot.placeId)
-    console.log(index)
     dispatch(deleteComment(params.placeId, index))
   }
 
   const update = () => {
-    console.log("updating comment ...")
-    console.log(commentId)
-    console.log(comment)
     dispatch(updateComment(params.placeId, commentId, comment))
+    dispatch(fetchComments(params.placeId))
     setModalToggle(false)
   }
 
   const handleChange = (e) => {
     setComment(e.target.value)
-    console.log(comment)
   }
 
   const prepareModal = (comment, id) => {
@@ -85,11 +75,8 @@ export default function SpotPage() {
   const params = useParams();
 
   useEffect(() => {
-    // console.log("IN COMMENTS USE EFFECT " + creatingComment)
-    if (!fetchingComments) {
-      if (!creatingComment) {
-        setCommentsArray(comments)
-      }
+    if (!fetchingComments && !creatingComment) {
+      setCommentsArray(comments)
     }
   }, [comments, creatingComment]);
 
@@ -104,7 +91,7 @@ export default function SpotPage() {
             setFirebaseUID(userId)
         })
         .catch(error => {
-            console.log("error in fetching firebase user id :/")
+      
         });
   }, [activeSpot]);
 
@@ -128,7 +115,7 @@ export default function SpotPage() {
   return (
     <div>
       <Header />
-      {fetchingSpots || !activeSpot ?
+      {!activeSpot ?
         <LoadSpinner />
         :
         <div>
@@ -153,8 +140,7 @@ export default function SpotPage() {
                 {popTimesToday}
               </div>
             </div>
-
-            {console.log(activeSpot)}
+        
             <div class="center">
               <h2>at a glance</h2>
               <div class="info">
@@ -216,8 +202,7 @@ export default function SpotPage() {
               
               <h2>all comments</h2>
               <br />
-              {/* {console.log("COMMENTS ARRAY")}
-              {console.log(commentsArray)} */}
+          
               {commentsArray && commentsArray.map(comment => {
                 return (
                   <div>

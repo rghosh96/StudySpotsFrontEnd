@@ -8,6 +8,7 @@ FETCH_SAVED_SPOTS_DETAILS,
     REMOVE_SAVED_SPOT_DETAILS
 } from '../actions/types';
 import { SUCCESS } from '../errorMessages'
+import { innerPropSort } from '../../helpers/dataStructureHelpers';
 
 const initialState = {
     creatingComment: false,
@@ -46,6 +47,7 @@ const initialState = {
 export default function (state = initialState, action) {
     var lastSavedSpotsIds = null;
     var nextSavedSpots = null;
+    var nextComments = null;
 
     switch (action.type) {
 
@@ -141,14 +143,17 @@ export default function (state = initialState, action) {
             }
 
         case CREATE_COMMENT:
-            console.log("IN STORE CREATE COMMENT")
-            console.log(action.payload.newComment)
-            console.log(state)
+            nextComments = state.comments;
+            if (action.payload.newComment) {
+                nextComments.push(action.payload.newComment)
+                nextComments = innerPropSort(nextComments, 'timestamp', false)
+            }
+
             return {
                 ...state,
                 creatingComment: action.payload.creatingComment,
                 errorMsg: action.payload.errorMsg || '',
-                comments: state.comments.push(action.payload.newComment) || state.comments
+                comments: nextComments
             }
 
         case DELETE_COMMENT:
@@ -165,6 +170,8 @@ export default function (state = initialState, action) {
             }
 
         case FETCH_COMMENTS_SUCCESS:
+                nextComments = innerPropSort(action.payload, 'timestamp', false)
+
             return {
                 ...state,
                 fetchingComments: false,

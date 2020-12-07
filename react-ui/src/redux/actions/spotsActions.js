@@ -615,7 +615,6 @@ export const createComment = (placeId, text) => async (dispatch) => {
                 userId: userId,
                 comment: text,
                 timestamp: new Date(),
-
             }
 
             if (isNaN(newComment.comment.length) || newComment.comment.length < 1 || newComment.comment.length > 280) {
@@ -698,18 +697,17 @@ export const updateComment = (placeId, commentId, newtext) => async (dispatch) =
             const fname = userData['fName'];
             const lname = userData['lName'];
 
-            const newComment = {
+            const updatedComment = {
                 fname: fname,
                 lname: lname,
                 userId: userId,
                 comment: newtext,
                 timestamp: new Date(),
-
             }
 
-            if (isNaN(newComment.comment.length) || newComment.comment.length < 1 || newComment.comment.length > 280) {
+            if (isNaN(updatedComment.comment.length) || updatedComment.comment.length < 1 || updatedComment.comment.length > 280) {
                 dispatch({
-                    type: CREATE_COMMENT,
+                    type: UPDATE_COMMENT,
                     payload: {
                         creatingComment: false,
                         errorMsg: INVALID_ARGS
@@ -718,36 +716,27 @@ export const updateComment = (placeId, commentId, newtext) => async (dispatch) =
                 return;
             }
 
-            setNestedDocumentData("spots", placeId, "comments", commentId, newComment)
+            setNestedDocumentData("spots", placeId, "comments", commentId, updatedComment)
+                .then(() => {
+                    dispatch({
+                        type: UPDATE_COMMENT,
+                        payload: {
+                            updatingComment: false,
+                            errorMsg: SUCCESS
+                        }
+                    })
+                })
                 .catch(error => {
                     dispatch({
                         type: UPDATE_COMMENT,
                         payload: {
                             updatingComment: false,
-                            payload: error.message
+                            errorMsg: error.message,
                         }
                     })
                 })
 
         })
-
-    // const newComment = {
-    //     comment: newtext,
-    //     timestamp: new Date(),
-    //     userId: userId
-    // }
-
-    // if (isNaN(newComment.comment.length) || newComment.comment.length < 1 || newComment.comment.length > 280) {
-    //     dispatch({
-    //         type: UPDATE_COMMENT,
-    //         payload: {
-    //             updatingComment: false,
-    //             errorMsg: INVALID_ARGS
-    //         }
-    //     });
-    //     return;
-    // }
-
 }
 
 export const fetchComments = (placeId) => (dispatch) => {
