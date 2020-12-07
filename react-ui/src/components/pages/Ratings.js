@@ -46,23 +46,6 @@ const Ratings = ({icon, updateRating, currentRating, itemType, signedIn}) => {
         
         <div class="ratings">
             {signedIn ? signedInView : notSignedInView}
-            {/* {[ ...Array(5)].map((item, i) => {
-                const ratingValue = i +1;
-                return <label>
-                <input type="radio" 
-                    name="rate" 
-                    value={ratingValue} 
-                    onClick={()=>updateRating(itemType, ratingValue)}
-                    />
-                <FontAwesomeIcon className="star" 
-                    color={ratingValue <= (hover || currentRating) ? "#c29257" : "#7f7f7f"}
-                    icon={icon} 
-                    size='2x'
-                    onMouseEnter={()=>setHover(ratingValue)}
-                    onMouseLeave={()=>setHover(null)}
-                    />
-                </label>
-            })} */}
         </div>
     )
 }

@@ -586,7 +586,7 @@ export const submitRating = (placeId, rating) => async (dispatch) => {
 }
 
 export const createComment = (placeId, text) => async (dispatch) => {
-
+    console.log("IN CREATE COMMENT!")
 
     dispatch({
         type: CREATE_COMMENT,
@@ -599,7 +599,6 @@ export const createComment = (placeId, text) => async (dispatch) => {
 
     getDocumentData("users", userId)
         .then(userData => {
-
             const fname = userData['fName'];
             const lname = userData['lName'];
 
@@ -643,7 +642,7 @@ export const createComment = (placeId, text) => async (dispatch) => {
 }
 
 export const deleteComment = (placeId, commentId) => (dispatch) => {
-
+    console.log("IN REDUX DELETE")
     dispatch({
         type: DELETE_COMMENT,
         payload: {
@@ -753,6 +752,7 @@ export const fetchComments = (placeId) => (dispatch) => {
                     lname: r.data().lname,
                     timestamp: r.data().timestamp,
                     userId: r.data().userId,
+                    commentId: r.id
                 }
             });
 
