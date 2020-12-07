@@ -215,86 +215,95 @@ export const fetchNearbySpots = (params) => (dispatch) => {
 //
 // onSuccess(spot): a callback which takes the spot details and dispatches accordingly
 // onFailure(status): a callback which dispatches in case of failure, takes the status of the request
-const fetchAPISpotDetails = (placeId, onSuccess, onFailure) => {
+const fetchAPISpotDetails = async (placeId, onSuccess, onFailure) => {
     try {
         // this will force a browser popup that asks permission to use the user's location
         navigator.geolocation.getCurrentPosition(
-            (position) => {
+            async (position) => {
                 var latitude = position.coords.latitude;
                 var longitude = position.coords.longitude;
                 if (latitude && longitude) {
                     // try getting ratings data
-                    getDocumentData("spots", placeId)
-                        .then(data => {
-                            var studySpotsRatings = {
-                                numRatings: data && data.numRatings ? data.numRatings : null,
-                                overall: data && data.avgOverallRating ? data.avgOverallRating : null,
-                                lighting: data && data.avgLightingRating ? data.avgLightingRating : null,
-                                music: data && data.avgMusicRating ? data.avgMusicRating : null,
-                                food: data && data.avgFoodRating ? data.avgFoodRating : null,
-                                space: data && data.avgSpaceRating ? data.avgSpaceRating : null,
-                            }
 
-                            // now get the rest of spot details from Places API
-                            var service = new window.google.maps.places.PlacesService(document.createElement('div'));
+                    var userId;
+                    try {
+                        userId = await getUserId();
+                    } catch (err) {
+                        userId = null;
+                    }
 
-                            service.getDetails(
-                                {
-                                    placeId: placeId,
-                                    // return only the fields specified
-                                    fields: [
-                                        "place_id",
-                                        "name",
-                                        "business_status",
-                                        "geometry",
-                                        "formatted_address",
-                                        "formatted_phone_number",
-                                        "icon",
-                                        "types",
-                                        "opening_hours",
-                                        "photos",
-                                        "price_level",
-                                        "rating",
-                                        "review",
-                                        "url"
-                                    ]
-                                },
+                    var ratings = await getDocumentData("spots", placeId);
+                    var userRating;
+                    
+                    if (await userId) {
+                        userRating = await getNestedDocumentData("spots", placeId, "ratings", userId);
+                    }
 
-                                async (results, status) => {
-                                    if (status == window.google.maps.places.PlacesServiceStatus.OK) {
-                                        let popTimes = await popularTimes(results.url);
-                                        let distance = euclidDistance(latitude, longitude, results.geometry.location.lat(), results.geometry.location.lng());
+                    var studySpotsRatings = {
+                        numRatings: ratings && ratings.numRatings ? ratings.numRatings : null,
+                        overall: ratings && ratings.avgOverallRating ? ratings.avgOverallRating : null,
+                        lighting: ratings && ratings.avgLightingRating ? ratings.avgLightingRating : null,
+                        music: ratings && ratings.avgMusicRating ? ratings.avgMusicRating : null,
+                        food: ratings && ratings.avgFoodRating ? ratings.avgFoodRating : null,
+                        space: ratings && ratings.avgSpaceRating ? ratings.avgSpaceRating : null,
+                    }
+                    // now get the rest of spot details from Places API
+                    var service = new window.google.maps.places.PlacesService(document.createElement('div'));
 
-                                        // createMarker(place); // for usage with map
-                                        let spotDetails = {
-                                            placeId: results.place_id,
-                                            name: results.name,
-                                            businessStatus: businessStatusMap.get(results.business_status),
-                                            distance: distance || null,
-                                            formattedAddress: results.formatted_address,
-                                            formattedPhoneNumber: results.formatted_phone_number,
-                                            iconUrl: results.icon || null,
-                                            types: results.types ? placesTypesReducer(results.types) : null,
-                                            openNow: results.opening_hours ? results.opening_hours.open_now : null,
-                                            openHours: results.opening_hours ? placesPeriodsReducer(results.opening_hours.periods) : null,
-                                            popularTimes: await popTimes,
-                                            photos: results.photos ? placesPhotosReducer(results.photos) : null,
-                                            priceLevel: priceLevelMap.get(results.price_level),
-                                            rating: results.rating || null,
-                                            reviews: results.reviews ? placesReviewsReducer(results.reviews) : null,
-                                            studySpotsRatings: studySpotsRatings,
-                                        }
+                    service.getDetails(
+                        {
+                            placeId: placeId,
+                            // return only the fields specified
+                            fields: [
+                                "place_id",
+                                "name",
+                                "business_status",
+                                "geometry",
+                                "formatted_address",
+                                "formatted_phone_number",
+                                "icon",
+                                "types",
+                                "opening_hours",
+                                "photos",
+                                "price_level",
+                                "rating",
+                                "review",
+                                "url"
+                            ]
+                        },
 
-                                        onSuccess(spotDetails);
-                                    } else {
-                                        onFailure(status);
-                                    }
+                        async (results, status) => {
+                            if (status == window.google.maps.places.PlacesServiceStatus.OK) {
+                                let popTimes = await popularTimes(results.url);
+                                let distance = euclidDistance(latitude, longitude, results.geometry.location.lat(), results.geometry.location.lng());
+
+                                // createMarker(place); // for usage with map
+                                let spotDetails = {
+                                    placeId: results.place_id,
+                                    name: results.name,
+                                    businessStatus: businessStatusMap.get(results.business_status),
+                                    distance: distance || null,
+                                    formattedAddress: results.formatted_address,
+                                    formattedPhoneNumber: results.formatted_phone_number,
+                                    iconUrl: results.icon || null,
+                                    types: results.types ? placesTypesReducer(results.types) : null,
+                                    openNow: results.opening_hours ? results.opening_hours.open_now : null,
+                                    openHours: results.opening_hours ? placesPeriodsReducer(results.opening_hours.periods) : null,
+                                    popularTimes: await popTimes,
+                                    photos: results.photos ? placesPhotosReducer(results.photos) : null,
+                                    priceLevel: priceLevelMap.get(results.price_level),
+                                    rating: results.rating || null,
+                                    reviews: results.reviews ? placesReviewsReducer(results.reviews) : null,
+                                    studySpotsRatings: await studySpotsRatings,
+                                    userRating: await userRating,
                                 }
-                            );
-                        })
-                        .catch(error => {
-                            onFailure(error.message);
-                        });
+
+                                onSuccess(spotDetails);
+                            } else {
+                                onFailure(status);
+                            }
+                        }
+                    );
                 } else {
                     onFailure(USER_DENIED_LOCATION);
                 }
@@ -453,10 +462,9 @@ export const submitRating = (placeId, rating) => async (dispatch) => {
     });
 
     try {
-
-    const userId = await getUserId();
-    const oldRatingsAgg = await getDocumentData("spots", placeId);
-    var newRatingsAgg = {};
+        const userId = await getUserId();
+        const oldRatingsAgg = await getDocumentData("spots", placeId);
+        var newRatingsAgg = {};
 
         // start by retieving existing rating from this user (if any)
         getNestedDocumentData("spots", placeId, "ratings", userId)
@@ -670,7 +678,7 @@ export const updateComment = (placeId, commentId, newtext) => async (dispatch) =
 
     getDocumentData("users", userId)
         .then(userData => {
-        
+
             const fname = userData['fName'];
             const lname = userData['lName'];
 
@@ -735,7 +743,7 @@ export const fetchComments = (placeId) => (dispatch) => {
         }
     })
 
-    getNestedCollectionData("spots", placeId, "comments") 
+    getNestedCollectionData("spots", placeId, "comments")
         .then(commentDetails => {
 
             var comments = commentDetails.docs.map(r => {
@@ -746,15 +754,15 @@ export const fetchComments = (placeId) => (dispatch) => {
                     timestamp: r.data().timestamp,
                     userId: r.data().userId,
                 }
-            })
-            console.log(comments)
+            });
+
             dispatch({
                 //success
                 type: FETCH_COMMENTS_SUCCESS,
                 fetchingComments: false,
                 commentsFetched: true,
                 payload: comments,
-                
+
             })
 
         })

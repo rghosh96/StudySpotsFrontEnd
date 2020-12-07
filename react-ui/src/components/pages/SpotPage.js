@@ -46,7 +46,7 @@ export default function SpotPage() {
 
   useEffect(() => {
     if (activeSpot && activeSpot.popularTimes.status === "ok") {
-      console.log("setting pop times")
+      
       const date = new Date();
       const day = date.getDay();
       setPopTimesToday(<PopTimesChart day={activeSpot.popularTimes.week[day].day} hours={activeSpot.popularTimes.week[day].hours} />)
@@ -65,11 +65,6 @@ export default function SpotPage() {
   return (
     <div>
       <Header />
-      {console.log("active spot")}
-      {console.log(activeSpot)}
-      {console.log("fetching spots")}
-      {console.log(fetchingSpots)}
-      {console.log("signed in ?" + isSignedIn)}
       {fetchingSpots || !activeSpot ?
         <LoadSpinner />
         :
@@ -119,8 +114,7 @@ export default function SpotPage() {
                   <p>overall:</p>
                   <Ratings icon={faSmileBeam} updateRating={updateState} currentRating={ratings.overall} itemType="overall" signedIn={isSignedIn}  />
                 </div>
-                {console.log("ratings")}
-                {console.log(ratings)}
+               
               </div>
               {isSignedIn ? <Button onClick={() => dispatch(submitRating(activeSpot.placeId, ratings))}>submit</Button> : null}
               

@@ -5,7 +5,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 // props are: desired icon, updating rating in spot page, and current rating from spot page
 const Ratings = ({icon, updateRating, currentRating, itemType, signedIn}) => {
-    console.log("currentRating: " + currentRating)
     // for hover effects when user hovers over to rate
     const [hover, setHover] = useState(null)
 
@@ -46,8 +45,6 @@ const Ratings = ({icon, updateRating, currentRating, itemType, signedIn}) => {
     return(
         
         <div class="ratings">
-            {console.log("INSIDE RATINGS")}
-            {console.log(signedIn)}
             {signedIn ? signedInView : notSignedInView}
             {/* {[ ...Array(5)].map((item, i) => {
                 const ratingValue = i +1;
@@ -66,7 +63,6 @@ const Ratings = ({icon, updateRating, currentRating, itemType, signedIn}) => {
                     />
                 </label>
             })} */}
-            {console.log(currentRating)}
         </div>
     )
 }
