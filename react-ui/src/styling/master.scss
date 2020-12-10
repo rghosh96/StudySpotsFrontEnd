@@ -1,30 +1,31 @@
 @import "~bootstrap/scss/bootstrap";
-@import 'colors';
-@import 'fonts';
-@import 'config';
-
+@import "colors";
+@import "fonts";
+@import "config";
 
 // to define common properties, and then simply call function
 @mixin easeOut {
-  transition: all .5s ease-out !important;
+  transition: all 0.5s ease-out !important;
 }
 
 * {
   box-sizing: border-box;
 }
 
-body, html, #root, .App {
+body,
+html,
+#root,
+.App {
   min-height: 100vh;
   width: 100%;
 }
 
 .title {
   color: $primary;
-  font-size: 1.7rem!important;
-  font-weight: bold!important;
+  font-size: 1.7rem !important;
+  font-weight: bold !important;
   text-align: left;
   padding-right: 15px;
-
 }
 
 .times {
@@ -32,10 +33,10 @@ body, html, #root, .App {
 }
 .popular {
   color: $primary;
-  font-size: 1.7rem!important;
-  font-weight: bold!important;
+  font-size: 1.7rem !important;
+  font-weight: bold !important;
   padding-left: 15px;
-  width: 70px!important;
+  width: 70px !important;
   height: 50px;
 }
 
@@ -45,7 +46,7 @@ body, html, #root, .App {
 }
 
 .open {
-  background-color: #687E63;
+  background-color: #687e63;
   color: white;
   text-align: center;
   border-radius: 10px;
@@ -53,9 +54,17 @@ body, html, #root, .App {
 }
 
 .image {
-  width: 100px!important;
-  height: 100px!important;
+  width: 100px !important;
+  height: 100px !important;
   border-radius: 50%;
+}
+
+.spotlist-header {
+  top: 30px;
+  position: relative;
+  transform: translateX(25%);
+  display: flex;
+  justify-content: flex-start;
 }
 
 .spotlight {
@@ -64,31 +73,26 @@ body, html, #root, .App {
   justify-content: center;
   align-items: center;
   padding: 50px !important;
+  width: 100%;
   min-width: 100%;
-  
-  h1 {
-    width: 100%;
-    display: flex;
-    justify-content: flex-start;
-  }
-  
+
   .keywordarea {
     width: 30%;
   }
-  
+
   .filterarea {
     display: flex;
     margin: 15px;
   }
-  
+
   .searcharea {
     margin-bottom: 50px;
   }
-  
+
   .filterbtn {
     margin: 10px;
   }
-  
+
   .spotcard {
     @include easeOut();
     &:hover {
@@ -104,7 +108,7 @@ body, html, #root, .App {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 50%;
+    width: 700px;
     margin: 50px!important;
     border: 1.5px solid #687E63;
     border-radius: 25px;
@@ -112,7 +116,6 @@ body, html, #root, .App {
     margin: 15px !important;
   }
 }
-
 
 .container {
   display: flex;
@@ -197,12 +200,13 @@ h3 {
   @include header();
 }
 
-#uncontrolled-tab-example-tab-reviews, #uncontrolled-tab-example-tab-comments,
+#uncontrolled-tab-example-tab-reviews,
+#uncontrolled-tab-example-tab-comments,
 #uncontrolled-tab-example-tab-photos {
   color: $grey !important;
   @include header();
   &:hover {
-    color:$white !important;
+    color: $white !important;
     background-color: $primary !important;
   }
   &.active {
@@ -251,14 +255,15 @@ Button {
 
 .pop-times-chart-wrapper {
   canvas {
-    width:500px !important;
-    height:250px !important;
+    width: 500px !important;
+    height: 250px !important;
     font-size: 12px !important;
   }
 }
 
 @include tiny {
-  .container, .signUpContainer {
+  .container,
+  .signUpContainer {
     padding: 1rem;
   }
   Form {
@@ -267,7 +272,8 @@ Button {
 }
 
 @include tablet {
-  .container, .signUpContainer {
+  .container,
+  .signUpContainer {
     padding-left: 3rem;
     padding-right: 3rem;
   }
@@ -277,13 +283,11 @@ Button {
 }
 
 @include desktop {
-  .container, .signUpContainer {
+  .container,
+  .signUpContainer {
     padding: 3rem;
   }
   Form {
     width: 100%;
   }
 }
-
-
-

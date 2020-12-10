@@ -2,7 +2,7 @@
 
 const express = require('express');
 const path = require('path');
-// const cors = require('cors');
+const cors = require('cors');
 // a logger middleware. morgan will use the 'next' method (passed to api functions) 
 // in order to log api requests in the console without interfering
 const morgan = require('morgan');
@@ -33,11 +33,11 @@ if (!isDev && cluster.isMaster) {
 } else {
     const app = express(); // start the express application which lets us use utility methods, etc.   
 
-    // var corsOptions = {
-    //     origin: "http://localhost:8081"
-    // };
+    var corsOptions = {
+        origin: "http://localhost:8081"
+    };
     
-    // app.use(cors(corsOptions));
+    app.use(cors(corsOptions));
     app.use(morgan('dev'));
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({extended: true}));
@@ -63,6 +63,9 @@ if (!isDev && cluster.isMaster) {
     // const customRoutes = require('./routes/custom');
     // .use() sets up some middleware. an incoming request (and its body) must go through .use() 
     // app.use('/api/custom', customRoutes);
+
+    const poptimesRoutes = require('./routes/poptimes');
+    app.use('/poptimes', poptimesRoutes);
 
     // All remaining requests return the React app, so it can handle routing.
     app.get('*', function (req, res) {
