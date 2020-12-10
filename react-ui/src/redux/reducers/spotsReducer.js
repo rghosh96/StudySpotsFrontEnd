@@ -8,6 +8,7 @@ FETCH_SAVED_SPOTS_DETAILS,
     REMOVE_SAVED_SPOT_DETAILS
 } from '../actions/types';
 import { SUCCESS } from '../errorMessages'
+import { innerPropSort } from '../../helpers/dataStructureHelpers';
 
 const initialState = {
     creatingComment: false,
@@ -46,6 +47,7 @@ const initialState = {
 export default function (state = initialState, action) {
     var lastSavedSpotsIds = null;
     var nextSavedSpots = null;
+    var nextComments = null;
 
     switch (action.type) {
 
@@ -141,19 +143,35 @@ export default function (state = initialState, action) {
             }
 
         case CREATE_COMMENT:
+            nextComments = state.comments;
+            if (action.payload.newComment) {
+                nextComments.push(action.payload.newComment)
+                nextComments = innerPropSort(nextComments, 'timestamp', false)
+            }
+
             return {
                 ...state,
                 creatingComment: action.payload.creatingComment,
                 errorMsg: action.payload.errorMsg || '',
+                comments: nextComments
             }
 
         case DELETE_COMMENT:
+            console.log('DELETE_COMMENT')
+            console.log(action.payload)
+
+            nextComments = state.comments;
+            if (action.payload.deletedCommentId) {
+                nextComments = nextComments.filter(c => c.commentId != action.payload.deletedCommentId);
+            }
+
             return {
                 ...state,
                 deletingComment: action.payload.deletingComment,
                 errorMsg: action.payload.errorMsg || '',
+                comments: nextComments
             }
-        
+            
         case FETCH_COMMENTS_REQUEST:
             return {
                 ...state,
@@ -161,6 +179,8 @@ export default function (state = initialState, action) {
             }
 
         case FETCH_COMMENTS_SUCCESS:
+                nextComments = innerPropSort(action.payload, 'timestamp', false)
+
             return {
                 ...state,
                 fetchingComments: false,

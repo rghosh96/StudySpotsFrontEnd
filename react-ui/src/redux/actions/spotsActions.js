@@ -50,7 +50,7 @@ import { getFirebase } from 'react-redux-firebase';
 import {
     mapify, mapGetArray, placesPeriodsReducer, placesPhotosReducer, placesReviewsReducer, placesTypesReducer
 } from '../../helpers/dataStructureHelpers';
-import { euclidDistance } from '../../helpers/distanceCalculator';
+import { euclidDistance, round } from '../../helpers/calculators';
 import popularTimes from '../../services/popularTimes';
 import {
     getUserId, setDocumentData, getDocumentData, getNestedDocumentData, setNestedDocumentData, appendToDocArray, removeFromDocArray, removeDocFromNestedDocArray, addAmbiguousDoc, getNestedCollectionData
@@ -225,85 +225,91 @@ const fetchAPISpotDetails = async (placeId, onSuccess, onFailure) => {
                 if (latitude && longitude) {
                     // try getting ratings data
 
-                    var userId;
-                    try {
-                        userId = await getUserId();
-                    } catch (err) {
-                        userId = null;
-                    }
-
-                    var ratings = await getDocumentData("spots", placeId);
-                    var userRating;
-                    
-                    if (await userId) {
-                        userRating = await getNestedDocumentData("spots", placeId, "ratings", userId);
-                    }
-
-                    var studySpotsRatings = {
-                        numRatings: ratings && ratings.numRatings ? ratings.numRatings : null,
-                        overall: ratings && ratings.avgOverallRating ? ratings.avgOverallRating : null,
-                        lighting: ratings && ratings.avgLightingRating ? ratings.avgLightingRating : null,
-                        music: ratings && ratings.avgMusicRating ? ratings.avgMusicRating : null,
-                        food: ratings && ratings.avgFoodRating ? ratings.avgFoodRating : null,
-                        space: ratings && ratings.avgSpaceRating ? ratings.avgSpaceRating : null,
-                    }
-                    // now get the rest of spot details from Places API
-                    var service = new window.google.maps.places.PlacesService(document.createElement('div'));
-
-                    service.getDetails(
-                        {
-                            placeId: placeId,
-                            // return only the fields specified
-                            fields: [
-                                "place_id",
-                                "name",
-                                "business_status",
-                                "geometry",
-                                "formatted_address",
-                                "formatted_phone_number",
-                                "icon",
-                                "types",
-                                "opening_hours",
-                                "photos",
-                                "price_level",
-                                "rating",
-                                "review",
-                                "url"
-                            ]
-                        },
-
-                        async (results, status) => {
-                            if (status == window.google.maps.places.PlacesServiceStatus.OK) {
-                                let popTimes = await popularTimes(results.url);
-                                let distance = euclidDistance(latitude, longitude, results.geometry.location.lat(), results.geometry.location.lng());
-
-                                // createMarker(place); // for usage with map
-                                let spotDetails = {
-                                    placeId: results.place_id,
-                                    name: results.name,
-                                    businessStatus: businessStatusMap.get(results.business_status),
-                                    distance: distance || null,
-                                    formattedAddress: results.formatted_address,
-                                    formattedPhoneNumber: results.formatted_phone_number,
-                                    iconUrl: results.icon || null,
-                                    types: results.types ? placesTypesReducer(results.types) : null,
-                                    openNow: results.opening_hours ? results.opening_hours.open_now : null,
-                                    openHours: results.opening_hours ? placesPeriodsReducer(results.opening_hours.periods) : null,
-                                    popularTimes: await popTimes,
-                                    photos: results.photos ? placesPhotosReducer(results.photos) : null,
-                                    priceLevel: priceLevelMap.get(results.price_level),
-                                    rating: results.rating || null,
-                                    reviews: results.reviews ? placesReviewsReducer(results.reviews) : null,
-                                    studySpotsRatings: await studySpotsRatings,
-                                    userRating: await userRating,
-                                }
-
-                                onSuccess(spotDetails);
-                            } else {
-                                onFailure(status);
+                    getDocumentData("spots", placeId)
+                        .then(ratings => {
+                            var studySpotsRatings = {
+                                numRatings: ratings && ratings.numRatings ? round(ratings.numRatings, 1) : null,
+                                overall: ratings && ratings.avgOverallRating ? round(ratings.avgOverallRating, 1) : null,
+                                lighting: ratings && ratings.avgLightingRating ? round(ratings.avgLightingRating, 1) : null,
+                                music: ratings && ratings.avgMusicRating ? round(ratings.avgMusicRating, 1) : null,
+                                food: ratings && ratings.avgFoodRating ? round(ratings.avgFoodRating, 1) : null,
+                                space: ratings && ratings.avgSpaceRating ? round(ratings.avgSpaceRating, 1) : null,
                             }
-                        }
-                    );
+
+                            getUserId()
+                                .then(async userId => {
+                                    var userRating;
+                                    if (userId) {
+                                        userRating = await getNestedDocumentData("spots", placeId, "ratings", userId);
+                                    } else {
+                                        userRating = null;
+                                    }
+
+                                    // now get the rest of spot details from Places API
+                                    var service = new window.google.maps.places.PlacesService(document.createElement('div'));
+
+                                    service.getDetails(
+                                        {
+                                            placeId: placeId,
+                                            // return only the fields specified
+                                            fields: [
+                                                "place_id",
+                                                "name",
+                                                "business_status",
+                                                "geometry",
+                                                "formatted_address",
+                                                "formatted_phone_number",
+                                                "icon",
+                                                "types",
+                                                "opening_hours",
+                                                "photos",
+                                                "price_level",
+                                                "rating",
+                                                "review",
+                                                "url"
+                                            ]
+                                        },
+
+                                        async (results, status) => {
+                                            if (status == window.google.maps.places.PlacesServiceStatus.OK) {
+                                                let popTimes = await popularTimes(results.url);
+                                                let distance = euclidDistance(latitude, longitude, results.geometry.location.lat(), results.geometry.location.lng());
+
+                                                // createMarker(place); // for usage with map
+                                                let spotDetails = {
+                                                    placeId: results.place_id,
+                                                    name: results.name,
+                                                    businessStatus: businessStatusMap.get(results.business_status),
+                                                    distance: distance || null,
+                                                    formattedAddress: results.formatted_address,
+                                                    formattedPhoneNumber: results.formatted_phone_number,
+                                                    iconUrl: results.icon || null,
+                                                    types: results.types ? placesTypesReducer(results.types) : null,
+                                                    openNow: results.opening_hours ? results.opening_hours.open_now : null,
+                                                    openHours: results.opening_hours ? placesPeriodsReducer(results.opening_hours.periods) : null,
+                                                    popularTimes: await popTimes,
+                                                    photos: results.photos ? placesPhotosReducer(results.photos) : null,
+                                                    priceLevel: priceLevelMap.get(results.price_level),
+                                                    rating: results.rating || null,
+                                                    reviews: results.reviews ? placesReviewsReducer(results.reviews) : null,
+                                                    studySpotsRatings: await studySpotsRatings,
+                                                    userRating: await userRating,
+                                                }
+
+                                                onSuccess(spotDetails);
+                                            } else {
+                                                onFailure(status);
+                                            }
+                                        }
+                                    );
+                                })
+                                .catch(error => {
+                                    onFailure(error.message);
+                                });
+                        })
+                        .catch(error => {
+                            onFailure(error.message);
+                        });
                 } else {
                     onFailure(USER_DENIED_LOCATION);
                 }
@@ -468,6 +474,16 @@ export const submitRating = (placeId, rating) => async (dispatch) => {
         }
     });
 
+    const onFailure = (error) => {
+        dispatch({
+            type: SUBMIT_RATING,
+            payload: {
+                submittingRating: false,
+                errorMsg: error.message
+            }
+        });
+    }
+
     try {
         const userId = await getUserId();
         const oldRatingsAgg = await getDocumentData("spots", placeId);
@@ -475,11 +491,9 @@ export const submitRating = (placeId, rating) => async (dispatch) => {
 
         // start by retieving existing rating from this user (if any)
         getNestedDocumentData("spots", placeId, "ratings", userId)
-            .then(existingRating => {
+            .then(async existingRating => {
                 // case where no users have ever rated this spot
                 if (oldRatingsAgg == null) {
-                    console.log("no one has rated")
-
                     newRatingsAgg = {
                         numOverallRatings: formattedRating.overall ? 1 : 0,
                         numMusicRatings: formattedRating.music ? 1 : 0,
@@ -566,34 +580,48 @@ export const submitRating = (placeId, rating) => async (dispatch) => {
                 }
 
                 // set the new aggregate ratings fields
-                return setDocumentData("spots", placeId, newRatingsAgg);
-            })
-            .then(() => {
-                // update the user's rating
-                return setNestedDocumentData("spots", placeId, "ratings", userId, formattedRating);
+                setDocumentData("spots", placeId, newRatingsAgg)
+                    .then(() => {
+                        // update the user's rating
+                        setNestedDocumentData("spots", placeId, "ratings", userId, formattedRating)
+                            .then(() => {
+                                dispatch({
+                                    type: SUBMIT_RATING,
+                                    payload: {
+                                        submittingRating: false,
+                                        errorMsg: SUCCESS
+                                    }
+                                });
+
+                                fetchSpotDetails(placeId)(dispatch);
+                            })
+                            .catch(error => {
+                                onFailure(error);
+                            });
+                    })
+                    .catch(error => {
+                        onFailure(error);
+                    });
             })
             .catch(error => {
-                dispatch({
-                    type: SUBMIT_RATING,
-                    payload: {
-                        submittingRating: false,
-                        errorMsg: error.message
-                    }
-                });
-            });
+                onFailure(error);
+            });    
     } catch (error) {
-        dispatch({
-            type: SUBMIT_RATING,
-            payload: {
-                submittingRating: false,
-                errorMsg: error.message
-            }
-        });
+       onFailure(error);
     }
 }
 
 export const createComment = (placeId, text) => async (dispatch) => {
-    console.log("IN CREATE COMMENT!")
+    if (isNaN(text.length) || text.length < 1 || text.length > 280) {
+        dispatch({
+            type: CREATE_COMMENT,
+            payload: {
+                creatingComment: false,
+                errorMsg: INVALID_ARGS
+            }
+        });
+        return;
+    }
 
     dispatch({
         type: CREATE_COMMENT,
@@ -609,29 +637,26 @@ export const createComment = (placeId, text) => async (dispatch) => {
             const fname = userData['fName'];
             const lname = userData['lName'];
 
-            const newComment = {
-                fname: fname,
-                lname: lname,
-                userId: userId,
-                comment: text,
-                timestamp: new Date(),
-
-            }
-
-            if (isNaN(newComment.comment.length) || newComment.comment.length < 1 || newComment.comment.length > 280) {
-                dispatch({
-                    type: CREATE_COMMENT,
-                    payload: {
-                        creatingComment: false,
-                        errorMsg: INVALID_ARGS
-                    }
-                });
-                return;
-            }
-
             addAmbiguousDoc("spots", placeId, "comments")
-                .then(commentDoc => {
-                    setNestedDocumentData("spots", placeId, "comments", commentDoc.id, newComment)
+                .then(async commentDoc => {
+                    var newComment = {
+                        fname: fname,
+                        lname: lname,
+                        userId: userId,
+                        comment: text,
+                        timestamp: new Date(),
+                    }
+
+                    let data = await setNestedDocumentData("spots", placeId, "comments", commentDoc.id, newComment)
+
+                    dispatch({
+                        type: CREATE_COMMENT,
+                        payload: {
+                            creatingComment: false,
+                            errorMsg: SUCCESS,
+                            newComment: {...newComment, commentId: commentDoc.id}
+                        }
+                    })
                 })
                 .catch(error => {
                     dispatch({
@@ -649,7 +674,6 @@ export const createComment = (placeId, text) => async (dispatch) => {
 }
 
 export const deleteComment = (placeId, commentId) => (dispatch) => {
-    console.log("IN REDUX DELETE")
     dispatch({
         type: DELETE_COMMENT,
         payload: {
@@ -658,6 +682,16 @@ export const deleteComment = (placeId, commentId) => (dispatch) => {
     })
 
     removeDocFromNestedDocArray("spots", placeId, "comments", commentId)
+        .then(() => {
+            dispatch({
+                type: DELETE_COMMENT,
+                payload: {
+                    deletingComment: false,
+                    errorMsg: SUCCESS,
+                    deletedCommentId: commentId
+                }
+            })
+        })
         .catch(error => {
             dispatch({
                 type: DELETE_COMMENT,
@@ -686,18 +720,17 @@ export const updateComment = (placeId, commentId, newtext) => async (dispatch) =
             const fname = userData['fName'];
             const lname = userData['lName'];
 
-            const newComment = {
+            const updatedComment = {
                 fname: fname,
                 lname: lname,
                 userId: userId,
                 comment: newtext,
                 timestamp: new Date(),
-
             }
 
-            if (isNaN(newComment.comment.length) || newComment.comment.length < 1 || newComment.comment.length > 280) {
+            if (isNaN(updatedComment.comment.length) || updatedComment.comment.length < 1 || updatedComment.comment.length > 280) {
                 dispatch({
-                    type: CREATE_COMMENT,
+                    type: UPDATE_COMMENT,
                     payload: {
                         creatingComment: false,
                         errorMsg: INVALID_ARGS
@@ -706,36 +739,27 @@ export const updateComment = (placeId, commentId, newtext) => async (dispatch) =
                 return;
             }
 
-            setNestedDocumentData("spots", placeId, "comments", commentId, newComment)
+            setNestedDocumentData("spots", placeId, "comments", commentId, updatedComment)
+                .then(() => {
+                    dispatch({
+                        type: UPDATE_COMMENT,
+                        payload: {
+                            updatingComment: false,
+                            errorMsg: SUCCESS
+                        }
+                    })
+                })
                 .catch(error => {
                     dispatch({
                         type: UPDATE_COMMENT,
                         payload: {
                             updatingComment: false,
-                            payload: error.message
+                            errorMsg: error.message,
                         }
                     })
                 })
 
         })
-
-    // const newComment = {
-    //     comment: newtext,
-    //     timestamp: new Date(),
-    //     userId: userId
-    // }
-
-    // if (isNaN(newComment.comment.length) || newComment.comment.length < 1 || newComment.comment.length > 280) {
-    //     dispatch({
-    //         type: UPDATE_COMMENT,
-    //         payload: {
-    //             updatingComment: false,
-    //             errorMsg: INVALID_ARGS
-    //         }
-    //     });
-    //     return;
-    // }
-
 }
 
 export const fetchComments = (placeId) => (dispatch) => {

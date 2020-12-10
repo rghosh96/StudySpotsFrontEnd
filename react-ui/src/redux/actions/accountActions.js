@@ -18,7 +18,6 @@ export const checkAuth = () => dispatch => {
 	// what if guest user? what happens when they refresh and have no acct?
 	// maybe include a link to signin on the signup page
 	firebase.auth().onAuthStateChanged((user) => {
-		console.log(user)
 		if (user) {
 			dispatch({ type: SIGN_IN_SUCCESS });
 			fetchUserData()(dispatch);

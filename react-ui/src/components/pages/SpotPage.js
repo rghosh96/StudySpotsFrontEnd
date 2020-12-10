@@ -38,34 +38,27 @@ export default function SpotPage() {
     })
   }
 
-  const handleSubmit = () => {
-    console.log("in handle submit")
-    console.log(activeSpot.placeId)
-    console.log(comment)
-    dispatch(createComment(activeSpot.placeId, comment))
-    dispatch(fetchComments(activeSpot.placeId))
+  const submitUserRating = () => {
+    dispatch(submitRating(activeSpot.placeId, ratings));
   }
 
-  const removeComment = (index) => {
-    console.log("deleting comment ...")
-    console.log(activeSpot.placeId)
-    console.log(index)
-    dispatch(deleteComment(params.placeId, index))
-    dispatch(fetchComments(activeSpot.placeId))
+  const addComment = () => {
+    dispatch(createComment(activeSpot.placeId, comment))
+  }
+
+  const removeComment = (id) => {
+    dispatch(deleteComment(params.placeId, id))
+    // dispatch(fetchComments(params.placeId))
   }
 
   const update = () => {
-    console.log("updating comment ...")
-    console.log(commentId)
-    console.log(comment)
     dispatch(updateComment(params.placeId, commentId, comment))
-    dispatch(fetchComments(activeSpot.placeId))
+    dispatch(fetchComments(params.placeId))
     setModalToggle(false)
   }
 
   const handleChange = (e) => {
     setComment(e.target.value)
-    console.log(comment)
   }
 
   const prepareModal = (comment, id) => {
@@ -80,7 +73,6 @@ export default function SpotPage() {
   const dispatch = useDispatch();
   const params = useParams();
 
-
   useEffect(() => {
     window.scrollTo(0, 0);
     if (!fetchingSpots && (!activeSpot || activeSpot.placeId != params.placeId)) {
@@ -92,26 +84,24 @@ export default function SpotPage() {
             setFirebaseUID(userId)
         })
         .catch(error => {
-            console.log("error in fetching firebase user id :/")
+      
         });
-  }, [activeSpot]);
 
-  useEffect(() => {
     if (activeSpot && activeSpot.popularTimes.status === "ok") {
       const date = new Date();
       const day = date.getDay();
       setPopTimesToday(<PopTimesChart day={activeSpot.popularTimes.week[day].day} hours={activeSpot.popularTimes.week[day].hours} />)
+    }
+    if (activeSpot && activeSpot.studySpotsRatings) {
       setRatings({
-        overall: activeSpot.studySpotsRatings.overall,
-        music: activeSpot.studySpotsRatings.music,
-        lighting: activeSpot.studySpotsRatings.lighting,
-        space: activeSpot.studySpotsRatings.space,
-        food: activeSpot.studySpotsRatings.food
+        overall: activeSpot.userRating ? activeSpot.userRating.overall : null,
+        music: activeSpot.userRating ? activeSpot.userRating.music : null,
+        lighting: activeSpot.userRating ? activeSpot.userRating.lighting : null,
+        space: activeSpot.userRating ? activeSpot.userRating.space : null,
+        food: activeSpot.userRating ? activeSpot.userRating.food : null,
       })
     }
   }, [activeSpot]);
-
-  // changed to render page when popular times loads, since it takes the longest
 
   return (
     <div>
@@ -123,7 +113,6 @@ export default function SpotPage() {
           <div class="container">
             <h1>{activeSpot.name}</h1>
             <p>{activeSpot.formattedAddress}</p>
-            {console.log(isSignedIn)}
             <div class="info">
               {activeSpot.photos ? <img class="main-image" src={activeSpot.photos[0].url} /> : null}
               <div class="infoSection">
@@ -142,38 +131,37 @@ export default function SpotPage() {
                 {popTimesToday}
               </div>
             </div>
-
-            {console.log(activeSpot)}
+        
             <div class="center">
               <h2>at a glance</h2>
               <div class="info">
                 <div class="infoSection">
-                  <p>music:</p>
+                  <p>your music rating:</p>
                   <Ratings icon={faMusic} updateRating={updateState} currentRating={ratings.music} itemType="music" signedIn={isSignedIn} />
-                  <p>avg rating: {activeSpot.studySpotsRatings.music}/5</p>
+                  <p>avg rating: {activeSpot.studySpotsRatings.music ? activeSpot.studySpotsRatings.music+"/5" : "no ratings yet .."}</p>
                 </div>
                 <div class="infoSection">
-                  <p>space:</p>
+                  <p>your space rating:</p>
                   <Ratings icon={faStore} updateRating={updateState} currentRating={ratings.space} itemType="space" signedIn={isSignedIn}  />
-                  <p>avg rating: {activeSpot.studySpotsRatings.space}/5</p>
+                  <p>avg rating: {activeSpot.studySpotsRatings.space ? activeSpot.studySpotsRatings.space+"/5" : "no ratings yet .."}</p>
                 </div>
                 <div class="infoSection">
-                  <p>lighting:</p>
+                  <p>your lighting rating:</p>
                   <Ratings icon={faAdjust} updateRating={updateState} currentRating={ratings.lighting} itemType="lighting" signedIn={isSignedIn}  />
-                  <p>avg rating: {activeSpot.studySpotsRatings.lighting}/5</p>
+                  <p>avg rating: {activeSpot.studySpotsRatings.lighting ? activeSpot.studySpotsRatings.lighting+"/5" : "no ratings yet .."}</p>
                 </div>
                 <div class="infoSection">
-                  <p>food:</p>
+                  <p>your food rating:</p>
                   <Ratings icon={faHamburger} updateRating={updateState} currentRating={ratings.food} itemType="food" signedIn={isSignedIn}  />
-                  <p>avg rating: {activeSpot.studySpotsRatings.food}/5</p>
+                  <p>avg rating: {activeSpot.studySpotsRatings.food ? activeSpot.studySpotsRatings.food+"/5" : "no ratings yet .."}</p>
                 </div>
                 <div class="infoSection">
-                  <p>overall:</p>
+                  <p>your overall rating:</p>
                   <Ratings icon={faSmileBeam} updateRating={updateState} currentRating={ratings.overall} itemType="overall" signedIn={isSignedIn}  />
-                  <p>avg rating: {activeSpot.studySpotsRatings.overall}/5</p>
+                  <p>avg rating: {activeSpot.studySpotsRatings.overall ? activeSpot.studySpotsRatings.overall+"/5" : "no ratings yet .."}</p>
                 </div>
               </div>
-              {isSignedIn ? <Button onClick={() => dispatch(submitRating(activeSpot.placeId, ratings))}>submit</Button> : null}
+              {isSignedIn ? <Button onClick={() => submitUserRating()}>submit</Button> : null}
               
             </div>
           </div>
@@ -184,8 +172,9 @@ export default function SpotPage() {
                 return (
                   <div>
                     <h3>{review.author}</h3>
+                    <p>{review.relativeTime}</p>
                     <p>{review.text}</p>
-                    <p>rating: {review.rating}</p>
+                    <p>Google rating: {review.rating}</p>
                     <hr />
                   </div>
                 )
@@ -198,31 +187,35 @@ export default function SpotPage() {
                     <Form.Group >
                     <Form.Control required as="textarea" rows={3} onChange={(e) => handleChange(e)} />
                     </Form.Group>
-                    <Button onClick={() => handleSubmit()}>Submit Comment!</Button>
+                    <Button onClick={() => addComment()}>Submit Comment!</Button>
                 </Form>
               <hr />
               </div> : null }
               
               <h2>all comments</h2>
               <br />
-              {console.log("COMMENTS ARRAY")}
-              {console.log(comments)}
-              {console.log(firebaseUID)}
-              {comments && comments.map(comment => {
-                return (
-                  <div>
-                    <h3>{comment.fname} {comment.lname}</h3>
-                    <p>{comment.comment}</p>
-                    {comment.userId === firebaseUID ? 
+          
+              {comments && comments.length != 0 ? 
+                comments.map(comment => {
+                  return (
                     <div>
-                      <Button onClick={() => removeComment(comment.commentId)}>delete comment</Button>
-                      <Button onClick={() => prepareModal(comment.comment, comment.commentId)}>update comment</Button>
-                    </div> 
-                    : null}
-                    <hr />
-                  </div>
-                )
-              })}
+                      <h3>{comment.fname} {comment.lname}</h3>
+                      <p>{comment.timestamp.toDate ? comment.timestamp.toDate().toDateString() : comment.timestamp.toDateString()}</p>
+                      <p>{comment.comment}</p>
+                      {comment.userId === firebaseUID ? 
+                      <div>
+                        <Button onClick={() => prepareModal(comment.comment, comment.commentId)}>update</Button>
+                        &nbsp;&nbsp;
+                        <Button onClick={() => removeComment(comment.commentId)}>delete</Button>
+                      </div> 
+                      : null}
+                      <hr />
+                    </div>
+                  )
+                })
+                :
+                <div className="gray">Be the first</div>
+              }
             </Tab>
             <Tab eventKey="photos" title="More Photos">
               <div class="photo-wrap">
