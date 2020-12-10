@@ -10,6 +10,7 @@ import {Modal} from 'react-bootstrap'
 import { Redirect } from 'react-router-dom';
 import LoadSpinner from './LoadSpinner'
 import Header from '../nav/Header'
+import { fetchUserData } from '../../redux/actions/accountActions';
 
 
 class Settings extends React.Component {
@@ -18,8 +19,6 @@ class Settings extends React.Component {
         password: '',
         fName: '',
         lName: '',
-        zipcode: '',
-        state: '',
         musicPref: [],
         spacePref: [],
         lightingPref: [],
@@ -30,10 +29,19 @@ class Settings extends React.Component {
     }
 
     componentDidMount(){
+        this.props.fetchUserData()
         setTimeout(() => { 
           this.setState({loading: false})
         },1000)
+        
     }
+
+    componentDidUpdate(prevProps) {
+        // Typical usage (don't forget to compare props):
+        if (this.props.userDataFetched !== prevProps.userDataFetched) {
+            this.setState({fName: this.props.userData.fName, lName: this.props.userData.lName})
+        }
+      }
 
     // handles general state change info
     handleChange = (e) => {
@@ -153,14 +161,15 @@ class Settings extends React.Component {
         if (this.state.loading) {
             return <LoadSpinner />
         } else {
-            console.log(this.state.userData)
+            console.log("USER DATA:")
+            console.log(this.props.userData)
         return (
             <div>
                 <Header />
                 <div className = "signUpContainer">
                 <Form id="form" onSubmit={this.handleSubmit}>
                     <h1>settings</h1>
-                    <p>Update password, preferences, and location here</p>
+                    <p>Update password, preferences, and location here for {this.state.fName} {this.state.lName}</p>
                     <hr></hr>
                     <Form.Group>
                         <Form.Label>New Password</Form.Label>
@@ -171,18 +180,6 @@ class Settings extends React.Component {
                         <Form.Label>Confirm Password</Form.Label>
                         <Form.Control onChange={this.handleConfirmPassword} id="passwordConfirm" type="password"/>
                     </Form.Group>
-
-                    <Form.Row>
-                        <Form.Group as={Col}>
-                            <Form.Label>State</Form.Label>
-                            <Form.Control onChange={this.handleChange} id="state"/>
-                        </Form.Group>
-                        
-                        <Form.Group as={Col} >
-                            <Form.Label>Zip Code</Form.Label>
-                            <Form.Control onChange={this.handleChange} id="zipcode" />
-                        </Form.Group>
-                    </Form.Row>
 
                     <p>Select preferences from the areas below. If you do not have a preference for an area, do not check any boxes.</p>
 
@@ -255,12 +252,15 @@ const mapStateToProps = state => ({
     updatingAccount: state.account.updatingAccount,
     isSignedIn: state.account.isSignedIn,
     userData: state.account.userData,
-    errorMsg: state.account.errorMsg
+    errorMsg: state.account.errorMsg,
+    userData: state.account.userData,
+    userDataFetched: state.account.userDataFetched
 });
 
 // tell redux what actions we want to use (the same ones we imported at the top)
 const mapDispatchToProps = {
-    updateUserAccount
+    updateUserAccount,
+    fetchUserData
 }
 
 // tell this component what it will be getting from redux. these members can be accessed using this.props
