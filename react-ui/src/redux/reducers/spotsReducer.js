@@ -157,12 +157,21 @@ export default function (state = initialState, action) {
             }
 
         case DELETE_COMMENT:
+            console.log('DELETE_COMMENT')
+            console.log(action.payload)
+
+            nextComments = state.comments;
+            if (action.payload.deletedCommentId) {
+                nextComments = nextComments.filter(c => c.commentId != action.payload.deletedCommentId);
+            }
+
             return {
                 ...state,
                 deletingComment: action.payload.deletingComment,
                 errorMsg: action.payload.errorMsg || '',
+                comments: nextComments
             }
-        
+            
         case FETCH_COMMENTS_REQUEST:
             return {
                 ...state,

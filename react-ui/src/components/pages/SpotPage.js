@@ -27,7 +27,6 @@ export default function SpotPage() {
   })
 
   const [comment, setComment] = useState('')
-  const [commentsArray, setCommentsArray] = useState()
   const [modalToggle, setModalToggle] = useState(false)
   const [commentId, setCommentId] = useState()
   const [firebaseUID, setFirebaseUID] = useState()
@@ -40,16 +39,16 @@ export default function SpotPage() {
   }
 
   const submitUserRating = () => {
-    dispatch(submitRating(activeSpot.placeId, ratings))
-    dispatch(fetchSpotDetails(params.placeId));
+    dispatch(submitRating(activeSpot.placeId, ratings));
   }
 
   const addComment = () => {
     dispatch(createComment(activeSpot.placeId, comment))
   }
 
-  const removeComment = (index) => {
-    dispatch(deleteComment(params.placeId, index))
+  const removeComment = (id) => {
+    dispatch(deleteComment(params.placeId, id))
+    // dispatch(fetchComments(params.placeId))
   }
 
   const update = () => {
@@ -75,12 +74,6 @@ export default function SpotPage() {
   const params = useParams();
 
   useEffect(() => {
-    if (!fetchingComments && !creatingComment) {
-      setCommentsArray(comments)
-    }
-  }, [comments, creatingComment]);
-
-  useEffect(() => {
     window.scrollTo(0, 0);
     if (!fetchingSpots && (!activeSpot || activeSpot.placeId != params.placeId)) {
       dispatch(fetchSpotDetails(params.placeId));
@@ -93,9 +86,7 @@ export default function SpotPage() {
         .catch(error => {
       
         });
-  }, [activeSpot]);
 
-  useEffect(() => {
     if (activeSpot && activeSpot.popularTimes.status === "ok") {
       const date = new Date();
       const day = date.getDay();
@@ -107,7 +98,7 @@ export default function SpotPage() {
         music: activeSpot.userRating ? activeSpot.userRating.music : null,
         lighting: activeSpot.userRating ? activeSpot.userRating.lighting : null,
         space: activeSpot.userRating ? activeSpot.userRating.space : null,
-        food: activeSpot.userRating ? activeSpot.userRating.food : null
+        food: activeSpot.userRating ? activeSpot.userRating.food : null,
       })
     }
   }, [activeSpot]);
@@ -115,7 +106,7 @@ export default function SpotPage() {
   return (
     <div>
       <Header />
-      {!activeSpot ?
+      {fetchingSpots || !activeSpot ?
         <LoadSpinner />
         :
         <div>
@@ -181,8 +172,9 @@ export default function SpotPage() {
                 return (
                   <div>
                     <h3>{review.author}</h3>
+                    <p>{review.relativeTime}</p>
                     <p>{review.text}</p>
-                    <p>rating: {review.rating}</p>
+                    <p>Google rating: {review.rating}</p>
                     <hr />
                   </div>
                 )
@@ -203,22 +195,27 @@ export default function SpotPage() {
               <h2>all comments</h2>
               <br />
           
-              {commentsArray && commentsArray.map(comment => {
-                return (
-                  <div>
-                    <h3>{comment.fname} {comment.lname}</h3>
-                    <p>{comment.comment}</p>
-                    {comment.userId === firebaseUID ? 
+              {comments && comments.length != 0 ? 
+                comments.map(comment => {
+                  return (
                     <div>
-                      <Button onClick={() => prepareModal(comment.comment, comment.commentId)}>update</Button>
-                      &nbsp;&nbsp;
-                      <Button onClick={() => removeComment(comment.commentId)}>delete</Button>
-                    </div> 
-                    : null}
-                    <hr />
-                  </div>
-                )
-              })}
+                      <h3>{comment.fname} {comment.lname}</h3>
+                      <p>{comment.timestamp.toDate ? comment.timestamp.toDate().toDateString() : comment.timestamp.toDateString()}</p>
+                      <p>{comment.comment}</p>
+                      {comment.userId === firebaseUID ? 
+                      <div>
+                        <Button onClick={() => prepareModal(comment.comment, comment.commentId)}>update</Button>
+                        &nbsp;&nbsp;
+                        <Button onClick={() => removeComment(comment.commentId)}>delete</Button>
+                      </div> 
+                      : null}
+                      <hr />
+                    </div>
+                  )
+                })
+                :
+                <div className="gray">Be the first</div>
+              }
             </Tab>
             <Tab eventKey="photos" title="More Photos">
               <div class="photo-wrap">
