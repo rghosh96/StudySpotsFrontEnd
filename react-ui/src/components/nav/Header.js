@@ -21,8 +21,7 @@ export default function Header() {
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">
-                        <Nav.Link as={Link} to="/">Spotlight</Nav.Link>
-                        {signedIn ? <Nav.Link as={Link} to="/myspots">My Spots</Nav.Link> : null}
+                        
                         {/* <Nav.Link as={Link} to="/spotpage/ChIJa00m55kayYcRnz5WcvjDiMI">Spot Page</Nav.Link> */}
                         {/* <NavDropdown title="Redux" id="basic-nav-dropdown">
                             <NavDropdown.Item as={Link} to="/redux/testaccountactions">Account</NavDropdown.Item>
@@ -31,6 +30,8 @@ export default function Header() {
                         </NavDropdown> */}
                     </Nav>
                     <Nav className="justify-content-end">
+                    <Nav.Link as={Link} to="/">Spotlight</Nav.Link>
+                        {signedIn ? <Nav.Link as={Link} to="/myspots">My Spots</Nav.Link> : null}
                             {signedIn ? null : <Nav.Link as={Link} to="/signin">Sign in</Nav.Link> }
                             {signedIn ? null : <Nav.Link as={Link} to="/signup">Sign up</Nav.Link> }
                             {signedIn ? <Nav.Link as={Link} onClick={signOut} to="/">Sign out</Nav.Link> : null }
