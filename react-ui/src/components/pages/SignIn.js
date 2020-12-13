@@ -67,7 +67,7 @@ class SignIn extends React.Component {
         return (
             <div>
                 <Header />
-                <div className="container">
+                <div className="signUpContainer">
                     <Form onSubmit={this.handleSubmit}>
                         <h1>sign in</h1>
                         <hr></hr>

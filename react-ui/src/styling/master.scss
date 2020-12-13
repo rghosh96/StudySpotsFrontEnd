@@ -109,8 +109,8 @@ html,
     justify-content: space-between;
     align-items: center;
     width: 700px;
-    margin: 50px!important;
-    border: 1.5px solid #687E63;
+    margin: 50px !important;
+    border: 1.5px solid #687e63;
     border-radius: 25px;
     padding: 10px;
     margin: 15px !important;
@@ -251,6 +251,17 @@ Button {
   &:hover {
     background-color: $accent !important;
   }
+}
+
+.dropdown-toggle {
+  background-color: white !important;
+  color: $primary !important;
+  border: 1px solid $primary !important;
+  border-radius: 5px;
+}
+
+.input-group-text {
+  background-color: white !important;
 }
 
 .pop-times-chart-wrapper {

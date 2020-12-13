@@ -6,7 +6,6 @@ import { useDispatch } from "react-redux";
 import { checkAuth } from "./redux/actions/accountActions";
 
 import MySpots from './components/pages/MySpots.js'
-import Settings from './components/pages/Settings.js'
 import Spotlight from './components/pages/Spotlight.js'
 import SignIn from './components/pages/SignIn.js'
 import SignUp from './components/pages/SignUp.js'
@@ -34,7 +33,6 @@ function App() {
           <Route exact path='/' component={Spotlight} />
           <Route exact path='/signin' component={SignIn} />
           <Route exact path='/signup' component={SignUp} />
-          <Route exact path='/settings' component={Settings} />
           <Route exact path='/myspots' component={MySpots} />
           <Route exact path='/spotpage/:placeId' component={SpotPage} />
 

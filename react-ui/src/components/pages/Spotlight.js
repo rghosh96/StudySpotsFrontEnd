@@ -90,7 +90,6 @@ class Spotlight extends React.Component {
             <div>
                 <Header />
                 <h1 className="spotlist-header">spotlight</h1>
-
                 <div className="spotlight">
                     <div className="keywordarea">
                         <InputGroup>
@@ -152,7 +151,7 @@ class Spotlight extends React.Component {
                             :
                             <span className="filterbtn">
                                 <Dropdown>
-                                    <Dropdown.Toggle variant="success" id="dropdown-basic">
+                                    <Dropdown.Toggle id="dropdown-basic">
                                         {this.state.rbDisp === '' ? "Rank By" : this.state.rbDisp}
                                     </Dropdown.Toggle>
 
