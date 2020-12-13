@@ -22,7 +22,7 @@ export default function Header() {
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">
                         <Nav.Link as={Link} to="/">Spotlight</Nav.Link>
-                        <Nav.Link as={Link} to="/myspots">My Spots</Nav.Link>
+                        {signedIn ? <Nav.Link as={Link} to="/myspots">My Spots</Nav.Link> : null}
                         {/* <Nav.Link as={Link} to="/spotpage/ChIJa00m55kayYcRnz5WcvjDiMI">Spot Page</Nav.Link> */}
                         {/* <NavDropdown title="Redux" id="basic-nav-dropdown">
                             <NavDropdown.Item as={Link} to="/redux/testaccountactions">Account</NavDropdown.Item>
