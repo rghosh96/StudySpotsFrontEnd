@@ -59,17 +59,13 @@ export default function MySpots() {
     }
 
     return loading ?
-        <div>
-            <Header />
-            <h1 className="spotlist-header">my spots</h1>
-            <div className="spotlight">
-                <div><LoadSpinner /></div>
-            </div>
+        <div className="spotlight">
+            <div><LoadSpinner /></div>
         </div>
         :
         <div>
             <Header />
-            <h1 className="spotlist-header">my spots</h1>
+            <h1 className="spotlist-header">{userData.fName}'s spots</h1>
 
             <div className="spotlight">
                 {!isSignedIn ?
