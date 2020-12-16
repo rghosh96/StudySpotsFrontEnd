@@ -126,6 +126,15 @@ html,
   min-width: 100%;
 }
 
+.spot-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 50px !important;
+  min-width: 100%;
+}
+
 .info {
   display: flex;
   width: 100%;
@@ -286,7 +295,7 @@ Button {
     justify-content: center;
     align-items: center;
     width: 100%;
-    overflow-y: hidden;
+    overflow-x: hidden;
 
     .keywordarea {
       width: 100%;
@@ -312,6 +321,7 @@ Button {
       display: flex;
       flex-direction: column;
       align-items: center;
+      margin-bottom: 10px;
     }
     .spotcard {
       @include easeOut();
@@ -329,19 +339,47 @@ Button {
         display: flex;
         flex-direction: column;
         align-items: center;
-        margin: 0px 0px 0px 0px !important;
+        margin: 0px 0px 15px 0px !important;
       }
+    }
+  }
 
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 700px;
-      margin: 50px !important;
-      border: 1.5px solid #687e63;
-      border-radius: 25px;
-      padding: 10px;
-      margin: 15px !important;
+  .spot-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 5px 10px 5px;
+    width: 100%;
+    overflow-x: hidden;
+  }
+  .main-image {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    margin-bottom: 15px;
+  }
+  .info {
+    display: flex;
+    width: 100%;
+    padding: 0px;
+    flex-direction: column;
+    align-items: center;
+  }
+  .infoSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-bottom: 1px $grey solid;
+    margin-bottom: 10px;
+  }
+  #uncontrolled-tab-example-tab-reviews,
+  #uncontrolled-tab-example-tab-comments,
+  #uncontrolled-tab-example-tab-photos {
+    color: $grey !important;
+    @include header();
+    &:hover {
+      color: $primary !important;
+      background-color: $white !important;
     }
   }
 }

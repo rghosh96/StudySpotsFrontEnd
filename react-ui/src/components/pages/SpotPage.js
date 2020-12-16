@@ -110,7 +110,7 @@ export default function SpotPage() {
         <LoadSpinner />
         :
         <div>
-          <div class="container">
+          <div class="spot-page">
             <h1>{activeSpot.name}</h1>
             <p>{activeSpot.formattedAddress}</p>
             <div class="info">
