@@ -89,9 +89,9 @@ class Spotlight extends React.Component {
         return (
             <div>
                 <Header />
-                <h1 className="spotlist-header">spotlight</h1>
-
+                
                 <div className="spotlight">
+                    <h1 className="spotlist-header">spotlight</h1>
                     <div className="keywordarea">
                         <InputGroup>
                             <InputGroup.Prepend>
@@ -152,7 +152,7 @@ class Spotlight extends React.Component {
                             :
                             <span className="filterbtn">
                                 <Dropdown>
-                                    <Dropdown.Toggle variant="success" id="dropdown-basic">
+                                    <Dropdown.Toggle id="dropdown-basic">
                                         {this.state.rbDisp === '' ? "Rank By" : this.state.rbDisp}
                                     </Dropdown.Toggle>
 
@@ -188,7 +188,7 @@ class Spotlight extends React.Component {
                                     </span>
 
                                     <span className="spotinfo" onClick={(e) => { this.handleClickSpot(e, spot.placeId) }}>
-                                        <div>
+                                        <div class="mobile">
                                             <span className="title" >
                                                 {spot.name}
                                             </span>

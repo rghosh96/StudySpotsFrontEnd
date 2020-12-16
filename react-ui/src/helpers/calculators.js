@@ -26,3 +26,13 @@ const kmToMi = (km) => {
     return km * 0.621371;
 }
 
+// from https://stackoverflow.com/questions/7342957/how-do-you-round-to-1-decimal-place-in-javascript
+// round(12345.6789, 2) returns 12345.68
+// round(12345.6789, 1) returns 12345.7
+// round(12345.6789) returns 12346
+// round(12345, 1) returns 12346
+export const round = (value, precision) => {
+    var multiplier = Math.pow(10, precision || 0);
+    return Math.round(value * multiplier) / multiplier;
+}
+

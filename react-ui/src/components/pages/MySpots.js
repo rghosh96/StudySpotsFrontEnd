@@ -59,26 +59,22 @@ export default function MySpots() {
     }
 
     return loading ?
-        <div>
-            <Header />
-            <h1 className="spotlist-header">my spots</h1>
-            <div className="spotlight">
-                <div><LoadSpinner /></div>
-            </div>
+        <div className="spotlight">
+            <div><LoadSpinner /></div>
         </div>
         :
         <div>
             <Header />
-            <h1 className="spotlist-header">my spots</h1>
+            
 
-            <div className="spotlight">
+            <div>
                 {!isSignedIn ?
                     <AccessDenied>
                         <div className="gray">You must be signed in to view your saved spots.</div>
                     </AccessDenied>
                     :
-                    <div>
-
+                    <div className="spotlight">
+                        <h1 className="spotlist-header">{userData.fName}'s spots</h1>
                         {fetchingSpots ?
                             <LoadSpinner />
                             :
@@ -96,7 +92,7 @@ export default function MySpots() {
                                         </span>
 
                                         <span className="spotinfo" onClick={(e) => { handleClickSpot(e, spot.placeId) }}>
-                                            <div>
+                                            <div className="mobile">
                                                 <span className="title" >
                                                     {spot.name}
                                                 </span>

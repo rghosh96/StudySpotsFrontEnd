@@ -52,64 +52,6 @@ class SignUp extends React.Component {
         }
     }
 
-    // handles state info that can have multiple options
-    handleMOptions = (e) => {
-        let mPref = this.state.musicPref
-        // check if the check box is checked or unchecked
-        if (e.target.checked) {
-            // add the numerical value of the checkbox to options array
-            mPref.push(e.target.value)
-        } else {
-            // or remove the value from the unchecked checkbox from the array
-            let index = mPref.indexOf(e.target.value)
-            mPref.splice(index, 1)
-        }
-        // update the state with the new array of options
-        this.setState({ musicPref: mPref })
-    }
-    handleSOptions = (e) => {
-        let sPref = this.state.spacePref
-        // check if the check box is checked or unchecked
-        if (e.target.checked) {
-            // add the numerical value of the checkbox to options array
-            sPref.push(e.target.value)
-        } else {
-            // or remove the value from the unchecked checkbox from the array
-            let index = sPref.indexOf(e.target.value)
-            sPref.splice(index, 1)
-        }
-        // update the state with the new array of options
-        this.setState({ spacePref: sPref })
-    }
-    handleLOptions = (e) => {
-        let lPref = this.state.lightingPref
-        // check if the check box is checked or unchecked
-        if (e.target.checked) {
-            // add the numerical value of the checkbox to options array
-            lPref.push(e.target.value)
-        } else {
-            // or remove the value from the unchecked checkbox from the array
-            let index = lPref.indexOf(e.target.value)
-            lPref.splice(index, 1)
-        }
-        // update the state with the new array of options
-        this.setState({ lightingPref: lPref })
-    }
-    handleFOptions = (e) => {
-        let fPref = this.state.foodPref
-        // check if the check box is checked or unchecked
-        if (e.target.checked) {
-            // add the numerical value of the checkbox to options array
-            fPref.push(e.target.value)
-        } else {
-            // or remove the value from the unchecked checkbox from the array
-            let index = fPref.indexOf(e.target.value)
-            fPref.splice(index, 1)
-        }
-        // update the state with the new array of options
-        this.setState({ foodPref: fPref })
-    }
-
     // handles submit, sending state information to redux store
     handleSubmit = (e) => {
         e.preventDefault();
@@ -185,40 +127,6 @@ class SignUp extends React.Component {
                         <Form.Label>Confirm Password *</Form.Label>
                         <Form.Control required onChange={this.handleConfirmPassword} id="passwordConfirm" type="password"/>
                     </Form.Group>
-
-                    <p>Select preferences from the areas below. If you do not have a preference for an area, do not check any boxes.</p>
-
-                    <Form.Row>
-                        <Form.Group as={Col}>
-                            <Form.Label>Music Preference</Form.Label>
-                            <Form.Check type="checkbox" label="Upbeat" value="upbeat" onChange={this.handleMOptions}/>
-                            <Form.Check type="checkbox" label="Lo-Fi" value="lofi" onChange={this.handleMOptions}/>
-                            <Form.Check type="checkbox" label="Indie" value="indie" onChange={this.handleMOptions}/>
-                            <Form.Check type="checkbox" label="Pop" value="pop" onChange={this.handleMOptions}/>
-                            <Form.Check type="checkbox" label="Funky" value="funky" onChange={this.handleMOptions}/>
-                        </Form.Group>
-                        <Form.Group as={Col}>
-                            <Form.Label>Space Preference</Form.Label>
-                            <Form.Check type="checkbox" label="Individual Study" value="individual" onChange={this.handleSOptions}/>
-                            <Form.Check type="checkbox" label="Couple of People" value="couple" onChange={this.handleSOptions}/>
-                            <Form.Check type="checkbox" label="Small Group (<4)" value="smallgroup" onChange={this.handleSOptions}/>
-                            <Form.Check type="checkbox" label="Large Group (5+)" value="largegroup" onChange={this.handleSOptions}/>
-                        </Form.Group>
-                    </Form.Row>
-                    <Form.Row>
-                        <Form.Group as={Col}>
-                            <Form.Label>Lighting Preference</Form.Label>
-                            <Form.Check type="checkbox" label="Dim Lighting" value="dim" onChange={this.handleLOptions}/>
-                            <Form.Check type="checkbox" label="Natural Lighting" value="natural" onChange={this.handleLOptions}/>
-                            <Form.Check type="checkbox" label="Bright Lighting" value="bright" onChange={this.handleLOptions}/>
-                        </Form.Group>
-                        <Form.Group as={Col}>
-                            <Form.Label>Food Preference</Form.Label>
-                            <Form.Check type="checkbox" label="Small Bites/Bakery" value="smallbites" onChange={this.handleFOptions}/>
-                            <Form.Check type="checkbox" label="Full Menu" value="fullmenu" onChange={this.handleFOptions}/>
-                            <Form.Check type="checkbox" label="Just Coffee" value="coffee" onChange={this.handleFOptions}/>
-                        </Form.Group>
-                    </Form.Row>
 
                     <Button type="submit">Submit</Button>
                 </Form>
