@@ -19,6 +19,7 @@ export const getUserId = async () => {
         if (user) {
             return await user.uid.toString();
         } else {
+            return null;
             throw new Error("There is no user signed in.");
         }
     };
