@@ -280,6 +280,70 @@ Button {
   Form {
     width: 100%;
   }
+  .spotlight {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    overflow-y: hidden;
+
+    .keywordarea {
+      width: 100%;
+    }
+
+    .filterarea {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .searcharea {
+      margin-bottom: 50px;
+    }
+
+    .filterbtn {
+      margin: 5px;
+    }
+    .title {
+      padding: 0px !important;
+    }
+    .mobile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .spotcard {
+      @include easeOut();
+      &:hover {
+        background-color: $hvrgrey !important;
+      }
+      display: flex;
+      flex-direction: column;
+      max-width: 100%;
+      align-items: center;
+      justify-content: center;
+
+      .spotinfo {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0px 0px 0px 0px !important;
+      }
+
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 700px;
+      margin: 50px !important;
+      border: 1.5px solid #687e63;
+      border-radius: 25px;
+      padding: 10px;
+      margin: 15px !important;
+    }
+  }
 }
 
 @include tablet {

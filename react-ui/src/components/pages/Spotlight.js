@@ -187,7 +187,7 @@ class Spotlight extends React.Component {
                                     </span>
 
                                     <span className="spotinfo" onClick={(e) => { this.handleClickSpot(e, spot.placeId) }}>
-                                        <div>
+                                        <div class="mobile">
                                             <span className="title" >
                                                 {spot.name}
                                             </span>
