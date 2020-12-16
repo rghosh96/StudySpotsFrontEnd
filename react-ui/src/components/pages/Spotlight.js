@@ -89,8 +89,9 @@ class Spotlight extends React.Component {
         return (
             <div>
                 <Header />
-                <h1 className="spotlist-header">spotlight</h1>
+                
                 <div className="spotlight">
+                    <h1 className="spotlist-header">spotlight</h1>
                     <div className="keywordarea">
                         <InputGroup>
                             <InputGroup.Prepend>
