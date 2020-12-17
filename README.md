@@ -2,6 +2,8 @@
 
 A **responsive web application** built using **React** & utilizing **Google API's** to discover local study spots based on certain criteria. The Popular Times API is used to quickly list spots based on how busy a spot currently is. Users can create accounts to save favorite study spots. A database hosted on **Heroku** is used to store user data. **Google Firebase** authentication will be used to create accounts.
 
+now live! https://study-spots-uark.herokuapp.com
+
 
 # Running the Application
 
